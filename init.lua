@@ -10,7 +10,7 @@ dofile(modpaths.."/trading.lua")
 
 local log = false	--debug actions
 local log2 = false	--debug chatting
-local log3 = true 	--debug textures
+local log3 = false 	--debug textures
 local log4 = false	--debug trading
 
 
@@ -149,13 +149,32 @@ local VISUAL_SIZES = {
 
 local REGION_TYPES = { "hot", "cold", "normal", "navtive", "desert" }
 
+--[[
 local function getClimateData(pos)
 	object_pos = vector.round({x=pos.x,y=pos.y,z=pos.z})
-	local temperature = minetest.get_perlin(35293, 1, 0, 500):get2d({x=object_pos.x,y=object_pos.z})
-	local humidity = minetest.get_perlin(12094, 2, 0.6, 750):get2d({x=object_pos.x,y=object_pos.z})
+	
+	local noise
+	
+	noise = minetest.get_perlin(35293, 1, 0, 500):get2d({x=object_pos.x,y=object_pos.z})
+	local temperature = round((noise * 100) + 100, 1)
+	
+	noise = minetest.get_perlin(12094, 2, 0.6, 750):get2d({x=object_pos.x,y=object_pos.z})
+	local humidity = round(noise * 100, 1)
 
 	return {temperature, humidity}
 end
+
+
+minetest.register_on_punchnode(function(pos, node, puncher, pointed_thing)
+
+	local climateData = getClimateData(pos)
+	local temperature = climateData[1]
+	local humidity = climateData[2]
+	
+	print("## temperature="..temperature.." humidity="..humidity)
+
+end)
+--]]
 
 local function getVillagerName(gender, region)
 	local name
@@ -2154,11 +2173,11 @@ local function spawnVillager(pos, building_type, region)
 	local copy_of_chat_scripts = copytable(villagers.chat[building_type].mainchat)
 	local copy_of_gtg_scripts = copytable(villagers.chat.gtg)
 	local copy_of_smalltalk_scripts = copytable(villagers.chat.smalltalk)
-	getRandomChatText(luaEntity, copy_of_hi_scripts, "vScriptHi", 3)
-	getRandomChatText(luaEntity, copy_of_bye_scripts, "vScriptBye", 3)
-	getRandomChatText(luaEntity, copy_of_chat_scripts, "vScriptMain", 3)
-	getRandomChatText(luaEntity, copy_of_gtg_scripts, "vScriptGtg", 3)
-	getRandomChatText(luaEntity, copy_of_smalltalk_scripts, "vScriptSmalltalk", 3)
+	getRandomChatText(self, copy_of_hi_scripts, "vScriptHi", 3)
+	getRandomChatText(self, copy_of_bye_scripts, "vScriptBye", 3)
+	getRandomChatText(self, copy_of_chat_scripts, "vScriptMain", 3)
+	getRandomChatText(self, copy_of_gtg_scripts, "vScriptGtg", 3)
+	getRandomChatText(self, copy_of_smalltalk_scripts, "vScriptSmalltalk", 3)
 	
 	-- use for villager trading with formspec formhandler callback
 	self.vID = self.vName .. tostring(math.random(9999))
@@ -2167,8 +2186,8 @@ local function spawnVillager(pos, building_type, region)
 	self.vNodeMetaPos = {x=pos.x, y=self.vTargetHeight-1, z=pos.z}
 	
 	-- generate list of items this villager will trade depending on building_type
-	-- setTradeInventory(luaEntity, "sell")
-	-- setTradeInventory(luaEntity, "buy")
+	-- setTradeInventory(self, "sell")
+	-- setTradeInventory(self, "buy")
 	
 	--set a random default yaw and facing direction
 	local random_num = math.random(8)
@@ -2184,7 +2203,7 @@ local function spawnVillager(pos, building_type, region)
 	-- debugging
 	self.vTextureString = newTexture
 
-	return luaEntity
+	return self
 	
 end
 
@@ -2207,11 +2226,11 @@ local function validateBuildingType(building_type)
 		return building_type
 	else
 		if building_type then
-			print("## Invalid building type: "..region..". Getting random one...")
+			print("## Invalid building type: "..region..". Set to ALLMENDE.")
 		else
-			print("## No building type specified. Getting random one...")
+			print("## No building type specified. Set to ALLMENDE.")
 		end
-		return bTypes[math.random(#bTypes)]
+		return "allmende"
 	end
 end
 
@@ -2231,17 +2250,16 @@ local function validateRegion(region)
 		return region
 	else
 		if region then
-			print("## Invalid region: "..region..". Getting random one...")
+			print("## Invalid region: "..region..". Set to NORMAL.")
 		else
-			print("## Region not specified. Getting random one...")
+			print("## Region not specified. Set to NORMAL.")
 		end
-		
-		return REGION_TYPES[math.random(#REGION_TYPES)]
+		return "normal"
 	end
 end
 
 -- manually spawn villager via chat command. mostly for testing.
-minetest.register_chatcommand("villager", {
+minetest.register_chatcommand("villagers", {
 	params = "<region> <building_type>",
 	description = "Spawn Villager",
 	privs = {},	
@@ -2252,12 +2270,7 @@ minetest.register_chatcommand("villager", {
 			local player = minetest.get_player_by_name(name)
 			local entity_name = "villagers:villager"
 			local pos = vector.round(player:getpos())
-			pos.y = pos.y + 1.0
-			
-			local climateData = getClimateData(pos)
-			local temperature = climateData[1]
-			local humidity = climateData[2]
-			print("## temperature="..temperature.." humidity="..humidity)
+			pos.y = pos.y + 0.5
 			
 			local params = string.split(param, " ")	
 			local region_type = validateRegion(params[1])
@@ -2542,20 +2555,19 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 				
 				-- spawn the actual villager entity
 				local luaEntity = spawnVillager(spawn_pos, building_data.typ, region_type)
-				
-				-- everything below is just for debug output -------
-				--[[
 				local vName = luaEntity.vName
+				
+				
+				--[[ debug output -------
 				local vPosStr = minetest.pos_to_string(luaEntity.vPos,1)
 				local vOriginPosStr = minetest.pos_to_string(luaEntity.vOriginPos,1)
-				
 				local target_pos = {x=luaEntity.vTargetPos.x, y=luaEntity.vTargetPos.y, z=luaEntity.vTargetPos.z}
 				local vTargetPosStr = minetest.pos_to_string(target_pos, 1)
 				target_pos.y = target_pos.y - 1
 				local nodename = getNodeName(target_pos)[2]
+				io.write("## SPAWNED on "..nodename.." ## "..vName.." ")
+				io.write("actualPos"..vPosStr.." origin"..vOriginPosStr.." target"..vTargetPosStr.." ")
 				--]]
-				--io.write("## SPAWNED on "..nodename.." ## "..vName.." ")
-				--io.write("actualPos"..vPosStr.." origin"..vOriginPosStr.." target"..vTargetPosStr.." ")
 				
 				-- preliminary code for villager trading behavior
 				minetest.after(3, function() 
