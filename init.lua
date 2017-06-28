@@ -160,21 +160,46 @@ local function getClimateData(pos)
 	
 	noise = minetest.get_perlin(12094, 2, 0.6, 750):get2d({x=object_pos.x,y=object_pos.z})
 	local humidity = round(noise * 100, 1)
-
 	return {temperature, humidity}
 end
-
-
 minetest.register_on_punchnode(function(pos, node, puncher, pointed_thing)
-
 	local climateData = getClimateData(pos)
 	local temperature = climateData[1]
 	local humidity = climateData[2]
 	
 	print("## temperature="..temperature.." humidity="..humidity)
-
 end)
 --]]
+
+local function setRegionType(pos)
+
+	local curr_pos
+	local node_names = {}
+	local radius_limit = 10
+	
+	-- save the names of nodes originating from pos and out
+	-- in 8 directions and stopping at radium_limit 
+	for dir_index = 1, #DIRECTIONS do
+		local direction = DIRECTIONS[dir_index]
+		curr_pos = {x=pos.x, y=pos.y, z=pos.z}
+		for rad_index = 1, radius_limit do
+			curr_pos.x = curr_pos.x + (NODE_AREA[direction][1] * rad_index)
+			curr_pos.z = curr_pos.z + (NODE_AREA[direction][2] * rad_index)
+			table.insert(node_names, minetest.get_node(curr_pos).name)
+		end
+	end
+	  
+	local sorted_nodes = {}
+	table.insert(sorted_nodes, table.remove(node_names))
+	for i = 1, #node_names do
+		
+	end
+	
+end
+
+minetest.register_on_punchnode(function(pos, node, puncher, pointed_thing)
+	setRegionType(pos)
+end)
 
 local function getVillagerName(gender, region)
 	local name
