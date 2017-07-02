@@ -1,6 +1,8 @@
 villagers = {}
 
 local modpaths = minetest.get_modpath("villagers")
+dofile(modpaths.."/contants.lua")
+dofile(modpaths.."/functions.lua")
 dofile(modpaths.."/items.lua")
 dofile(modpaths.."/names.lua")
 dofile(modpaths.."/plots.lua")
@@ -2807,4 +2809,3 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 	end --end for loop
 	--io.write("\n")
 end
-
