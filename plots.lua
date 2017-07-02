@@ -8,9 +8,28 @@
 -- village gambit: cementry, lamp, hotel, pub, stable, 
 --]]
 villagers.plots = {
-	allmende = { female = 2, age = {"young", "old"} }, 
-	bakery = { female=2, age={"adult", "adult", "old"} }, 
-	bench =	{ female=2, age={"adult", "old", "old"} }, 
+	
+	allmende = { 
+		female = 2, 
+		age = {"young", "old"} ,
+		sell = {"none"}
+	}, 
+	
+	bakery = { 
+		female=2, 
+		age={"adult", "adult", "old"} ,
+		sell = {
+			"default:apple "..villagers.COSTS.apple.." "..villagers.STOCKS.apple,
+			"farming:wheat "..villagers.COSTS.wheat.." "..villagers.STOCKS.wheat,
+			"farming:flour "..villagers.COSTS.flour.." "..villagers.STOCKS.flour,
+			"farming:bread "..villagers.COSTS.bread.." "..villagers.STOCKS.bread
+		}
+	}, 
+	
+	bench =	{ 
+		female=2, age={"adult", "old", "old"} 
+	}, 
+	
 	chateau = { female=3, age={"adult", "adult", "old"} }, 
 	church = { female=4, age={"adult", "old", "old"} }, 
 	deco = { female=2, age={"young", "adult", "old"} }, 
@@ -52,5 +71,3 @@ villagers.plots = {
 	pub = { female=3, age={"adult", "adult", "old"} },
 	stable = { female=2, age={"adult"} }
 }
-
-
