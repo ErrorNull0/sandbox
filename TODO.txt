@@ -1,11 +1,13 @@
 COMPLETED:
+- fixed crash on non-players punching villagers
 - show an alert and prevent trading if villager is still trading with another player
 - added coins for villagers to accept payment (and to give payment when buying item from player)
 - initial trading farmspec with each item containing random stock 1 - 10, and each item just costsing 1 coin
-- currently all villager types have something to trade (which will change later)
+- currently all villager types have test/dummy items to trade (which will change later)
 
 TODO:
-- complete implementing player's inventory count to trading formspec
+- add quest/sell items to all townhalls.. or well/fountains if no townhall
+- complete detailing cost and available stock for goods that villagers can sell to players
 - make item stock based on the item type: expensive items have less stock, but bigger villages have more stock.
 - complete item cost system. each item will have random cost but will be high cost in general for bigger villages.
 - make certain villagers have nothing to trade at all.
