@@ -492,6 +492,109 @@ villagers.chat = {
 			"empty for now.",
 			
 			"I can't lock my doors."
+			
+			
+			
+			"Skeleton key default left-click\n"..
+			"action is to create a key for\n"..
+			"the locked object."
+
+			"right-click for opening\n"..
+			"stuff with keys."
+
+			"one gold ingot makes\n"..
+			"a skeleton key."
+
+			"The owner of locked things\n"..
+			"never needs to use keys\n"..
+			"for own things."
+
+			"You need steel ingots\n"..
+			"to make carts."
+
+			"To make a cart, you do\n"..
+			"a 'U' shape like boat with\n"..
+			"steel ingots!"
+			 
+			"Carts will only move on rails."
+
+			"You need to be 'sneaky' to"\n..
+			"pickup a mine cart."
+
+			"You can drop items in a\n"..
+			"minecart to transport items!"
+
+			"Powered rails can automatically\n"..
+			"accellerate moving carts."
+
+			"Sese crytsal fragments is\n"..
+			"the important ingredient to\n"..
+			"make powered rails."
+
+			"You can make a skeleton key\n"..
+			"from a gold ingot."
+
+			"If you want to share a\n"..
+			"locked item with a friend,\n"..
+			"just give them a key."
+
+			"Use a skeleton key on a locked\n"..
+			"item and it will turn into a\n"..
+			"key that you can share!"
+
+			"If you remove a locked item,\n"..
+			"then any keys you shared for it\n"..
+			"will no longer work."
+
+			"You can smelt any key back into\n"..
+			"a gold ingot - it's like magic!"..
+
+			"Did you know common bushes grow\n"..
+			"in grasslands, decidious\n"..
+			"forests and snowy places?"
+
+			"Acacia bushes grow in"..
+			"savannahs."
+
+			"Bush leaves defy gravity -\n"..
+			"they never fall if you greak\n"..
+			"off their stems!"
+
+			"Did you know a bush stem can be\n"..
+			"crafted into 1 wooden plank?"
+
+			"Corals live in warm, shallow\n"..
+			"oceans - maybe near deserts or\n"..
+			"savannahs. Not sure!"
+
+			"You can harvest coral skeletons\n"..
+			"from the orage and brown coral."..
+
+			"If coral is expose to air,\n"..
+			"they will die and turn into\n"..
+			"skeleton coral."
+
+			"You need pickaxes to\n"..
+			"dig up coral!"
+
+			"You can use flint and steel\n"..
+			"on a coal block to create a\n"..
+			"permanent flame."
+
+			"If you have TNT, don't get too\n"..
+			"close to any torches or to\n"..
+			"flint and steel.. boom!"
+
+			"Moss like to glow on anything\n"..
+			"that is cobblestone when there\n"..
+			"is water near it."
+
+			"If you pour water into lava\n"..
+			"you can sometimes get obsidian!"
+
+			"Snow blocks and ice will cool\n"..
+			"down lava and if it's just\n"..
+			"right it will make obsidian."
 		}
 	}, 
 	
@@ -501,7 +604,7 @@ villagers.chat = {
 		mainchat = {
 			"My name is VILLAGER_NAME.", 
 			"That's my hut.",
-			"The space is tiny, but\n."..
+			"The space is tiny, but\n"..
 			"I don't mind it.",
 			"The place is not too bad.",
 			"At least I don't worry about\n"..
@@ -543,7 +646,13 @@ villagers.chat = {
 	lumberjack = {
 		greetings = DEFAULT_HI,
 		goodbyes = DEFAULT_BYE,
-		mainchat = DEFAULT_MAIN
+		mainchat = {
+			"My name is VILLAGER_NAME.", 
+			"That's my home as a BUILDING_TYPE.", 
+			"I am a AGE GENDER.",
+			"This is a REGION region.",
+			"I like to trade random things."
+		}
 	}, 
 	
 	library = {
