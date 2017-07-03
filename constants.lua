@@ -57,10 +57,8 @@ towntest_Nanuk_well_0_90
 30-70 taoki
 50-60 cornernote 
 5-60 sandcity
-
 -- incorporate restock times, and items that must be sold, and minimim
 numbers of items to be sold
-
 <<NOTES>>
 If any of the schema types are unavailable, then unsupported village mods installed
 and simply retern special "none" string.
@@ -77,91 +75,129 @@ local STOCK = {
 	bed = 99, chest = 99, drinking_glass = 99, straw = 99, slab_straw = 99,
 	glass_bottle = 99, wheat = 99, cotton = 99, string = 99, sword_steel = 50,
 	axe_steel = 50, pick_steel = 50, shovel_steel = 70, hoe_steel = 70,
-	bucket_empty = 70, iron_lump = 50, steel_ingot = 50,
+	bucket_empty = 70, iron_lump = 50, steel_ingot = 50, gunpowder = 5,
+	tnt = 5, skeleton_key = 5, gold_lump = 5, copper_lump = 5, screwdriver = 5,
+	mese_crystal_fragment = 5, diamond = 5,
 }
 
 local COST = {
-	apple = 1, bread = 3, string = 5, mushroom_red = 5, mushroom_brown = 5,
-	paper = 3, book = 15, rose = 5, tulip = 5, dandelion_yellow = 5,
-	geranium = 5, viola = 5, dandelion_white = 5, dirt = 1, sand = 2,
-	gravel = 2, clay = 14, clay_lump = 3, tree = 18, wood = 4, stick = 1,
-	boat = 30, torch = 15,  shovel_wood = 15, pick_wood = 15, sword_wood = 15,
-	axe_wood = 15, sign_wall_wood = 10, slab_wood = 3, stair_wood = 5,
-	door_wood_a = 10, trapdoor = 5, fence_wood = 10, ladder_wood = 10,
-	bed = 30, chest = 20, drinking_glass = 5, straw = 5, slab_straw = 3,
-	glass_bottle = 5, wheat = 2, cotton = 3, string = 3, sword_steel = 150,
-	axe_steel = 150, pick_steel = 150, shovel_steel = 90, hoe_steel = 90,
-	bucket_empty = 80, iron_lump = 60, steel_ingot = 70,
-}
-
-local COIN_ITEMS = {
-	{split=0, min=1, max=1},
-	{"villagers:coins 999", "default:snow 4"},
-	{"villagers:coins 999", "default:leaves 4"},
-}
-
-local STREETMERCHANT = {
-	well = {
-		{"tnt:gunpowder "..STOCK.gunpowder, "villagers:coins "..COST.gunpowder}, 
-		{"tnt:gunpowder "..STOCK.gunpowder, "villagers:coins "..COST.gunpowder}, 
+	apple = 1, bread = 3, 
 	
-	--[[
-		"tnt:gunpowder"		
-		tnt:tnt
-		"screwdriver:screwdriver"
-		default:key
-		"default:steel_ingot"
-	output = "default:steel_ingot"
-	recipe = "default:iron_lump",
-		output = "default:copper_ingot",
-	recipe = "default:copper_lump",
-		output = "default:tin_ingot",
-	recipe = "default:tin_lump",
-		output = "default:gold_ingot",
-	recipe = "default:gold_lump",
-		output = 'default:gold_ingot',
-	recipe = 'default:skeleton_key',
-	--]]
+	mushroom_red = 5, 	mushroom_brown = 5,
+	rose = 5, tulip = 5,  dandelion_yellow = 5, geranium = 5,
+	viola = 5, dandelion_white = 5, 
+	
+	papyrus = 2, paper = 6, book = 20, 
+	
+	cotton = 3, string = 3, 
+	wheat = 2, straw = 5, slab_straw = 3,
+	
+	dirt = 1,  gravel = 2, wool = 5,
+	sand = 2, glass = 4, glass_bottle = 1, drinking_glass = 8, 
+	clay_lump = 3, clay = 14, clay_brick = 60,
+	
+	cobble = 3, stone = 6, 
+	
+	coal_lump = 20, coal_block = 190,
+	gunpowder = 25, tnt = 150, 
+	
+	stick = 1, slab_wood = 3, wood = 5, tree = 23, 
+	stair_wood = 7, trapdoor = 16, door_wood = 33, 
+	torch = 8, sign_wall_wood = 11, 
+	bed = 34, boat = 28, chest = 44, 
+ 
+	ladder_wood = 1, fence_wood = 24, gate_wood = 16,
+	
+	iron_lump = 80,				steel_ingot = 100, 
+	bronze_lump = 160, 			bronze_ingot = 180, 
+	gold_lump = 280, 			gold_ingot = 300,  
+	mese_crystal_fragment = 70, mese_crystal = 550,
+								diamond = 995,
+								
+	screwdriver = 105, locked_chest = 150, skeleton_key = 190, bucket_empty = 280, 
+	door_steel = 610,
+	
+	shovel_wood = 8, 	shovel_stone = 9,	shovel_steel = 105,	shovel_bronze = 185,
+	pick_wood = 16, 	pick_stone = 21, 	pick_steel = 305,	pick_bronze = 560,
+	sword_wood = 12, 	sword_stone = 14,	sword_steel = 205,	sword_bronze = 365,
+	axe_wood = 18, 		axe_stone = 21,  	axe_steel = 305,  	axe_bronze = 565, 
+	hoe_wood = 13, 		hoe_stone = 15,		hoe_steel = 205,	hoe_bronze = 365,
+	
+	
+}
+
+local BUY_ITEMS = {
+	plants = { -- desired by well or fountain villagers
+		{split=0, min=1, max=2},
+		{"villagers:coins 99", "default:sapling 1"},
+		{"villagers:coins 99", "default:junglesapling 1"},
+		{"villagers:coins 99", "default:aspen_sapling 1"},
+		{"villagers:coins 99", "default:acacia_sapling 1"},
+		{"villagers:coins 99", "default:pine_sapling 1"},
+		{"villagers:coins 99", "default:bush_sapling 1"},
+		{"villagers:coins 99", "default:bush_stem 1"},
+		{"villagers:coins 99", "default:dry_shrub 1"},
+		{"villagers:coins 99", "farming:seed_wheat 1"},
+		{"villagers:coins 99", "farming:seed_cotton 1"},
+		{"villagers:coins 99", "default:coral_skeleton 1"},
+		{"villagers:coins 99", "default:flowers:waterlily 1"},
 	},
-	fountain = {
+	earth = { -- desired by some claytraders
+		{split=0, min=1, max=2},
+		{"villagers:coins 99", "default:dirt 6"},
+		{"villagers:coins 99", "default:sand 4"},
+		{"villagers:coins 99", "default:desert_sand 4"},
+		{"villagers:coins 99", "default:silver_sand 4"},
+		{"villagers:coins 99", "default:gravel 4"},
+		{"villagers:coins 99", "default:cobble 3"},
+		{"villagers:coins 99", "default:snow 4"},
+		{"villagers:coins 99", "default:snowblock 4"},
+		{"villagers:coins 99", "default:ice 4"},
+	},
+	flowers = { -- desired by well or fountain villagers
+		{split=0, min=1, max=2},
+		{"villagers:coins 99", "default:rose 1"},
+		{"villagers:coins 99", "default:tulip 1"},
+		{"villagers:coins 99", "default:dandelion_yellow 1"},
+		{"villagers:coins 99", "default:geranium 1"},
+		{"villagers:coins 99", "default:viola 1"},
+		{"villagers:coins 99", "default:dandelion_white 1"},
+		{"villagers:coins 99", "default:mushroom_red 1"},
+		{"villagers:coins 99", "default:mushroom_brown 1"},
+	},
+	quest = { -- desired by villagers in townhalls
+		{"default:mese_crystal_fragment 5", "default:gold_lump 1"},
+		{"default:gold_ingot 5", "default:gold_lump 1"},
+		{"default:mese_crystal 5", "default:gold_lump 1"},
+		{"default:diamond 5", "default:gold_lump 1"},
+		
+
 	}
 }
 
-local ALLITEMS = {
-		{"default:apple "..STOCK.apple, "villagers:coins "..COST.apple}, 
-		{"farming:bread "..STOCK.bread, "villagers:coins "..COST.bread}, 
-		
-		{"farming:string "..STOCK.string, "villagers:coins "..COST.string},
-		{"farming:cotton "..STOCK.cotton, "villagers:coins "..COST.cotton},
-		{"default:stick "..STOCK.stick, "villagers:coins "..COST.stick},
-		
-		{"default:paper "..STOCK.paper, "villagers:coins "..COST.paper},
-		{"default:book "..STOCK.book, "villagers:coins "..COST.book},
-		{"default:torch "..STOCK.torch, "villagers:coins "..COST.torch},
-		
-		{"flowers:mushroom_red "..STOCK.mushroom_red, "villagers:coins "..COST.mushroom_red},
-		{"flowers:mushroom_brown "..STOCK.mushroom_brown, "villagers:coins "..COST.mushroom_brown},
-		
-		{"flowers:rose "..STOCK.rose, "villagers:coins "..COST.rose},
-		{"flowers:tulip "..STOCK.tulip, "villagers:coins "..COST.tulip},
-		{"flowers:dandelion_yellow "..STOCK.dandelion_yellow, "villagers:coins "..COST.dandelion_yellow},
-		{"flowers:geranium "..STOCK.geranium, "villagers:coins "..COST.geranium},
-		{"flowers:viola "..STOCK.viola, "villagers:coins "..COST.viola},
-		{"flowers:dandelion_white "..STOCK.dandelion_white, "villagers:coins "..COST.dandelion_white}
-		
-		{"vessels:drinking_glass "..STOCK.drinking_glass, "villagers:coins "..COST.drinking_glass},
-		{"vessels:glass_bottle "..STOCK.glass_bottle, "villagers:coins "..COST.glass_bottle},
 
-
-
-
+local MYSTERY_MERCHANT = {
+	{split=0, min=1, max=2},
+	{"tnt:gunpowder "..STOCK.gunpowder, "villagers:coins "..COST.gunpowder}, 
+	{"tnt:tnt "..STOCK.tnt, "villagers:coins "..COST.tnt}, 
+	{"default:skeleton_key "..STOCK.skeleton_key, "villagers:coins "..COST.skeleton_key}, 
+	{"default:gold_lump "..STOCK.gold_lump, "villagers:coins "..COST.gold_lump}, 
+	{"default:copper_lump "..STOCK.copper_lump, "villagers:coins "..COST.copper_lump}, 
+	{"screwdriver:screwdriver "..STOCK.screwdriver, "villagers:coins "..COST.screwdriver}, 
+	{"default:mese_crystal_fragment "..STOCK.mese_crystal_fragment, "villagers:coins "..COST.mese_crystal_fragment}, 
+	{"default:diamond "..STOCK.diamond, "villagers:coins "..COST.diamond}, 
+	--{"default:iron_lump "..STOCK.iron_lump, "villagers:coins "..COST.iron_lump}, 
+	--{"default:copper_lump "..STOCK.copper_lump, "villagers:coins "..COST.copper_lump}, 
+	--{"default:tin_lump "..STOCK.tin_lump, "villagers:coins "..COST.tin_lump}, 
 }
 
+
+
 --[[
-	split: random items must be first selected from index 1 to 'split'
-	--if split=0 then random items can be selected anywhere in the table
-	min: at least this many items must to chosen for trade inventory
-	max: at most this many items must be chosen for trade inventory
+	A random number of items between 'min' and 'max' are chosen from
+	the corresponding table 'villagers.ITEMS.[building_type].[scm_type].
+	Items from index = 1 to index = 'split' in the table are chosen
+	first as priority.
 --]]
 villagers.ITEMS = {
 	tent = {
@@ -196,7 +232,7 @@ villagers.ITEMS = {
 			{"vessels:glass_bottle "..STOCK.glass_bottle, "villagers:coins "..COST.glass_bottle},
 			{"default:paper "..STOCK.paper, "villagers:coins "..COST.paper},
 		}
-		tent_open_big_3 = COIN_ITEMS
+		tent_open_big_3 = COIN_ITEMS --townhall
 	},
 	charachoal = {
 		charachoal_hill = {
