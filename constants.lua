@@ -94,7 +94,7 @@ local COST = {
 	
 	dirt = 1,  gravel = 2, wool = 5,
 	sand = 2, glass = 4, glass_bottle = 1, drinking_glass = 8, 
-	clay_lump = 3, clay = 14, clay_brick = 60,
+	clay_lump = 5, clay = 22, clay_brick = 23, brick = 100,
 	
 	cobble = 3, stone = 6, 
 	
@@ -166,12 +166,11 @@ local BUY_ITEMS = {
 		{"villagers:coins 99", "default:mushroom_brown 1"},
 	},
 	quest = { -- desired by villagers in townhalls
-		{"default:mese_crystal_fragment 5", "default:gold_lump 1"},
-		{"default:gold_ingot 5", "default:gold_lump 1"},
-		{"default:mese_crystal 5", "default:gold_lump 1"},
-		{"default:diamond 5", "default:gold_lump 1"},
-		
-
+		{"default:mese_crystal_fragment 5", "default:coal_lump 90"},
+		{"default:bronze_ingot 5", "default:papyrus 50"},
+		{"default:gold_ingot 5", "tnt:tnt 50"},
+		{"default:mese_crystal 5", "default:tin_ingot 90"},
+		{"default:diamond 5", "default:flint 90"},
 	}
 }
 
@@ -232,7 +231,12 @@ villagers.ITEMS = {
 			{"vessels:glass_bottle "..STOCK.glass_bottle, "villagers:coins "..COST.glass_bottle},
 			{"default:paper "..STOCK.paper, "villagers:coins "..COST.paper},
 		}
-		tent_open_big_3 = COIN_ITEMS --townhall
+		tent_open_big_3 = { --townhall
+			{split=0, min=1, max=1},
+			{"default:steel_ingot 3", "default:clay_lump 30"},
+			{"default:steel_ingot 3", "group:wool 30"},
+			{"default:steel_ingot 3", "farming:cotton 50"}
+		}
 	},
 	charachoal = {
 		charachoal_hill = {
@@ -241,6 +245,12 @@ villagers.ITEMS = {
 			-- tier split --
 			{"default:dirt "..STOCK.dirt, "villagers:coins "..COST.dirt},
 			{"default:gravel "..STOCK.gravel, "villagers:coins "..COST.gravel}
+		}
+		charachoal_hut = { -- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:steel_ingot 3", "default:clay_lump 30"},
+			{"default:steel_ingot 3", "default:coal_lump 20"},
+			{"default:steel_ingot 3", "group:tree 30"}
 		}
 	},
 	claytrader = {
@@ -265,8 +275,12 @@ villagers.ITEMS = {
 			{"default:clay "..STOCK.clay, "villagers:coins "..COST.clay},
 			{"default:clay_lump "..STOCK.clay_lump, "villagers:coins "..COST.clay_lump}
 		}, 
-		trader_clay_5 = COIN_ITEMS
-		
+		trader_clay_5 = { -- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:bronze_ingot 3", "default:clay_lump 50"},
+			{"default:bronze_ingot 3", "default:coal_lump 30"},
+			{"default:bronze_ingot 3", "group:tree 30"}
+		}
 	},
 	lumberjack = {
 		lumberjack_stable = {
@@ -361,7 +375,13 @@ villagers.ITEMS = {
 			{"farming:string "..STOCK.string, "villagers:string "..COST.string}, 
 		}, 
 		well = STREETMERCHANT.well, 
-		fountain = STREETMERCHANT.fountain, 
+		fountain =  = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"}
+		},
 		house_with_garden_1_0 = {
 			{split=4, min=4, max=8},
 			{"default:apple "..STOCK.apple, "villagers:coins "..COST.apple},
@@ -487,6 +507,76 @@ villagers.ITEMS = {
 		baking_house_4 = {},
 		cow_shed_1_270 = {}, 
 		shed_with_forge_v2_1_0 = {}
+		tree_place_1 = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"}
+		},
+		tree_place_2 = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"}
+		},
+		tree_place_3 = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"}
+		},
+		tree_place_4 = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"}
+		},
+		tree_place_5 = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"}
+		},
+		tree_place_6 = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"}
+		},
+		tree_place_7 = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"}
+		},
+		tree_place_8 = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"}
+		},
+		tree_place_9 = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"}
+		},
+		tree_place_10 = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"},
+			{"default:gold_ingot 3", "xxx:xxx xx"}
+		},
 		--field_1
 		--field_2
 		--field_3
@@ -495,7 +585,13 @@ villagers.ITEMS = {
 	gambit = {
 		gambit_church_1_0_180 = {},
 		gambit_forge_1_2_270 = {},
-		gambit_fountain_1_1_90 = {},
+		gambit_fountain_1_1_90 = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:mese_crystal 3", "xxx:xxx xx"},
+			{"default:mese_crystal 3", "xxx:xxx xx"},
+			{"default:mese_crystal 3", "xxx:xxx xx"}
+		},
 		gambit_library_hotel_0_180 = {},
 		gambit_pub_1_0_0 = {},
 		gambit_shed_open_chests_2_0 = {},
@@ -504,13 +600,22 @@ villagers.ITEMS = {
 		gambit_stable_1_2_90 = {}
 		--gambit_field_1_1_90
 		--gambit_tower_1_0_270
+		
+		
+		
+		
 	},
 	taoki = {
 		default_town_farm = {}, -- field
 		default_town_tower = {},
 		default_town_well = {},
-		default_town_fountain = {},
-		default_town_park = {}
+		default_town_fountain = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:mese_crystal 3", "xxx:xxx xx"},
+			{"default:mese_crystal 3", "xxx:xxx xx"},
+			{"default:mese_crystal 3", "xxx:xxx xx"}
+		}
 	},
 	cornernote = {
 
@@ -523,8 +628,14 @@ villagers.ITEMS = {
 		--towntest_cornernote_tower_1_90 --tower
 		--towntest_cornernote_turret_1_90 --tower
 		--towntest_Nanuk_lavabeacon_0_90 --tower
-		--towntest_kddekadenz_castle_3_90
-		--towntest_cornernote_fortress_4_0
+		towntest_kddekadenz_castle_3_90
+		towntest_cornernote_fortress_4_0 = { 
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:diamond 3", "xxx:xxx xx"},
+			{"default:diamond 3", "xxx:xxx xx"},
+			{"default:diamond 3", "xxx:xxx xx"}
+		}
 	},
 	sandcity = {
 		sandcity_ap_tower_1_1_270 = {}, --tower
