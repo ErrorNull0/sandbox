@@ -115,7 +115,7 @@ local COST = {
 								diamond = 995,
 								
 	screwdriver = 105, locked_chest = 150, skeleton_key = 190, bucket_empty = 280, 
-	door_steel = 610,
+	door_steel = 620, steel_bottle = 550,
 	
 	shovel_wood = 8, 	shovel_stone = 9,	shovel_steel = 105,	shovel_bronze = 185,
 	pick_wood = 16, 	pick_stone = 21, 	pick_steel = 305,	pick_bronze = 560,
@@ -156,14 +156,14 @@ local BUY_ITEMS = {
 	},
 	flowers = { -- desired by well or fountain villagers
 		{split=0, min=1, max=2},
-		{"villagers:coins 99", "default:rose 1"},
-		{"villagers:coins 99", "default:tulip 1"},
-		{"villagers:coins 99", "default:dandelion_yellow 1"},
-		{"villagers:coins 99", "default:geranium 1"},
-		{"villagers:coins 99", "default:viola 1"},
-		{"villagers:coins 99", "default:dandelion_white 1"},
-		{"villagers:coins 99", "default:mushroom_red 1"},
-		{"villagers:coins 99", "default:mushroom_brown 1"},
+		{"villagers:coins 99", "flowers:rose 1"},
+		{"villagers:coins 99", "flowers:tulip 1"},
+		{"villagers:coins 99", "flowers:dandelion_yellow 1"},
+		{"villagers:coins 99", "flowers:geranium 1"},
+		{"villagers:coins 99", "flowers:viola 1"},
+		{"villagers:coins 99", "flowers:dandelion_white 1"},
+		{"villagers:coins 99", "flowers:mushroom_red 1"},
+		{"villagers:coins 99", "flowers:mushroom_brown 1"},
 	},
 	quest = { -- desired by villagers in townhalls
 		{"default:mese_crystal_fragment 5", "default:coal_lump 90"},
@@ -250,7 +250,7 @@ villagers.ITEMS = {
 			{split=0, min=1, max=1},
 			{"default:steel_ingot 3", "default:clay_lump 30"},
 			{"default:steel_ingot 3", "default:coal_lump 20"},
-			{"default:steel_ingot 3", "group:tree 30"}
+			{"default:steel_ingot 3", "default:flint 10"}
 		}
 	},
 	claytrader = {
@@ -277,7 +277,7 @@ villagers.ITEMS = {
 		}, 
 		trader_clay_5 = { -- ensure only %25 of these villagers will desire this
 			{split=0, min=1, max=1},
-			{"default:bronze_ingot 3", "default:clay_lump 50"},
+			{"default:bronze_ingot 3", "default:clay_lump 60"},
 			{"default:bronze_ingot 3", "default:coal_lump 30"},
 			{"default:bronze_ingot 3", "group:tree 30"}
 		}
@@ -336,6 +336,14 @@ villagers.ITEMS = {
 			{"default:wood "..STOCK.wood, "villagers:coins "..COST.wood},
 			{"default:tree "..STOCK.tree, "villagers:coins "..COST.tree},
 		}
+		lumberjack_8 = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:bronze_ingot 3", "default:coal_lump 30"},
+			{"default:bronze_ingot 3", "farming:cotton 100"},
+			{"default:bronze_ingot 3", "group:wool 60"}
+		}
+		
 	},
 	logcabin = {
 		logcabinpub1 = {
@@ -360,6 +368,14 @@ villagers.ITEMS = {
 			{"default:apple "..STOCK.apple, "villagers:coins "..COST.apple}, 
 			{"farming:bread "..STOCK.bread, "villagers:coins "..COST.bread}, 
 		}
+		logcabin11 = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:bronze_ingot 3", "farming:straw 60"},
+			{"default:bronze_ingot 3", "default:coal_lump 30"},
+			{"default:bronze_ingot 3", "default:clay_lump 60"},
+		}
+		
 	},
 	nore = {
 		wheat_field = {
@@ -375,12 +391,12 @@ villagers.ITEMS = {
 			{"farming:string "..STOCK.string, "villagers:string "..COST.string}, 
 		}, 
 		well = STREETMERCHANT.well, 
-		fountain =  = {	
+		fountain = {	
 			-- ensure only %25 of these villagers will desire this
 			{split=0, min=1, max=1},
-			{"default:gold_ingot 3", "xxx:xxx xx"},
-			{"default:gold_ingot 3", "xxx:xxx xx"},
-			{"default:gold_ingot 3", "xxx:xxx xx"}
+			{"default:gold_ingot 3", "default:papyrus 220"},
+			{"default:gold_ingot 3", "default:clay 20"},
+			{"default:gold_ingot 3", "default:coal_lump 45"}
 		},
 		house_with_garden_1_0 = {
 			{split=4, min=4, max=8},
@@ -419,7 +435,6 @@ villagers.ITEMS = {
 			{"default:shovel_steel "..STOCK.shovel_steel, "villagers:coins "..COST.shovel_steel},
 			{"default:hoe_steel "..STOCK.hoe_steel, "villagers:coins "..COST.hoe_steel},
 			{"bucket:bucket_empty "..STOCK.bucket_empty, "villagers:coins "..COST.bucket_empty},
-			{"default:iron_lump "..STOCK.iron_lump, "villagers:coins "..COST.iron_lump},
 			{"default:steel_ingot "..STOCK.steel_ingot, "villagers:coins "..COST.steel_ingot},
 			
 		}, 
@@ -573,9 +588,10 @@ villagers.ITEMS = {
 		tree_place_10 = {	
 			-- ensure only %25 of these villagers will desire this
 			{split=0, min=1, max=1},
-			{"default:gold_ingot 3", "xxx:xxx xx"},
-			{"default:gold_ingot 3", "xxx:xxx xx"},
-			{"default:gold_ingot 3", "xxx:xxx xx"}
+			{"default:gold_ingot 3", "default:papyrus 220"},
+			{"default:gold_ingot 3", "default:clay_lump 100"},
+			{"default:gold_ingot 3", "default:coal_lump 45"},
+			{"default:mese_crystal 3", "default:tin_lump 25"},
 		},
 		--field_1
 		--field_2
@@ -585,19 +601,22 @@ villagers.ITEMS = {
 	gambit = {
 		gambit_church_1_0_180 = {},
 		gambit_forge_1_2_270 = {},
-		gambit_fountain_1_1_90 = {	
-			-- ensure only %25 of these villagers will desire this
-			{split=0, min=1, max=1},
-			{"default:mese_crystal 3", "xxx:xxx xx"},
-			{"default:mese_crystal 3", "xxx:xxx xx"},
-			{"default:mese_crystal 3", "xxx:xxx xx"}
-		},
+		gambit_fountain_1_1_90 = {},
 		gambit_library_hotel_0_180 = {},
 		gambit_pub_1_0_0 = {},
 		gambit_shed_open_chests_2_0 = {},
 		gambit_shop_0_90 = {},
 		gambit_shop_large_0_0 = {},
-		gambit_stable_1_2_90 = {}
+		gambit_stable_1_2_90 = {},
+		
+		gambit_cementry_0_180 = {	
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:mese_crystal 3", "default:torch 110"},
+			{"default:mese_crystal 3", "group:wool 170"},
+			{"default:mese_crystal 3", "farming:straw 170"}
+		},
+		
 		--gambit_field_1_1_90
 		--gambit_tower_1_0_270
 		
@@ -612,13 +631,13 @@ villagers.ITEMS = {
 		default_town_fountain = {	
 			-- ensure only %25 of these villagers will desire this
 			{split=0, min=1, max=1},
-			{"default:mese_crystal 3", "xxx:xxx xx"},
-			{"default:mese_crystal 3", "xxx:xxx xx"},
-			{"default:mese_crystal 3", "xxx:xxx xx"}
+			{"default:mese_crystal 3", "tnt:gunpowder 35"},
+			{"default:mese_crystal 3", "default:clay 40"},
+			{"default:mese_crystal 3", "farming:cotton 280"},
+			{"default:mese_crystal 3", "default:flint 50"},
 		}
 	},
 	cornernote = {
-
 		towntest_kddekadenz_barn1_1_90 = {}, --shed
 		towntest_kddekadenz_barn2_1_90 = {}, --shed
 		towntest_kddekadenz_factory_1_90 = {}, --shed
@@ -628,23 +647,75 @@ villagers.ITEMS = {
 		--towntest_cornernote_tower_1_90 --tower
 		--towntest_cornernote_turret_1_90 --tower
 		--towntest_Nanuk_lavabeacon_0_90 --tower
-		towntest_kddekadenz_castle_3_90
+		towntest_kddekadenz_castle_3_90 = { 
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:diamond 3", "default:clay_brick 70"},
+			{"default:diamond 3", "default:iron_lump 20"},
+			{"default:diamond 3", "tnt:tnt 10"},
+			{"default:diamond 3", "default:flint 100"},
+			{"default:diamond 3", "default:tin_lump 100"},
+		}
 		towntest_cornernote_fortress_4_0 = { 
 			-- ensure only %25 of these villagers will desire this
 			{split=0, min=1, max=1},
-			{"default:diamond 3", "xxx:xxx xx"},
-			{"default:diamond 3", "xxx:xxx xx"},
-			{"default:diamond 3", "xxx:xxx xx"}
+			{"default:diamond 3", "default:clay_brick 70"},
+			{"default:diamond 3", "default:iron_lump 20"},
+			{"default:diamond 3", "tnt:tnt 10"},
+			{"default:diamond 3", "default:flint 100"},
+			{"default:diamond 3", "default:tin_lump 100"},
 		}
 	},
 	sandcity = {
-		sandcity_ap_tower_1_1_270 = {}, --tower
-		sandcity_ap_tower_2_1_270 = {}, --tower
-		sandcity_ap_tower_3_1_270 = {}, --tower
-		sandcity_ap_tower_4_1_270 = {}, --tower
-		sandcity_ap_tower_5_1_270 = {}, --tower
-		sandcity_ap_tower_6_1_270 = {}, --tower
-		sandcity_ap_tower_7_1_270 = {} --tower
+		sandcity_ap_tower_1_1_270 = {
+			{split=0, min=1, max=1},
+			{"default:wood "..STOCK.wood, "villagers:coins "..COST.wood},
+			{"default:glass "..STOCK.glass, "villagers:coins "..COST.glass},
+			{"vessels:steel_bottle "..STOCK.steel_bottle, "villagers:coins "..COST.steel_bottle},
+		}, --tower
+		sandcity_ap_tower_2_1_270 = {
+			{split=0, min=1, max=1},
+			{"default:wood "..STOCK.wood, "villagers:coins "..COST.wood},
+			{"default:glass "..STOCK.glass, "villagers:coins "..COST.glass},
+			{"vessels:steel_bottle "..STOCK.steel_bottle, "villagers:coins "..COST.steel_bottle},
+		}, --tower
+		sandcity_ap_tower_3_1_270 = {
+			{split=0, min=1, max=1},
+			{"default:wood "..STOCK.wood, "villagers:coins "..COST.wood},
+			{"default:glass "..STOCK.glass, "villagers:coins "..COST.glass},
+			{"vessels:steel_bottle "..STOCK.steel_bottle, "villagers:coins "..COST.steel_bottle},
+		}, --tower
+		sandcity_ap_tower_4_1_270 = {
+			{split=0, min=1, max=1},
+			{"default:wood "..STOCK.wood, "villagers:coins "..COST.wood},
+			{"default:glass "..STOCK.glass, "villagers:coins "..COST.glass},
+			{"vessels:steel_bottle "..STOCK.steel_bottle, "villagers:coins "..COST.steel_bottle},
+		}, --tower
+		sandcity_ap_tower_5_1_270 = {
+			{split=0, min=1, max=1},
+			{"default:wood "..STOCK.wood, "villagers:coins "..COST.wood},
+			{"default:glass "..STOCK.glass, "villagers:coins "..COST.glass},
+			{"vessels:steel_bottle "..STOCK.steel_bottle, "villagers:coins "..COST.steel_bottle},
+		}, --tower
+		sandcity_ap_tower_6_1_270 = {
+			{split=0, min=1, max=1},
+			{"default:wood "..STOCK.wood, "villagers:coins "..COST.wood},
+			{"default:glass "..STOCK.glass, "villagers:coins "..COST.glass},
+			{"vessels:steel_bottle "..STOCK.steel_bottle, "villagers:coins "..COST.steel_bottle},
+		}, --tower
+		sandcity_ap_tower_7_1_270 = {
+			{split=0, min=1, max=1},
+			{"default:wood "..STOCK.wood, "villagers:coins "..COST.wood},
+			{"default:glass "..STOCK.glass, "villagers:coins "..COST.glass},
+			{"vessels:steel_bottle "..STOCK.steel_bottle, "villagers:coins "..COST.steel_bottle},
+		}, --tower
+		sandcity_meeting_small_1_1_270  = { 
+			-- ensure only %25 of these villagers will desire this
+			{split=0, min=1, max=1},
+			{"default:diamond 3", "default:clay_brick 70"},
+			{"default:diamond 3", "flowers:dandelion_white 300"},
+			{"default:diamond 3", "default:bronze_lump 10"},
+		}
 	}
 	
 }
