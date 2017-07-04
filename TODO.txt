@@ -7,7 +7,8 @@ COMPLETED:
 - added more chat dialgue to 'home' villagers for now
 
 TODO:
-- add quest/sell items to all townhalls.. or well/fountains if no townhall
+
+- finish quest/sell items to all townhalls.. or well/fountains if no townhall.. with gold and bronze ingots
 - add 'mystery street merchant'
 - complete detailing cost and available stock for goods that villagers can sell to players
 - make item stock based on the item type: expensive items have less stock, but bigger villages have more stock.
@@ -29,9 +30,9 @@ TODO:
 - make custom dialogue also based on village type. Ex: huts in medieval are larger and have beds and huts in cornernote do not.
 
 - make the village region type (hot, cold, normal, native, desert) not based purely on the village type, but instead
--- based on the surrounding blocks from the village spawn point. 
+-- based on the surrounding blocks and village tree types from the village spawn point. 
 
-- allow villagers to walk through doors
+- allow villagers to open/close and walk through doors and gates
 - while villager is walking and attempting to chat, show chat bubble 'pardon me', 'excuse me', 'sorry', 'coming through', 'walking here', etc.
 - due to many more spawned villagers matching each bed, make most of these villagers walk the roads instead of randomly wandering around the plot
 
@@ -49,6 +50,9 @@ TODO:
 - make field villagers stay near their fields and not wander off
 - villager wields the tool depending on what item digging - shovel for snow, hoe for crops and soil, etc
 
+- add unique chat dialogue for remaining villager types
+- add better clothing textures for 'church' villager types
+- add clothing textures that match old aged villagers
 - make church villagers look for and stay inside the church
 
 - add support for weather mod
@@ -62,16 +66,17 @@ TODO:
 - add different dress type of males (currently using slightly modified texture of female full dress)
 - add more full dress styles for females
 
+- tower guard spawn atop the tower too!
+- free roaming villagers that just walk the streets and chat
+- villagers climb stairs and villagers sit on furniture
+- support for Farming Redo items for trading
+
 - allow villagers to kill mobs
 - allow villagers to get 'knocked out' (but not die) from attackes
 - knocked out villagers will automatically recover and stand back up after some time
 - cannot trade with a knocked out villager
 - knocked out villager can only respond like 'uuuhg', 'ouch', 'help', etc when knocked out
 - player can right-click on villager with a healing item to help recovery
-
-- complete a simple trading system
-- upon trading, formspec also pulls from villager's inventory of dug/harvested crops
-
 
 ISSUES/BUGS:
 - gambit and sandcity village types have no beds
