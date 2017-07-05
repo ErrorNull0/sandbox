@@ -1,50 +1,4 @@
 --[[
-NORE:
-wheat_field, cotton_field, well, fountain, house_with_garden_1_0
-church_1_0, tower_1_0, forge_1_0, library_1_0, inn_1_0, pub_1_0
-LOG CABIN:
-logcabinpub1, logcabinpub2, logcabinpub3
-MEDIEVAL:
-church_1, forge_1, mill_1, watermill_1, farm_full_1, farm_full_2,
-farm_full_3, farm_full_4, farm_full_5, farm_full_6, farm_tiny_1,
-farm_tiny_2, farm_tiny_3, farm_tiny_4, farm_tiny_5, farm_tiny_6,
-farm_tiny_7, taverne_1, taverne_2, taverne_3, taverne_4, well_1,
-well_2, well_3, well_4, well_5, well_6, well_7, well_8, wagon_1,
-wagon_2, wagon_3, wagon_4, wagon_5, wagon_6, wagon_7, wagon_8,
-wagon_9, wagon_10, wagon_11, wagon_12, shed_1, shed_2, shed_3,
-shed_4, shed_5, shed_6, shed_7, shed_8, shed_9, shed_10, shed_11,
-shed_12, baking_house_1, baking_house_2, baking_house_3, baking_house_4,
-cow_shed_1_270, shed_with_forge_v2_1_0
-CHARACHAOL:
-charachoal_hill
-LUMBERJACK:
-lumberjack_stable, lumberjack_pub_1, lumberjack_church_1, lumberjack_hotel_1,
-lumberjack_shop_1, lumberjack_sawmill_1
-CLAYTRADER:
-clay_pit_1, clay_pit_2, clay_pit_3, clay_pit_4, clay_pit_5
-TAOKI:
-default_town_farm (field), default_town_tower, default_town_well, default_town_fountain
-TENT:
-tent_open_3 (shop), tent_open_big_1 (pub), tent_open_big_2 (church)
-TOWER:
-hochsitz_1, hochsitz_2, hochsitz_3, hochsitz_4
-CHATEAU:
-chateau_without_garden
-VILLAGE SANDCITY:
-sandcity_ap_tower_1_1_270, sandcity_ap_tower_2_1_270, sandcity_ap_tower_3_1_270
-sandcity_ap_tower_4_1_270, sandcity_ap_tower_5_1_270, sandcity_ap_tower_6_1_270
-sandcity_ap_tower_7_1_270
-VILLAGE GAMBIT MOD:
-gambit_church_1_0_180, gambit_forge_1_2_270, gambit_fountain_1_1_90, 
-gambit_library_hotel_0_180, gambit_pub_1_0_0, gambit_shed_open_chests_2_0, 
-gambit_shop_0_90, gambit_shop_large_0_0, gambit_stable_1_2_90, 
-gambit_tower_1_0_270
-VILLAGE TOWNTEST/CORNERNOTE:
-towntest_cornernote_tower_1_90, towntest_cornernote_turret_1_90 (tower), 
-towntest_kddekadenz_barn1_1_90 (shed), towntest_kddekadenz_barn2_1_90 (shed),
-towntest_kddekadenz_factory_1_90 (shed), towntest_kddekadenz_windmill_0_90, 
-towntest_Nanuk_chapel_1_180, towntest_Nanuk_lavabeacon_0_90 (tower), 
-towntest_Nanuk_well_0_90
 <<VILLAGE TYPES>>
 5-20 tent
 10-15 charachoal
@@ -57,8 +11,7 @@ towntest_Nanuk_well_0_90
 30-70 taoki
 50-60 cornernote 
 5-60 sandcity
--- incorporate restock times, and items that must be sold, and minimim
-numbers of items to be sold
+-- incorporate restock times, 
 <<NOTES>>
 If any of the schema types are unavailable, then unsupported village mods installed
 and simply retern special "none" string.
@@ -81,7 +34,7 @@ local STOCK = {
 }
 
 local COST = {
-	apple = 1, bread = 3, 
+	apple = 2, bread = 17, 
 	
 	mushroom_red = 5, 	mushroom_brown = 5,
 	rose = 5, tulip = 5,  dandelion_yellow = 5, geranium = 5,
@@ -90,7 +43,7 @@ local COST = {
 	papyrus = 2, paper = 6, book = 20, 
 	
 	cotton = 3, string = 3, 
-	wheat = 2, straw = 5, slab_straw = 3,
+	wheat = 2, straw = 7, slab_straw = 4, flour = 9
 	
 	dirt = 1,  gravel = 2, wool = 5,
 	sand = 2, glass = 4, glass_bottle = 1, drinking_glass = 8, 
@@ -98,6 +51,7 @@ local COST = {
 	
 	cobble = 3, stone = 6, 
 	
+	-- coal burn time = 40
 	coal_lump = 20, coal_block = 190,
 	gunpowder = 25, tnt = 150, 
 	
@@ -122,56 +76,47 @@ local COST = {
 	sword_wood = 12, 	sword_stone = 14,	sword_steel = 205,	sword_bronze = 365,
 	axe_wood = 18, 		axe_stone = 21,  	axe_steel = 305,  	axe_bronze = 565, 
 	hoe_wood = 13, 		hoe_stone = 15,		hoe_steel = 205,	hoe_bronze = 365,
-	
-	
 }
 
-local BUY_ITEMS = {
-	plants = { -- desired by well or fountain villagers
-		{split=0, min=1, max=2},
-		{"villagers:coins 99", "default:sapling 1"},
-		{"villagers:coins 99", "default:junglesapling 1"},
-		{"villagers:coins 99", "default:aspen_sapling 1"},
-		{"villagers:coins 99", "default:acacia_sapling 1"},
-		{"villagers:coins 99", "default:pine_sapling 1"},
-		{"villagers:coins 99", "default:bush_sapling 1"},
-		{"villagers:coins 99", "default:bush_stem 1"},
-		{"villagers:coins 99", "default:dry_shrub 1"},
-		{"villagers:coins 99", "farming:seed_wheat 1"},
-		{"villagers:coins 99", "farming:seed_cotton 1"},
-		{"villagers:coins 99", "default:coral_skeleton 1"},
-		{"villagers:coins 99", "default:flowers:waterlily 1"},
+local DEFAULTS = {
+	farm_full = {
+		{split=4, min=6, max=8},			
+		{"default:apple "..STOCK.apple, "villagers:coins "..COST.apple},
+		{"farming:bread "..STOCK.bread, "villagers:coins "..COST.bread},
+		{"farming:wheat "..STOCK.wheat, "villagers:coins "..COST.wheat}, 
+		{"farming:flour "..STOCK.flour, "villagers:coins "..COST.flour}, 
+		-- split --
+		{"flowers:mushroom_red "..STOCK.mushroom_red, "villagers:coins "..COST.mushroom_red},
+		{"flowers:mushroom_brown "..STOCK.mushroom_brown, "villagers:coins "..COST.mushroom_brown}, 						
+		{"farming:straw "..STOCK.straw, "villagers:coins "..COST.straw}, 
+		{"farming:cotton "..STOCK.cotton, "villagers:cotton "..COST.cotton}, 
+		{"farming:string "..STOCK.string, "villagers:string "..COST.string},
 	},
-	earth = { -- desired by some claytraders
-		{split=0, min=1, max=2},
-		{"villagers:coins 99", "default:dirt 6"},
-		{"villagers:coins 99", "default:sand 4"},
-		{"villagers:coins 99", "default:desert_sand 4"},
-		{"villagers:coins 99", "default:silver_sand 4"},
-		{"villagers:coins 99", "default:gravel 4"},
-		{"villagers:coins 99", "default:cobble 3"},
-		{"villagers:coins 99", "default:snow 4"},
-		{"villagers:coins 99", "default:snowblock 4"},
-		{"villagers:coins 99", "default:ice 4"},
+	farm_tiny = {
+		{split=2, min=3, max=4},			
+		{"farming:bread "..STOCK.bread, "villagers:coins "..COST.bread},
+		{"farming:wheat "..STOCK.wheat, "villagers:coins "..COST.wheat}, 
+		-- split --
+		{"farming:flour "..STOCK.flour, "villagers:coins "..COST.flour}, 
+		{"default:apple "..STOCK.apple, "villagers:coins "..COST.apple},
+		{"farming:straw "..STOCK.straw, "villagers:coins "..COST.straw}, 
+		{"farming:cotton "..STOCK.cotton, "villagers:cotton "..COST.cotton}, 
+		{"farming:string "..STOCK.string, "villagers:string "..COST.string},
+		{"flowers:mushroom_red "..STOCK.mushroom_red, "villagers:coins "..COST.mushroom_red},
+		{"flowers:mushroom_brown "..STOCK.mushroom_brown, "villagers:coins "..COST.mushroom_brown}, 						
 	},
-	flowers = { -- desired by well or fountain villagers
-		{split=0, min=1, max=2},
-		{"villagers:coins 99", "flowers:rose 1"},
-		{"villagers:coins 99", "flowers:tulip 1"},
-		{"villagers:coins 99", "flowers:dandelion_yellow 1"},
-		{"villagers:coins 99", "flowers:geranium 1"},
-		{"villagers:coins 99", "flowers:viola 1"},
-		{"villagers:coins 99", "flowers:dandelion_white 1"},
-		{"villagers:coins 99", "flowers:mushroom_red 1"},
-		{"villagers:coins 99", "flowers:mushroom_brown 1"},
+	wagon = {
+		{split=0, min=1, max=1},			
+		{"farming:straw "..STOCK.straw, "villagers:coins "..COST.straw}, 
+		{"stairs:slab_straw "..STOCK.slab_straw, "villagers:string "..COST.slab_straw},
+		{"farming:string "..STOCK.string, "villagers:string "..COST.string}
 	},
-	quest = { -- desired by villagers in townhalls
-		{"default:mese_crystal_fragment 5", "default:coal_lump 90"},
-		{"default:bronze_ingot 5", "default:papyrus 50"},
-		{"default:gold_ingot 5", "tnt:tnt 50"},
-		{"default:mese_crystal 5", "default:tin_ingot 90"},
-		{"default:diamond 5", "default:flint 90"},
-	}
+	shed = {
+		{split=0, min=1, max=1},			
+		{"bucket:bucket_empty "..STOCK.bucket_empty, "villagers:coins "..COST.bucket_empty},
+		{"default:shovel_stone "..STOCK.shovel_stone, "villagers:coins "..COST.shovel_stone},
+		{"default:hoe_stone "..STOCK.hoe_stone, "villagers:coins "..COST.hoe_stone},
+	},
 }
 
 
@@ -399,12 +344,12 @@ villagers.ITEMS = {
 			{"default:gold_ingot 3", "default:coal_lump 45"}
 		},
 		house_with_garden_1_0 = {
-			{split=4, min=4, max=8},
+			{split=3, min=3, max=6},
 			{"default:apple "..STOCK.apple, "villagers:coins "..COST.apple},
 			{"farming:bread "..STOCK.bread, "villagers:coins "..COST.bread},
 			{"farming:wheat "..STOCK.wheat, "villagers:coins "..COST.wheat}, 
-			{"farming:cotton "..STOCK.cotton, "villagers:cotton "..COST.cotton}, 
 			-- split --
+			{"farming:cotton "..STOCK.cotton, "villagers:cotton "..COST.cotton}, 
 			{"flowers:mushroom_red "..STOCK.mushroom_red, "villagers:coins "..COST.mushroom_red},
 			{"flowers:mushroom_brown "..STOCK.mushroom_brown, "villagers:coins "..COST.mushroom_brown}, 						
 			{"flowers:rose "..STOCK.rose, "villagers:coins "..COST.rose},
@@ -434,9 +379,6 @@ villagers.ITEMS = {
 			{"default:pick_steel "..STOCK.pick_steel, "villagers:coins "..COST.pick_steel},
 			{"default:shovel_steel "..STOCK.shovel_steel, "villagers:coins "..COST.shovel_steel},
 			{"default:hoe_steel "..STOCK.hoe_steel, "villagers:coins "..COST.hoe_steel},
-			{"bucket:bucket_empty "..STOCK.bucket_empty, "villagers:coins "..COST.bucket_empty},
-			{"default:steel_ingot "..STOCK.steel_ingot, "villagers:coins "..COST.steel_ingot},
-			
 		}, 
 		library_1_0 = {
 			{split=1, min=1, max=2},
@@ -463,27 +405,78 @@ villagers.ITEMS = {
 		}
 	},
 	medieval = {
-		church_1 = {}, 
-		forge_1 = {}, 
-		mill_1 = {}, 
-		watermill_1 = {}, 
-		farm_full_1 = {}, 
-		farm_full_2 = {},
-		farm_full_3 = {}, 
-		farm_full_4 = {}, 
-		farm_full_5 = {}, 
-		farm_full_6 = {}, 
-		farm_tiny_1 = {},
-		farm_tiny_2 = {}, 
-		farm_tiny_3 = {}, 
-		farm_tiny_4 = {}, 
-		farm_tiny_5 = {}, 
-		farm_tiny_6 = {},
-		farm_tiny_7 = {}, 
-		taverne_1 = {}, 
-		taverne_2 = {}, 
-		taverne_3 = {}, 
-		taverne_4 = {}, 
+		church_1 = {
+			{split=2, min=2, max=3},
+			{"farming:bread "..STOCK.bread, "villagers:coins "..COST.bread}, 
+			{"default:book "..STOCK.book, "villagers:coins "..COST.book},
+			-- tier split --
+			{"vessels:glass_bottle "..STOCK.glass_bottle, "villagers:coins "..COST.glass_bottle},
+			{"default:paper "..STOCK.paper, "villagers:coins "..COST.paper},
+		}, 
+		forge_1 = {
+			{split=1, min=3, max=6},
+			{"default:sword_steel "..STOCK.sword_steel, "villagers:coins "..COST.sword_steel},
+			-- split --
+			{"default:axe_steel "..STOCK.axe_steel, "villagers:coins "..COST.axe_steel},
+			{"default:pick_steel "..STOCK.pick_steel, "villagers:coins "..COST.pick_steel},
+			{"default:shovel_steel "..STOCK.shovel_steel, "villagers:coins "..COST.shovel_steel},
+			{"default:hoe_steel "..STOCK.hoe_steel, "villagers:coins "..COST.hoe_steel},
+			{"bucket:bucket_empty "..STOCK.bucket_empty, "villagers:coins "..COST.bucket_empty},
+			{"default:steel_ingot "..STOCK.steel_ingot, "villagers:coins "..COST.steel_ingot},
+		}, 
+		mill_1 = {
+			{split=1, min=1, max=2},
+			{"farming:flour "..STOCK.flour, "villagers:coins "..COST.flour},
+			-- split --
+			{"farming:straw "..STOCK.straw, "villagers:coins "..COST.straw},
+		}, 
+		watermill_1 = {
+			{split=1, min=1, max=2},
+			{"farming:flour "..STOCK.flour, "villagers:coins "..COST.flour},
+			-- split --
+			{"farming:straw "..STOCK.straw, "villagers:coins "..COST.straw},
+		}, 
+		farm_full_1 = DEFAULTS.farm_full,
+		farm_full_2 = DEFAULTS.farm_full,
+		farm_full_3 = DEFAULTS.farm_full,
+		farm_full_4 = DEFAULTS.farm_full,
+		farm_full_5 = DEFAULTS.farm_full,
+		farm_full_6 = DEFAULTS.farm_full, 
+		farm_tiny_1 = DEFAULTS.farm_tiny,
+		farm_tiny_2 = DEFAULTS.farm_tiny,
+		farm_tiny_3 = DEFAULTS.farm_tiny,
+		farm_tiny_4 = DEFAULTS.farm_tiny,
+		farm_tiny_5 = DEFAULTS.farm_tiny,
+		farm_tiny_6 = DEFAULTS.farm_tiny,
+		farm_tiny_7 = DEFAULTS.farm_tiny,
+		taverne_1 = { --big
+			{split=1, min=1, max=3},
+			{"vessels:drinking_glass "..STOCK.drinking_glass, "villagers:coins "..COST.drinking_glass},
+			-- split --
+			{"default:apple "..STOCK.apple, "villagers:coins "..COST.apple}, 
+			{"farming:bread "..STOCK.bread, "villagers:coins "..COST.bread}, 
+		}, 
+		taverne_2 = { --med
+			{split=1, min=1, max=3},
+			{"vessels:drinking_glass "..STOCK.drinking_glass, "villagers:coins "..COST.drinking_glass},
+			-- split --
+			{"default:apple "..STOCK.apple, "villagers:coins "..COST.apple}, 
+			{"farming:bread "..STOCK.bread, "villagers:coins "..COST.bread}, 
+		}, 
+		taverne_3 = { --med
+			{split=1, min=1, max=3},
+			{"vessels:drinking_glass "..STOCK.drinking_glass, "villagers:coins "..COST.drinking_glass},
+			-- split --
+			{"default:apple "..STOCK.apple, "villagers:coins "..COST.apple}, 
+			{"farming:bread "..STOCK.bread, "villagers:coins "..COST.bread}, 
+		}, 
+		taverne_4 = { --small
+			{split=1, min=1, max=3},
+			{"vessels:drinking_glass "..STOCK.drinking_glass, "villagers:coins "..COST.drinking_glass},
+			-- split --
+			{"default:apple "..STOCK.apple, "villagers:coins "..COST.apple}, 
+			{"farming:bread "..STOCK.bread, "villagers:coins "..COST.bread}, 
+		}, 
 		well_1 = ALLITEMS.tier1,
 		well_2 = ALLITEMS.tier1,
 		well_3 = ALLITEMS.tier1,
@@ -492,30 +485,30 @@ villagers.ITEMS = {
 		well_6 = ALLITEMS.tier1,
 		well_7 = ALLITEMS.tier1,
 		well_8 = ALLITEMS.tier1,
-		wagon_1 = {},
-		wagon_2 = {}, 
-		wagon_3 = {}, 
-		wagon_4 = {}, 
-		wagon_5 = {}, 
-		wagon_6 = {}, 
-		wagon_7 = {}, 
-		wagon_8 = {},
-		wagon_9 = {}, 
-		wagon_10 = {}, 
-		wagon_11 = {}, 
-		wagon_12 = {}, 
-		shed_1 = {}, 
-		shed_2 = {}, 
-		shed_3 = {},
-		shed_4 = {}, 
-		shed_5 = {}, 
-		shed_6 = {}, 
-		shed_7 = {}, 
-		shed_8 = {}, 
-		shed_9 = {}, 
-		shed_10 = {}, 
-		shed_11 = {},
-		shed_12 = {}, 
+		wagon_1 = DEFAULTS.wagon,
+		wagon_2 = DEFAULTS.wagon,
+		wagon_3 = DEFAULTS.wagon, 
+		wagon_4 = DEFAULTS.wagon, 
+		wagon_5 = DEFAULTS.wagon, 
+		wagon_6 = DEFAULTS.wagon, 
+		wagon_7 = DEFAULTS.wagon, 
+		wagon_8 = DEFAULTS.wagon,
+		wagon_9 = DEFAULTS.wagon, 
+		wagon_10 = DEFAULTS.wagon,
+		wagon_11 = DEFAULTS.wagon,
+		wagon_12 = DEFAULTS.wagon,
+		shed_1 = DEFAULTS.shed,
+		shed_2 = DEFAULTS.shed,
+		shed_3 = DEFAULTS.shed,
+		shed_4 = DEFAULTS.shed,
+		shed_5 = DEFAULTS.shed,
+		shed_6 = DEFAULTS.shed,
+		shed_7 = DEFAULTS.shed,
+		shed_8 = DEFAULTS.shed,
+		shed_9 = DEFAULTS.shed,
+		shed_10 = DEFAULTS.shed,
+		shed_11 = DEFAULTS.shed,
+		shed_12 = DEFAULTS.shed,
 		baking_house_1 = {}, 
 		baking_house_2 = {}, 
 		baking_house_3 = {}, 
