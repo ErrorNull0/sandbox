@@ -4,10 +4,12 @@ COMPLETED:
 - added coins for villagers to accept payment (and to give payment when buying item from player)
 - initial trading farmspec with each item containing random stock 1 - 10, and each item just costsing 1 coin
 - currently all villager types have test/dummy items to trade (which will change later)
+- completed premliminary cost table for common/default items based on coin
 - added more chat dialgue to 'home' villagers for now
 - completed assigning prelim 'quest' items
 
 TODO:
+- finish defining default for sheds
 - complete adding selling items to the remaining villages and their building types
 - add 'mystery street merchant'
 - complete detailing cost and available stock for goods that villagers can sell to players
