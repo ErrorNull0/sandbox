@@ -339,20 +339,20 @@ minetest.register_entity("villagers:villager", {
 -- main villager spawning function
 function villagers.spawnVillager(pos, region, village_type, building_type, schem_type, trading_allowed, yaw_data, bed_data)
 	
-	if villagers.log5 then io.write("\n      spawnVillager() ") end
-	
 	if villagers.log5 then 
+		io.write("\n      spawnVillager() ")
 		io.write("buildType="..building_type.." ")
-		if schem_type then
-			io.write("schemType="..schem_type.." ") 
-		else
-			io.write("schemType=NIL ") 
-		end
+		if schem_type then io.write("schemType="..schem_type.." ") 
+		else io.write("schemType=NIL ") end
 	end
 	
 	-- SPAWN THE ACTUAL VILLAGER ENTITY!!!!
 	local objectRef = minetest.add_entity(pos, "villagers:villager")
 	local self = objectRef:get_luaentity()	
+	
+	if villagers.plots[building_type] == nil then
+		print("## ERROR Unexpected building_type="..building_type)
+	end
 	
 	--get GENDER and save to 'vGender' object custom field
 	local gender = "male"
@@ -758,7 +758,9 @@ local function spawnOnJobPlot(bpos, region_type, village_type, building_type, sc
 	
 end
 
-function getRegionFromSurroundings(village_pos, village_radius)
+
+
+function getBuildingTypeFromArea(village_pos, village_radius)
 	
 	-- debug output
 	if villagers.log5 then
@@ -777,27 +779,33 @@ function getRegionFromSurroundings(village_pos, village_radius)
 		local search_dir = villagers.DIRECTIONS[dir_index]
 		-- gather name of every odd node staring at 1 node
 		-- from the village_pos to village_radius
-		for radius_index = 1, radius_index < village_radius do
+		local radius_index = 1
+		while radius_index < village_radius do
 			village_pos.x = village_pos.x + (villagers.NODE_AREA[search_dir][1] * radius_index)
 			village_pos.z = village_pos.z + (villagers.NODE_AREA[search_dir][2] * radius_index)
 			table.insert(nodenames, villagers.getNodeName(village_pos)[2])
 			radius_index = radius_index + 2
 		end
+		
 	end
 	if villagers.log5 then io.write("nodesGathered: "..minetest.serialize(nodenames).." ") end
 	
 	-- count re-occuring nodenames and sort from highest occurrance to lowest
-	local popped = table.remove(nodenames)
 	local rated_nodenames = {}
+	local popped_name = table.remove(nodenames)
 	rated_nodenames[popped_name] = 1  --record the first occurance
-	for i = 1, #nodenames do
-		popped = table.remove(nodenames)
-		if name_count then
-			rated_nodenames[popped] = rated_nodenames[popped] + 1
-		else
-			rated_nodenames[popped] = 1
+	
+	while #nodenames > 0 do
+		for key,value in pairs(rated_nodenames) do
+			if key == popped_name then
+				rated_nodenames[key] = rated_nodenames[key] + 1
+			else
+				rated_nodenames[key] = 1
+			end
+			popped_name = table.remove(nodenames)
 		end
 	end
+	
 	if villagers.log5 then io.write("rated_nodenames: "..minetest.serialize(rated_nodenames).." ") end
 	
 	-- identify the nodename that occurred the most
@@ -810,35 +818,35 @@ function getRegionFromSurroundings(village_pos, village_radius)
 	end
 	if villagers.log5 then io.write("top_nodename="..top_nodename.." ") end
 
-	local clothing_type
+	local region_type
 	--tent, claytrader, lumberjack, log cabin, nore, medieval, taoki, cornernote 
 	-- assign region type based on the top node found
 	-- region types: cold, hot, normal, native, desert
 	if top_nodename == "DIRT_WITH_SNOW" then 
-		clothing_type = "cold"
+		region_type = "cold"
 	elseif top_nodename == "SNOWBLOCK" then 
-		clothing_type = "cold"
+		region_type = "cold"
 	elseif top_nodename == "ICE" then 
-		clothing_type = "cold"
+		region_type = "cold"
 	elseif top_nodename == "DIRT_WITH_DRY_GRASS" then 
-		clothing_type = "hot"
+		region_type = "hot"
 	elseif top_nodename == "SAND" then 
-		clothing_type = "hot"
+		region_type = "hot"
 	elseif top_nodename == "DIRT_WITH_GRASS" then 
-		clothing_type = "normal"
+		region_type = "normal"
 	elseif top_nodename == "DIRT_WITH_RAINFOREST_LITTER" then 
-		clothing_type = "native"
+		region_type = "native"
 	elseif top_nodename == "DESERT_SAND" then 
-		if math.random(3) == 1 then clothing_type = "hot"
-		else clothing_type = "desert" end
+		if math.random(3) == 1 then region_type = "hot"
+		else region_type = "desert" end
 	elseif top_nodename == "SILVER_SAND" then 
-		if math.random(3) == 1 then clothing_type = "hot"
-		else clothing_type = "desert" end
+		if math.random(3) == 1 then region_type = "hot"
+		else region_type = "desert" end
 	else 
 		print("ERROR Invalid top_nodename="..top_nodename)
 	end
 	
-	return clothing_type
+	return region_type
 
 --[[
 GROUND NODES:
@@ -847,7 +855,6 @@ sand, dirt_with_grass, dirt_with_rainforest_litter,
 desert_sand, silver_sand, water_source, water_flowing, 
 river_water_source, river_water_flowing, tree, 
 jungletree, pine_tree, acacia_tree, aspen_tree,
-
 DECORATIONS:
 snow, cactus, papyrus, dry_shrub, junglegrass, grass_1, 
 grass_2, grass_3, grass_4, grass_5, dry_grass_1,
@@ -858,6 +865,7 @@ acacia_bush_leaves, acacia_bush_sapling
 
 end
 
+
 -- spawn traders in villages
 mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param2_data, a, cid )
 	
@@ -865,43 +873,114 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 		--io.write("ERROR: mg_villages mob is not installed.")
 		return
 	end
-
 	
 	local village_pos = {x=village.vx, y=village.vh, z=village.vz}
 	local village_type  = village.village_type
 	local snowCover = village.artificial_snow
+
+	local meta = minetest.get_meta(village_pos)
 	
+	if meta:to_table() then
+		local pos_string = minetest.pos_to_string(village_pos)
+		if meta:get_string("pos") == "" then
+			io.write("** NEW ** "..pos_string.." ")
+			meta:set_string("pos", pos_string)
+			meta:set_string("type", village_type)
+			meta:set_int("attempts", 1)
+			io.write("savedMeta: pos, type, attempts ")
+		else
+			io.write("** PRIOR ** "..pos_string.." ")
+			local attempts = meta:get_int("attempts")
+			local type = meta:get_string("type")
+			local pos = meta:get_string("pos")
+			
+			attempts = attempts + 1
+			io.write("type="..type.." attempt #"..attempts.." posFromMeta"..pos.." ")
+			meta:set_int("attempts", attempts)
+			
+			local pos1 = minetest.string_to_pos(pos)
+			local pos2 = village_pos
+			io.write("distance="..villagers.round(vector.distance(pos1, pos2), 1).." ")
+		end
+		io.write("\n")
+	else
+		--io.write("NotLoaded SKIP! ")
+	end
+	
+	
+	--[[
+	local village_id = meta:get_string("id")
+		
+	if meta == nil then
+		io.write("passedPos"..minetest.pos_to_string(village_pos).." mapChunkNotLoaded SKIP! ")
+		return
+	end
+	
+	io.write("meta:"..minetest.serialize(meta:to_table()))
+	
+	
+	io.write("\n")
+	io.write("nodename="..villagers.getNodeName(village_pos)[2].." ")
+	io.write("pos_passed"..minetest.pos_to_string(village_pos).." ")
+	io.write("type_passed="..village_type.." ")
+	
+	if village_id == "" then
+		io.write("newVillage ")
+		meta:set_string("id", minetest.pos_to_string(village_pos))
+		meta:set_string("type", village_type)
+		meta:set_int("attempts", 1)
+		io.write("savedMeta: id, type, attempts ")
+	else
+		io.write("existingVillage: ")
+		
+		local attempts = meta:get_int("attempts")
+		local type = meta:get_string("type")
+		io.write("type="..type.." attempt #"..attempts.." posFromMeta"..village_id.." ")
+		
+		local pos_from_meta = minetest.string_to_pos(village_id)
+		local pos_from_mapgen = village_pos
+		
+		io.write("\n  distance between meta and passed positions: ")
+		local distance
+		distance = villagers.round(vector.distance(pos_from_mapgen, pos_from_meta), 1)
+		io.write(distance.." ")
+	end
+	--]]
+	
+	
+	--[[
 	-- debug output
 	if villagers.log5 then
 		io.write("\n## ")
 		io.write("village_pos"..minetest.pos_to_string(village_pos).." ")
-		io.write("radius="..village.vs.." ")
 		io.write("type="..village_type.." ")
+		io.write("radius="..village.vs.." ")
 		io.write("snow="..tostring(snowCover).." ")
 		io.write("buildings="..#village.to_add_data.bpos.." ")
 	end
 	
-	local clothing_type
+	local region_type
 	-- certain village types will have villagers look a
 	-- specific style/clothes regardless of surrounding nodes
 	-- clothing types: hot, cold, normal, native, desert
 	if village_type == "sandcity" then
-		clothing_type = "desert"
+		region_type = "desert"
 	elseif village_type == "claytrader" then
-		clothing_type = "desert"
+		region_type = "desert"
 	elseif village_type == "charachoal" then
-		clothing_type = "native"
+		region_type = "native"
 	elseif village_type == "gambit" then
-		clothing_type = "desert"
+		region_type = "desert"
 	elseif snowCover == 1 then
-		clothing_type = "cold"
+		region_type = "cold"
 		
 	-- remaining village types will have villagers clothes/look
 	-- based on the surrounding nodes
 	else
-		clothing_type = getClothingFromSurroundings(village_pos, village.vs)
+		region_type = getBuildingTypeFromArea(village_pos, village.vs)
 	end
-		
+
+	
 	-- for each building in the village
 	for building_index,bpos in pairs(village.to_add_data.bpos) do
 	
@@ -922,45 +1001,21 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 			end
 		end
 		
-		local spawn_type
-		if minetest.get_modpath('village_canadian') then
-			spawn_type = "nobed"
+		if bpos.btype ~= "road" then
+			io.write("scm="..dump(building_scm).." ")
+			io.write("type="..building_type.." ")
+			io.write("beds="..#bpos.beds.." ")
 			
-		elseif minetest.get_modpath('village_modern_houses') then
-			spawn_type = "nobed"
+			if #bpos.beds > 0 then
+				spawnOnBedPlot(bpos, region_type, village_type, building_type, building_data.scm, village.vx, village.vz)
+			else
+				spawnOnJobPlot(bpos, region_type, village_type, building_type, building_data.scm, minp, maxp)
+			end
 			
-		elseif minetest.get_modpath('village_ruins') then
-			spawn_type = "nobed"
-			
-		elseif bpos.btype == "road" then
-			spawn_type = "road"
-			
-		elseif (village_type == "sandcity" and building_type == "house") or
-			(village_type == "cornernote" and building_type == "hut") or
-			(village_type == "gambit" and building_type == "house") then
-			spawn_type = "nobed"
-			
-		elseif building_type == "house" or building_type == "tavern" or building_type == "library" or
-			building_type == "mill" or building_type == "farm_full" or building_type == "farm_tiny" or
-			building_type == "forge" or building_type == "hut" or building_type == "lumberjack" or 
-			building_type == "trader" then
-			spawn_type = "bed"
-		else
-			spawn_type = "nobed"
-		end
-		
-		-- spawn a villager for each # of beds in that building
-		if spawn_type == "bed" then
-			spawnOnBedPlot(bpos, clothing_type, village_type, building_type, building_data.scm, village.vx, village.vz)
-			
-		-- for homes that don't yet have beds, force a villager to spawn anyway
-		elseif spawn_type == "nobed" then
-			spawnOnJobPlot(bpos, clothing_type, village_type, building_type, building_data.scm, minp, maxp)
-			
-		else
-			-- do nothing for now..
 		end
 		
 	end --end for loop
 	--io.write("\n")
+	
+	--]]
 end
