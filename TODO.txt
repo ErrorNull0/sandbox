@@ -1,27 +1,29 @@
 COMPLETED:
-- fixed crash on non-players punching villagers
-- show an alert and prevent trading if villager is still trading with another player
-- added coins for villagers to accept payment (and to give payment when buying item from player)
-- initial trading farmspec with each item containing random stock 1 - 10, and each item just costsing 1 coin
-- currently all villager types have test/dummy items to trade (which will change later)
-- completed premliminary cost table for common/default items based on coin
-- added more chat dialgue to 'home' villagers for now
-- completed assigning prelim 'quest' items
+- coded to search surroundings to determine region/clothing type
+- tweaked mg_villages.part_of_village_spawned() to track each village map load attempt
 
 TODO:
-- finish defining default for sheds
-- complete adding selling items to the remaining villages and their building types
-- add 'mystery street merchant'
-- complete detailing cost and available stock for goods that villagers can sell to players
-- make item stock based on the item type: expensive items have less stock, but bigger villages have more stock.
-- make certain villagers have nothing to trade at all.
-- add another chat category for villagers called 'info' that pulls from a common pool of useful game facts.
+- look into spawning villagers AFTER all the village has spawned
+-- now that village gen attempts are tracked.. check surrounding nodes to get region_type
+-- after the 3rd village load attept...
+
+- add check for unsupported mods. do not load villager's mod if unsupported mods are present
+- rename 'region' and 'region_type' to 'clothing'
+- use nodemetadata to track how mand mystery and simplyjob traders will spawn..
+-- then can spawn mystery trader and coin exchange trader
+- minetest.after removing chat bubbles when many are in screen. 
+- create mystery merchants that sell only one valueable items at a time (only one in each village)
+
+- prevent manual spawning if in water
+- villagers in snowy region will offer some snow for free
+- create custom main dialogue for traders
+- make metalsmith use only mineral and metal related dialogue from 'game facts'
+- make chat dialogue based on scm type and not building type anymore
 -- for now, only librarians, smith, tower gaurds, and house residents give random game facts.
 - slightly reduce the chance for smalltalk chat for each villager
+- make item stock based on the item type: expensive items have less stock, but bigger villages have more stock.
 
-- test when alert message when player tries to trade with villager who is currently trading with another player
-
-- ensure homes with multiple inhabitants follow these patterns:
+- make villagers who spawn in homes with multiple inhabitants follow these patterns:
 -- 1 inhab: a) adult male b) adult female c) old male d) old female
 -- 2 inhab: a) adult male and female b) old male and female c) more to come
 -- 3 inhab: a) adult male and female and young b) old male and female and young
@@ -80,6 +82,7 @@ TODO:
 - player can right-click on villager with a healing item to help recovery
 
 ISSUES/BUGS:
-- gambit and sandcity village types have no beds
-- cornernote village type does not have beds in their huts
-- on very rare occasions villagers seen to walk diagonally
+
+- player who initiated a chat or trade might have chat bubble stick when 
+-- another player chats same villager
+- on very rare occasions villagers seen to walk diagonally
