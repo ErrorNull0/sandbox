@@ -1,11 +1,10 @@
 COMPLETED:
-- coded to search surroundings to determine region/clothing type
-- tweaked mg_villages.part_of_village_spawned() to track each village map load attempt
+- completed code to determine region type based on surrounding nodes in village
 
 TODO:
-- look into spawning villagers AFTER all the village has spawned
--- now that village gen attempts are tracked.. check surrounding nodes to get region_type
--- after the 3rd village load attept...
+- complete merging back prod version of spawning.lua to sandbox version... to complete village spawn
+- cascade any other changes down to other functions now that region type is found via geography
+- have mg_villages mapgen stop looping when all villagers have spawned.
 
 - add check for unsupported mods. do not load villager's mod if unsupported mods are present
 - rename 'region' and 'region_type' to 'clothing'
