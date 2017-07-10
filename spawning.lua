@@ -1,7 +1,73 @@
--- ==================================== SPAWNING AND ENTITY REGISTRATION ==================================
--- ========================================================================================================
+-- HELPER FUNCTIONS
 
---[[ ENTITY REGISTRATION AND INITIAL SPAWNING --]]
+--[[
+'village_pos' is the position of the village mg_villages mod is attempting
+to finish spawning.
+
+RETURNS the player data (name, pos, dist) that is nearest to the village
+position, but must at most 50 blocks. If no players are inside 50 block
+radius of village position, then function returns 'false'.
+--]]
+local function getValidPlayer(village_pos, distance_max)
+	local log = true
+	local player_pos, player_name
+	local dist_current, dist_shortest
+	local valid_player_name
+	
+	-- cycle through all connected players
+	for _,player in ipairs(minetest.get_connected_players()) do
+		if player then	
+			player_pos = player:get_pos()
+			player_name = player:get_player_name()
+			dist_current = vector.distance(player_pos, village_pos)
+			if log then
+				io.write("\n  "..player:get_player_name()..minetest.pos_to_string(player_pos).." ")
+				io.write(" distance="..villagers.round(dist_current, 1).." ")
+			end
+			
+			-- The village position from the player meets minimum distance
+			-- that is visually practical to start gathering environment data
+			-- which will determine the region type of this village.
+			if dist_current < distance_max then
+				if log then io.write("rangeOK ") end
+				
+				-- this is the first player in the list to be checked
+				if valid_player_name == nil then
+					if log then io.write("firstPlayerInSequence setAsShortestDist ") end
+					dist_shortest = dist_current
+					valid_player_name = player_name
+					
+				-- other players have already been checked
+				else
+					if log then io.write("checkingDist.. ") end
+					-- This is the closest player distance from the
+					-- village pos so far. Save this player.
+					if dist_current < dist_shortest then
+						if log then io.write("** betterChoiceFound ** ") end
+						dist_shortest = dist_current
+						valid_player_name = player_name
+					end
+						if log then io.write("notAnyBetter checkingNextPlayer.. ") end
+					end
+				end
+				
+			-- The village position is too far from the player. No need to
+			-- attempt gathering spawning data as player most likely cannot
+			-- even see to that village position.
+			else
+				if log then io.write("outOfRange SKIP ") end
+			end
+		end
+	end
+	if log then io.write("\n") end
+	
+	if valid_player_name then 
+		return {name=valid_player_name, pos=player_pos, dist=dist_shortest}
+	end
+	
+end
+
+
 
 -------------------------
 -- ENTITY REGISTRATION --
@@ -759,16 +825,33 @@ local function spawnOnJobPlot(bpos, region_type, village_type, building_type, sc
 end
 
 
-
-function getBuildingTypeFromArea(village_pos, village_radius)
+--[[
+GROUND NODES:
+dirt_with_snow, snowblock, ice, dirt_with_dry_grass,
+sand, dirt_with_grass, dirt_with_rainforest_litter,
+desert_sand, silver_sand, water_source, water_flowing, 
+river_water_source, river_water_flowing, tree, 
+jungletree, pine_tree, acacia_tree, aspen_tree,
+DECORATIONS:
+snow, cactus, papyrus, dry_shrub, junglegrass, grass_1, 
+grass_2, grass_3, grass_4, grass_5, dry_grass_1,
+dry_grass_2, dry_grass_3, dry_grass_4, dry_grass_5, 
+bush_stem, bush_leaves, bush_sapling, acacia_bush_stem, 
+acacia_bush_leaves, acacia_bush_sapling
+--]]
+function getRegionFromArea(pos, radius)
+	
+	local origin_pos = {x=pos.x, y=pos.y, z=pos.z}
+	local origin_pos_str = minetest.pos_to_string(origin_pos)
 	
 	-- debug output
-	if villagers.log5 then
-		io.write("village_pos"..minetest.pos_to_string(village_pos).." ")
-		io.write("radius="..village_radius.." ")
+	if log then
+		io.write("\n  ")
+		io.write("origin_pos"..origin_pos_str.." ")
+		io.write("radius="..radius.." ")
 	end
 	
-	if villagers.log5 then io.write("GatheringNodes @"..minetest.pos_to_string(village_pos).." ")end
+	if log then io.write("GettingNodes @"..origin_pos_str.." ")end
 	--gather stats of the surrounding nodes at this village position
 	--to determine what region (cold, hot, normal, native, desert) this
 	--village should be correspond to
@@ -778,17 +861,22 @@ function getBuildingTypeFromArea(village_pos, village_radius)
 	for dir_index = 1, 8 do
 		local search_dir = villagers.DIRECTIONS[dir_index]
 		-- gather name of every odd node staring at 1 node
-		-- from the village_pos to village_radius
+		-- from the origin_pos to radius
 		local radius_index = 1
-		while radius_index < village_radius do
-			village_pos.x = village_pos.x + (villagers.NODE_AREA[search_dir][1] * radius_index)
-			village_pos.z = village_pos.z + (villagers.NODE_AREA[search_dir][2] * radius_index)
-			table.insert(nodenames, villagers.getNodeName(village_pos)[2])
+		while radius_index < radius do
+			origin_pos.x = origin_pos.x + (villagers.NODE_AREA[search_dir][1] * radius_index)
+			origin_pos.z = origin_pos.z + (villagers.NODE_AREA[search_dir][2] * radius_index)
+			table.insert(nodenames, villagers.getNodeName(origin_pos)[2])
 			radius_index = radius_index + 2
 		end
 		
 	end
-	if villagers.log5 then io.write("nodesGathered: "..minetest.serialize(nodenames).." ") end
+	if log then 
+		io.write("nodesGathered: ")
+		for i = 1, #nodenames do
+			io.write(nodenames[i].." ")
+		end
+	end
 	
 	-- count re-occuring nodenames and sort from highest occurrance to lowest
 	local rated_nodenames = {}
@@ -806,7 +894,7 @@ function getBuildingTypeFromArea(village_pos, village_radius)
 		end
 	end
 	
-	if villagers.log5 then io.write("rated_nodenames: "..minetest.serialize(rated_nodenames).." ") end
+	if log then io.write("rated_nodenames: "..minetest.serialize(rated_nodenames).." ") end
 	
 	-- identify the nodename that occurred the most
 	local top_count = 0
@@ -816,7 +904,7 @@ function getBuildingTypeFromArea(village_pos, village_radius)
 			top_nodename = key
 		end
 	end
-	if villagers.log5 then io.write("top_nodename="..top_nodename.." ") end
+	if log then io.write("top_nodename="..top_nodename.." ") end
 
 	local region_type
 	--tent, claytrader, lumberjack, log cabin, nore, medieval, taoki, cornernote 
@@ -847,170 +935,100 @@ function getBuildingTypeFromArea(village_pos, village_radius)
 	end
 	
 	return region_type
-
---[[
-GROUND NODES:
-dirt_with_snow, snowblock, ice, dirt_with_dry_grass,
-sand, dirt_with_grass, dirt_with_rainforest_litter,
-desert_sand, silver_sand, water_source, water_flowing, 
-river_water_source, river_water_flowing, tree, 
-jungletree, pine_tree, acacia_tree, aspen_tree,
-DECORATIONS:
-snow, cactus, papyrus, dry_shrub, junglegrass, grass_1, 
-grass_2, grass_3, grass_4, grass_5, dry_grass_1,
-dry_grass_2, dry_grass_3, dry_grass_4, dry_grass_5, 
-bush_stem, bush_leaves, bush_sapling, acacia_bush_stem, 
-acacia_bush_leaves, acacia_bush_sapling
---]]
-
 end
 
 
 -- spawn traders in villages
 mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param2_data, a, cid )
+	local log = true
 	
-	if not( minetest.get_modpath( 'mg_villages')) then
-		--io.write("ERROR: mg_villages mob is not installed.")
-		return
-	end
+	-- mg_villages mod is required and not installed
+	if not( minetest.get_modpath( 'mg_villages')) then return end
 	
 	local village_pos = {x=village.vx, y=village.vh, z=village.vz}
+	local village_pos_str = minetest.pos_to_string(village_pos)
+	local village_type = village.village_type
 	
-	-- cycle through all connected players
-	for _,player in ipairs(minetest.get_connected_players()) do
-		if player ~= nil then			
-			
-			local player_pos = vector.round(player:get_pos())
-			local village_pos_str = minetest.pos_to_string(village_pos)
-			local village_type = village.village_type
-			io.write("\n"..string.upper(village_type).." v"..village_pos_str.." ")
-			io.write("p"..minetest.pos_to_string(player_pos).." ")
-			
-			local distance = villagers.round(vector.distance(player_pos, village_pos),1)
-			io.write("dist="..distance.." ")
-			
-			if distance < 50 then 
-				io.write("distOk ")
-				local meta = minetest.get_meta(village_pos)
-				
-				if meta:to_table() then
-					io.write("mapchunkAvail ")
-					io.write("\n  ")
-					if meta:get_string("pos") == "" then
-						io.write("** NEW ** ")
-						meta:set_string("pos", village_pos_str)
-						meta:set_string("type", village_type)
-						meta:set_int("attempts", 1)
-						io.write("savedMeta: pos"..village_pos_str.." type="..village_type..", attempts=1 ")
-					else
-						io.write("** PRIOR ** ")
-						local attempts = meta:get_int("attempts")
-						local type = meta:get_string("type")
-						local pos = meta:get_string("pos")
-						io.write("LoadedMeta: pos"..pos.." type="..type..", attempts="..attempts.." ")
-						attempts = attempts + 1
-						meta:set_int("attempts", attempts)
-						io.write("raisedAttemptsTo="..attempts.." ")
-					end
-					
-				else
-					io.write("chunkNotLoaded ")
-				end
-				--check surrounding nodes
-			else
-				io.write("distFar skipSpawn ")
-				--do not attempt villager spawn
-			end
-			
-		else 
-			print("## ERROR - Player has despawned.")
-		end
-		
+	io.write("\n"..string.upper(village_type)..village_pos_str.." ")
+	
+	-- found player within max 50 blocks of village pos
+	local player_data = getValidPlayer(village_pos, 50)
+	
+	-- all players out of range from current village pos
+	if player_data == nil then 
+		if log then io.write("allPlayersOutOfRange SKIP\n") end
+		return 
 	end
 	
+	local player_name = player_data.name
+	local player_pos = player_data.pos
+	local player_dist = player_data.dist
+	if log then 
+		io.write("  ")
+		io.write("nearestPlayer="..string.upper(player_name).." ")
+		io.write("pos"..minetest.pos_to_string(player_pos, 1).." ")
+		io.write("dis="..player_dist.." ")
+	end
 	
-	
-	--[[
-	local village_type  = village.village_type
-	local snowCover = village.artificial_snow
-
 	local meta = minetest.get_meta(village_pos)
 	
-	if meta:to_table() then
-		local pos_string = minetest.pos_to_string(village_pos)
-		io.write(pos_string.." ")
-		io.write("["..string.upper(village_type).."] ")
-		if meta:get_string("pos") == "" then
-			io.write("** NEW ** ")
-			meta:set_string("pos", pos_string)
-			meta:set_string("type", village_type)
-			meta:set_int("attempts", 1)
-			io.write("savedMeta: pos"..pos_string.." type="..village_type..", attempts=1 ")
-		else
-			io.write("** PRIOR ** ")
-			local attempts = meta:get_int("attempts")
-			local type = meta:get_string("type")
-			local pos = meta:get_string("pos")
-			io.write("LoadedMeta: pos"..pos.." type="..type..", attempts="..attempts.." ")
-			attempts = attempts + 1
-			meta:set_int("attempts", attempts)
-			io.write("raisedAttemptsTo="..attempts.." ")
-			
-			local pos1 = minetest.string_to_pos(pos)
-			local pos2 = village_pos
-			local distance = villagers.round(vector.distance(pos1, pos2), 1)
-			io.write("distance="..distance.." ")
-			
-			if distance == 0 then
-				io.write("** PRIOR HERE NOW ** "..pos_string.." ")
-			else
-				io.write("** PRIOR AT DISTANCE ** "..pos_string.." ")
-			end
-		end
-		io.write("\n")
-	else
-		--io.write("NotLoaded SKIP! ")
-	end
-	--]]
-	
-	--[[
-	local village_id = meta:get_string("id")
-		
-	if meta == nil then
-		io.write("passedPos"..minetest.pos_to_string(village_pos).." mapChunkNotLoaded SKIP! ")
+	-- Map chunk no loaded yet so cannot access any block metadata.
+	-- Wait for next cycle. Maybe player is just not facing in the
+	-- direction of village pos either.
+	if meta:to_table() == nil then
+		if log then io.write("chunkNotLoaded SKIP\n") end
 		return
 	end
 	
-	io.write("meta:"..minetest.serialize(meta:to_table()))
+	local attempts = 0
 	
-	
-	io.write("\n")
-	io.write("nodename="..villagers.getNodeName(village_pos)[2].." ")
-	io.write("pos_passed"..minetest.pos_to_string(village_pos).." ")
-	io.write("type_passed="..village_type.." ")
-	
-	if village_id == "" then
-		io.write("newVillage ")
-		meta:set_string("id", minetest.pos_to_string(village_pos))
+	-- Metadata key 'pos' is not set.
+	-- This is a 'new' village generate attempt
+	if meta:get_string("pos") == "" then
+		meta:set_string("pos", village_pos_str)
 		meta:set_string("type", village_type)
 		meta:set_int("attempts", 1)
-		io.write("savedMeta: id, type, attempts ")
+		if log then 
+			io.write("[NEW] ")
+			io.write("savedMeta >> ")
+			io.write("pos"..village_pos_str.." ")
+			io.write("type="..village_type..", attempts=1 ")
+		end
+	-- This village attempted to generate at a prior cycle
+	-- but didn't complete and so this is another attempt.
 	else
-		io.write("existingVillage: ")
 		
-		local attempts = meta:get_int("attempts")
+		attempts = meta:get_int("attempts")
 		local type = meta:get_string("type")
-		io.write("type="..type.." attempt #"..attempts.." posFromMeta"..village_id.." ")
-		
-		local pos_from_meta = minetest.string_to_pos(village_id)
-		local pos_from_mapgen = village_pos
-		
-		io.write("\n  distance between meta and passed positions: ")
-		local distance
-		distance = villagers.round(vector.distance(pos_from_mapgen, pos_from_meta), 1)
-		io.write(distance.." ")
+		local pos = meta:get_string("pos")
+		if log then
+			io.write("[RETRY] ")
+			io.write("LoadedMeta: pos"..pos.." ")
+			io.write("type="..type..", attempts="..attempts.." ")
+		end
+		attempts = attempts + 1
+		meta:set_int("attempts", attempts)
+		if log then io.write("raisedAttemptsTo="..attempts.." ") end
 	end
-	--]]
+	
+	local MIN_CYCLES_TO_WAIT = 10
+	if attempts < MIN_CYCLES_TO_WAIT then
+		if log then 
+			io.write("stillTooSoon remainingCyclesToWait=")
+			io.write((MIN_CYCLES_TO_WAIT - attempts).." ")
+			io.write("SKIP\n")
+		end
+		return
+	end
+	
+	if log then io.write("waitingComplete! Getting region_type.. ") end
+	local region_type = getRegionFromArea(village_pos, village.vs)
+	
+	
+	
+	
+
+	
 	
 	
 	--[[
@@ -1044,7 +1062,6 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 	else
 		region_type = getBuildingTypeFromArea(village_pos, village.vs)
 	end
-
 	
 	-- for each building in the village
 	for building_index,bpos in pairs(village.to_add_data.bpos) do
