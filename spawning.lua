@@ -875,6 +875,62 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 	end
 	
 	local village_pos = {x=village.vx, y=village.vh, z=village.vz}
+	
+	-- cycle through all connected players
+	for _,player in ipairs(minetest.get_connected_players()) do
+		if player ~= nil then			
+			
+			local player_pos = vector.round(player:get_pos())
+			local village_pos_str = minetest.pos_to_string(village_pos)
+			local village_type = village.village_type
+			io.write("\n"..string.upper(village_type).." v"..village_pos_str.." ")
+			io.write("p"..minetest.pos_to_string(player_pos).." ")
+			
+			local distance = villagers.round(vector.distance(player_pos, village_pos),1)
+			io.write("dist="..distance.." ")
+			
+			if distance < 50 then 
+				io.write("distOk ")
+				local meta = minetest.get_meta(village_pos)
+				
+				if meta:to_table() then
+					io.write("mapchunkAvail ")
+					io.write("\n  ")
+					if meta:get_string("pos") == "" then
+						io.write("** NEW ** ")
+						meta:set_string("pos", village_pos_str)
+						meta:set_string("type", village_type)
+						meta:set_int("attempts", 1)
+						io.write("savedMeta: pos"..village_pos_str.." type="..village_type..", attempts=1 ")
+					else
+						io.write("** PRIOR ** ")
+						local attempts = meta:get_int("attempts")
+						local type = meta:get_string("type")
+						local pos = meta:get_string("pos")
+						io.write("LoadedMeta: pos"..pos.." type="..type..", attempts="..attempts.." ")
+						attempts = attempts + 1
+						meta:set_int("attempts", attempts)
+						io.write("raisedAttemptsTo="..attempts.." ")
+					end
+					
+				else
+					io.write("chunkNotLoaded ")
+				end
+				--check surrounding nodes
+			else
+				io.write("distFar skipSpawn ")
+				--do not attempt villager spawn
+			end
+			
+		else 
+			print("## ERROR - Player has despawned.")
+		end
+		
+	end
+	
+	
+	
+	--[[
 	local village_type  = village.village_type
 	local snowCover = village.artificial_snow
 
@@ -882,31 +938,40 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 	
 	if meta:to_table() then
 		local pos_string = minetest.pos_to_string(village_pos)
+		io.write(pos_string.." ")
+		io.write("["..string.upper(village_type).."] ")
 		if meta:get_string("pos") == "" then
-			io.write("** NEW ** "..pos_string.." ")
+			io.write("** NEW ** ")
 			meta:set_string("pos", pos_string)
 			meta:set_string("type", village_type)
 			meta:set_int("attempts", 1)
-			io.write("savedMeta: pos, type, attempts ")
+			io.write("savedMeta: pos"..pos_string.." type="..village_type..", attempts=1 ")
 		else
-			io.write("** PRIOR ** "..pos_string.." ")
+			io.write("** PRIOR ** ")
 			local attempts = meta:get_int("attempts")
 			local type = meta:get_string("type")
 			local pos = meta:get_string("pos")
-			
+			io.write("LoadedMeta: pos"..pos.." type="..type..", attempts="..attempts.." ")
 			attempts = attempts + 1
-			io.write("type="..type.." attempt #"..attempts.." posFromMeta"..pos.." ")
 			meta:set_int("attempts", attempts)
+			io.write("raisedAttemptsTo="..attempts.." ")
 			
 			local pos1 = minetest.string_to_pos(pos)
 			local pos2 = village_pos
-			io.write("distance="..villagers.round(vector.distance(pos1, pos2), 1).." ")
+			local distance = villagers.round(vector.distance(pos1, pos2), 1)
+			io.write("distance="..distance.." ")
+			
+			if distance == 0 then
+				io.write("** PRIOR HERE NOW ** "..pos_string.." ")
+			else
+				io.write("** PRIOR AT DISTANCE ** "..pos_string.." ")
+			end
 		end
 		io.write("\n")
 	else
 		--io.write("NotLoaded SKIP! ")
 	end
-	
+	--]]
 	
 	--[[
 	local village_id = meta:get_string("id")
