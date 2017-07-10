@@ -15,7 +15,7 @@ local STOCK = {
 	tree = 90, wood = 90, stick = 90,
 	boat = 10, torch = 40, 
 	
-	sign_wall_wood = 40, slab_wood = 90, stair_wood = 40,p
+	sign_wall_wood = 40, slab_wood = 90, stair_wood = 40,
 	door_wood = 20, trapdoor = 20, bookshelf = 20,
 	gate_wood = 40, fence_wood = 40, ladder_wood = 40,
 	
