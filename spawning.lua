@@ -5,11 +5,11 @@
 to finish spawning.
 
 RETURNS the player data (name, pos, dist) that is nearest to the village
-position, but must at most 50 blocks. If no players are inside 50 block
+position, but not more than 50 blocks. If no players are inside 50 block
 radius of village position, then function returns 'false'.
 --]]
 local function getValidPlayer(village_pos, distance_max)
-	local log = true
+	local log = false
 	local player_pos, player_name
 	local dist_current, dist_shortest
 	local valid_player_name
@@ -21,7 +21,7 @@ local function getValidPlayer(village_pos, distance_max)
 			player_name = player:get_player_name()
 			dist_current = vector.distance(player_pos, village_pos)
 			if log then
-				io.write("\n  "..player:get_player_name()..minetest.pos_to_string(player_pos).." ")
+				io.write("\n  "..player:get_player_name()..minetest.pos_to_string(player_pos, 1).." ")
 				io.write(" distance="..villagers.round(dist_current, 1).." ")
 			end
 			
@@ -46,7 +46,7 @@ local function getValidPlayer(village_pos, distance_max)
 						if log then io.write("** betterChoiceFound ** ") end
 						dist_shortest = dist_current
 						valid_player_name = player_name
-					end
+					else
 						if log then io.write("notAnyBetter checkingNextPlayer.. ") end
 					end
 				end
@@ -59,13 +59,188 @@ local function getValidPlayer(village_pos, distance_max)
 			end
 		end
 	end
-	if log then io.write("\n") end
 	
-	if valid_player_name then 
-		return {name=valid_player_name, pos=player_pos, dist=dist_shortest}
+	
+	if log then 
+		io.write("\n") 
 	end
 	
+	
+	if valid_player_name then 
+		return { name = valid_player_name, pos = player_pos, dist = dist_shortest }
+	end
 end
+
+
+function getRegionFromArea(pos, radius)
+	local log = false
+	
+	local RADIUS_MAX = 30
+	local origin_pos = {x=pos.x, y=pos.y, z=pos.z}
+	local origin_pos_str = minetest.pos_to_string(origin_pos)
+	
+	-- debug output
+	if log then
+		io.write("\n  ")
+		io.write("origin_pos"..origin_pos_str.." ")
+		io.write("radius="..radius.." ")
+	end
+	
+	if radius > RADIUS_MAX then
+		if log then io.write("radiusTooLarge radiusIsNow="..RADIUS_MAX.." ") end
+		radius = RADIUS_MAX 
+	end
+	
+	if log then io.write("GettingNodes.. ")end
+	--gather stats of the surrounding nodes at this village position
+	--to determine what region (cold, hot, normal, native, desert) this
+	--village should be correspond to
+	local nodenames = {}
+		
+	-- seach each of the 8 directions N, NE, E, SE, S, SW, W, NW
+	for dir_index = 1, 8 do
+		local search_dir = villagers.DIRECTIONS[dir_index]
+		
+		if log then io.write("\n    "..search_dir..": ") end
+		
+		-- gather name of every odd node staring at 1 node
+		-- from the origin_pos to radius
+		local radius_index = 1
+		local loc = {x=0, y=origin_pos.y, z=0}
+		local nodename
+		while radius_index < radius do
+			loc.x = origin_pos.x + (villagers.NODE_AREA[search_dir][1] * radius_index)
+			loc.z = origin_pos.z + (villagers.NODE_AREA[search_dir][2] * radius_index)
+			nodename = villagers.getNodeName(loc)[2]
+			
+			if log then io.write(nodename) end
+			if nodename == "ROAD" or nodename == "DIRT" or nodename == "AIR" then
+				if log then io.write("[skipped] ") end
+			else 
+				if log then io.write(", ") end
+				table.insert(nodenames, nodename)
+			end
+			
+			radius_index = radius_index + 2
+		end
+		
+	end
+	
+	if log then 
+		io.write("\n    nodesGathered: ")
+		for i = 1, #nodenames do
+			io.write(nodenames[i].." ")
+		end
+	end
+	
+	-- count re-occuring nodenames and sort from highest occurrance to lowest
+	local rated_nodenames = {}
+	local popped_name
+	--rated_nodenames[popped_name] = 1  --record the first occurance
+	
+	if log then io.write("\nratingNodes.. ") end
+	while #nodenames >= 0 do
+		popped_name = table.remove(nodenames)
+		if log then 
+			io.write("\n  nodenamesSize="..#nodenames.." ")
+			io.write("popped="..popped_name.." ")
+		end
+		
+		local match_found = false
+		for key,value in pairs(rated_nodenames) do
+			if log then io.write("\n    '"..key.."="..value.."' ") end
+			if key == popped_name then
+				match_found = true
+				rated_nodenames[key] = rated_nodenames[key] + 1
+				if log then io.write("[MATCH] set v="..rated_nodenames[key].." ") end
+				break
+			else
+				if log then io.write("[noMatch] loopAgain.. ") end
+			end
+		end
+		if not match_found then
+			if log then io.write("endOf 'rated_nodenames' withNoMatch savedAsNew poppingNextNode.. ") end
+			rated_nodenames[popped_name] = 1
+		end
+		if #nodenames == 0 then 
+			break 
+		end
+	end
+	
+	if log then
+		io.write("\n## rated_nodenames: ")
+		for k,v in pairs(rated_nodenames) do
+			io.write(k.."="..v.." ")
+		end
+	end
+	
+	-- identify the nodename that occurred the most
+	if log then io.write("\n  getHighestRatedNode.. ") end
+	local top_count = 0
+	local top_nodename
+	for key,value in pairs(rated_nodenames) do
+		if log then 
+			io.write("\n    '"..key.."="..value.."' ")
+			io.write("top_count="..top_count.." ")
+		end
+		if value > top_count then
+			top_count = value
+			top_nodename = key
+			if log then io.write("higherValue! setTopCount="..top_count.." setTopNode="..top_nodename.." ") end
+		else
+			if log then io.write("noChange ") end
+		end
+	end
+	if log then io.write("\n  ## top_nodename = "..top_nodename.." count="..top_count.." ") end
+
+	local region_type
+	--tent, claytrader, lumberjack, log cabin, nore, medieval, taoki, cornernote 
+	-- assign region type based on the top node found
+	-- region types: cold, hot, normal, native, desert
+	if top_nodename == "DIRT_WITH_SNOW" then 
+		region_type = "cold"
+	elseif top_nodename == "SNOWBLOCK" then 
+		region_type = "cold"
+	elseif top_nodename == "ICE" then 
+		region_type = "cold"
+	elseif top_nodename == "DIRT_WITH_DRY_GRASS" then 
+		region_type = "hot"
+	elseif top_nodename == "SAND" then 
+		region_type = "hot"
+	elseif top_nodename == "DIRT_WITH_GRASS" then 
+		region_type = "normal"
+	elseif top_nodename == "DIRT_WITH_RAINFOREST_LITTER" then 
+		region_type = "native"
+	elseif top_nodename == "DESERT_SAND" then 
+		if math.random(3) == 1 then region_type = "hot"
+		else region_type = "desert" end
+	elseif top_nodename == "DESERT_STONE" then 
+		if math.random(3) == 1 then region_type = "hot"
+		else region_type = "desert" end
+	elseif top_nodename == "SILVER_SAND" then 
+		if math.random(3) == 1 then region_type = "hot"
+		else region_type = "desert" end
+	else 
+		print("ERROR Invalid top_nodename="..top_nodename)
+	end
+	
+	return region_type
+end
+
+--[[
+GROUND NODES:
+dirt_with_snow, snowblock, ice, dirt_with_dry_grass,
+sand, dirt_with_grass, dirt_with_rainforest_litter,
+desert_sand, silver_sand, water_source, water_flowing, 
+river_water_source, river_water_flowing, tree, 
+jungletree, pine_tree, acacia_tree, aspen_tree,
+DECORATIONS:
+snow, cactus, papyrus, dry_shrub, junglegrass, grass_1, 
+grass_2, grass_3, grass_4, grass_5, dry_grass_1,
+dry_grass_2, dry_grass_3, dry_grass_4, dry_grass_5, 
+bush_stem, bush_leaves, bush_sapling, acacia_bush_stem, 
+acacia_bush_leaves, acacia_bush_sapling
+--]]
 
 
 
@@ -825,138 +1000,33 @@ local function spawnOnJobPlot(bpos, region_type, village_type, building_type, sc
 end
 
 
---[[
-GROUND NODES:
-dirt_with_snow, snowblock, ice, dirt_with_dry_grass,
-sand, dirt_with_grass, dirt_with_rainforest_litter,
-desert_sand, silver_sand, water_source, water_flowing, 
-river_water_source, river_water_flowing, tree, 
-jungletree, pine_tree, acacia_tree, aspen_tree,
-DECORATIONS:
-snow, cactus, papyrus, dry_shrub, junglegrass, grass_1, 
-grass_2, grass_3, grass_4, grass_5, dry_grass_1,
-dry_grass_2, dry_grass_3, dry_grass_4, dry_grass_5, 
-bush_stem, bush_leaves, bush_sapling, acacia_bush_stem, 
-acacia_bush_leaves, acacia_bush_sapling
---]]
-function getRegionFromArea(pos, radius)
-	
-	local origin_pos = {x=pos.x, y=pos.y, z=pos.z}
-	local origin_pos_str = minetest.pos_to_string(origin_pos)
-	
-	-- debug output
-	if log then
-		io.write("\n  ")
-		io.write("origin_pos"..origin_pos_str.." ")
-		io.write("radius="..radius.." ")
-	end
-	
-	if log then io.write("GettingNodes @"..origin_pos_str.." ")end
-	--gather stats of the surrounding nodes at this village position
-	--to determine what region (cold, hot, normal, native, desert) this
-	--village should be correspond to
-	local nodenames = {}
-		
-	-- seach each of the 8 directions N, NE, E, SE, S, SW, W, NW
-	for dir_index = 1, 8 do
-		local search_dir = villagers.DIRECTIONS[dir_index]
-		-- gather name of every odd node staring at 1 node
-		-- from the origin_pos to radius
-		local radius_index = 1
-		while radius_index < radius do
-			origin_pos.x = origin_pos.x + (villagers.NODE_AREA[search_dir][1] * radius_index)
-			origin_pos.z = origin_pos.z + (villagers.NODE_AREA[search_dir][2] * radius_index)
-			table.insert(nodenames, villagers.getNodeName(origin_pos)[2])
-			radius_index = radius_index + 2
-		end
-		
-	end
-	if log then 
-		io.write("nodesGathered: ")
-		for i = 1, #nodenames do
-			io.write(nodenames[i].." ")
-		end
-	end
-	
-	-- count re-occuring nodenames and sort from highest occurrance to lowest
-	local rated_nodenames = {}
-	local popped_name = table.remove(nodenames)
-	rated_nodenames[popped_name] = 1  --record the first occurance
-	
-	while #nodenames > 0 do
-		for key,value in pairs(rated_nodenames) do
-			if key == popped_name then
-				rated_nodenames[key] = rated_nodenames[key] + 1
-			else
-				rated_nodenames[key] = 1
-			end
-			popped_name = table.remove(nodenames)
-		end
-	end
-	
-	if log then io.write("rated_nodenames: "..minetest.serialize(rated_nodenames).." ") end
-	
-	-- identify the nodename that occurred the most
-	local top_count = 0
-	local top_nodename
-	for key,value in pairs(rated_nodenames) do
-		if value > top_count then
-			top_nodename = key
-		end
-	end
-	if log then io.write("top_nodename="..top_nodename.." ") end
-
-	local region_type
-	--tent, claytrader, lumberjack, log cabin, nore, medieval, taoki, cornernote 
-	-- assign region type based on the top node found
-	-- region types: cold, hot, normal, native, desert
-	if top_nodename == "DIRT_WITH_SNOW" then 
-		region_type = "cold"
-	elseif top_nodename == "SNOWBLOCK" then 
-		region_type = "cold"
-	elseif top_nodename == "ICE" then 
-		region_type = "cold"
-	elseif top_nodename == "DIRT_WITH_DRY_GRASS" then 
-		region_type = "hot"
-	elseif top_nodename == "SAND" then 
-		region_type = "hot"
-	elseif top_nodename == "DIRT_WITH_GRASS" then 
-		region_type = "normal"
-	elseif top_nodename == "DIRT_WITH_RAINFOREST_LITTER" then 
-		region_type = "native"
-	elseif top_nodename == "DESERT_SAND" then 
-		if math.random(3) == 1 then region_type = "hot"
-		else region_type = "desert" end
-	elseif top_nodename == "SILVER_SAND" then 
-		if math.random(3) == 1 then region_type = "hot"
-		else region_type = "desert" end
-	else 
-		print("ERROR Invalid top_nodename="..top_nodename)
-	end
-	
-	return region_type
-end
-
 
 -- spawn traders in villages
 mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param2_data, a, cid )
-	local log = true
+	local log = false
 	
 	-- mg_villages mod is required and not installed
-	if not( minetest.get_modpath( 'mg_villages')) then return end
+	if not( minetest.get_modpath( 'mg_villages')) then return end	
 	
 	local village_pos = {x=village.vx, y=village.vh, z=village.vz}
 	local village_pos_str = minetest.pos_to_string(village_pos)
 	local village_type = village.village_type
+	local village_radius = village.vs
+	local village_snow = village.artificial_snow
 	
-	io.write("\n"..string.upper(village_type)..village_pos_str.." ")
+	if log then
+		io.write("\n"..string.upper(village_type)..village_pos_str.." ")
+		io.write("radius="..village_radius.." ")
+		io.write("snow="..tostring(village_snow).." ")
+		io.write("buildings="..#village.to_add_data.bpos.." ")
+	end 
 	
 	-- found player within max 50 blocks of village pos
 	local player_data = getValidPlayer(village_pos, 50)
 	
 	-- all players out of range from current village pos
 	if player_data == nil then 
-		if log then io.write("allPlayersOutOfRange SKIP\n") end
+		if log then io.write("  allPlayersOutOfRange SKIP\n") end
 		return 
 	end
 	
@@ -967,7 +1037,7 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 		io.write("  ")
 		io.write("nearestPlayer="..string.upper(player_name).." ")
 		io.write("pos"..minetest.pos_to_string(player_pos, 1).." ")
-		io.write("dis="..player_dist.." ")
+		io.write("dis="..villagers.round(player_dist, 1).." ")
 	end
 	
 	local meta = minetest.get_meta(village_pos)
@@ -980,7 +1050,7 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 		return
 	end
 	
-	local attempts = 0
+	local attempts
 	
 	-- Metadata key 'pos' is not set.
 	-- This is a 'new' village generate attempt
@@ -988,6 +1058,7 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 		meta:set_string("pos", village_pos_str)
 		meta:set_string("type", village_type)
 		meta:set_int("attempts", 1)
+		attempts = 1
 		if log then 
 			io.write("[NEW] ")
 			io.write("savedMeta >> ")
@@ -1011,35 +1082,14 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 		if log then io.write("raisedAttemptsTo="..attempts.." ") end
 	end
 	
-	local MIN_CYCLES_TO_WAIT = 10
+	local MIN_CYCLES_TO_WAIT = 5
 	if attempts < MIN_CYCLES_TO_WAIT then
 		if log then 
-			io.write("stillTooSoon remainingCyclesToWait=")
+			io.write("\n  stillTooSoon remainingCyclesToWait=")
 			io.write((MIN_CYCLES_TO_WAIT - attempts).." ")
 			io.write("SKIP\n")
 		end
 		return
-	end
-	
-	if log then io.write("waitingComplete! Getting region_type.. ") end
-	local region_type = getRegionFromArea(village_pos, village.vs)
-	
-	
-	
-	
-
-	
-	
-	
-	--[[
-	-- debug output
-	if villagers.log5 then
-		io.write("\n## ")
-		io.write("village_pos"..minetest.pos_to_string(village_pos).." ")
-		io.write("type="..village_type.." ")
-		io.write("radius="..village.vs.." ")
-		io.write("snow="..tostring(snowCover).." ")
-		io.write("buildings="..#village.to_add_data.bpos.." ")
 	end
 	
 	local region_type
@@ -1054,50 +1104,15 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 		region_type = "native"
 	elseif village_type == "gambit" then
 		region_type = "desert"
-	elseif snowCover == 1 then
+	elseif village_snow == 1 then
 		region_type = "cold"
 		
 	-- remaining village types will have villagers clothes/look
 	-- based on the surrounding nodes
 	else
-		region_type = getBuildingTypeFromArea(village_pos, village.vs)
+		region_type = getRegionFromArea(village_pos,village_radius)
 	end
 	
-	-- for each building in the village
-	for building_index,bpos in pairs(village.to_add_data.bpos) do
+	if log then io.write("## REGION TYPE = "..region_type) end
 	
-		local building_data = mg_villages.BUILDINGS[bpos.btype]
-		local building_type = building_data.typ
-		local building_scm = building_data.scm
-		local building_pos = {x=bpos.x, y=bpos.y, z=bpos.z}
-		
-		if villagers.log5 then
-			io.write("\n  building #"..building_index.." ")
-			io.write("loc"..minetest.pos_to_string(building_pos).." ")
-			io.write("type_id="..bpos.btype.." ")
-			
-			if bpos.btype ~= "road" then
-				io.write("scm="..dump(building_scm).." ")
-				io.write("type="..building_type.." ")
-				io.write("beds="..#bpos.beds.." ")
-			end
-		end
-		
-		if bpos.btype ~= "road" then
-			io.write("scm="..dump(building_scm).." ")
-			io.write("type="..building_type.." ")
-			io.write("beds="..#bpos.beds.." ")
-			
-			if #bpos.beds > 0 then
-				spawnOnBedPlot(bpos, region_type, village_type, building_type, building_data.scm, village.vx, village.vz)
-			else
-				spawnOnJobPlot(bpos, region_type, village_type, building_type, building_data.scm, minp, maxp)
-			end
-			
-		end
-		
-	end --end for loop
-	--io.write("\n")
-	
-	--]]
 end
