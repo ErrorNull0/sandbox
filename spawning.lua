@@ -108,7 +108,10 @@ function getRegionFromArea(pos, radius)
 			nodename = villagers.getNodeName(loc)[2]
 			
 			if log then io.write(nodename) end
-			if nodename == "ROAD" or nodename == "DIRT" or nodename == "AIR" then
+			if nodename == "ROAD" or 
+				nodename == "DIRT" or 
+				nodename == "STONE" or 
+				nodename == "AIR" then
 				if log then io.write("[skipped] ") end
 			else 
 				if log then io.write(", ") end
@@ -161,12 +164,13 @@ function getRegionFromArea(pos, radius)
 		end
 	end
 	
-	if log then
+	--if log then
 		io.write("\n## rated_nodenames: ")
 		for k,v in pairs(rated_nodenames) do
 			io.write(k.."="..v.." ")
 		end
-	end
+		io.write("\n")
+	--end
 	
 	-- identify the nodename that occurred the most
 	if log then io.write("\n  getHighestRatedNode.. ") end
@@ -240,12 +244,15 @@ acacia_bush_leaves, acacia_bush_sapling
 
 -- main villager spawning function
 function villagers.spawnVillager(pos, region, village_type, building_type, schem_type, trading_allowed, yaw_data, bed_data)
+	local log = true
 	
-	if villagers.log5 then 
+	if log then 
 		io.write("\n      spawnVillager() ")
-		io.write("buildType="..building_type.." ")
-		if schem_type then io.write("schemType="..schem_type.." ") 
-		else io.write("schemType=NIL ") end
+		io.write(region.." "..village_type.." "..building_type.." "..schem_type.." ")
+		io.write("tradAllow="..tostring(trading_allowed).." ")
+		if yaw_data then io.write("tradAllow="..tostring(trading_allowed).." ") end
+		if yaw_data then io.write("tradAllow="..tostring(trading_allowed).." ") end
+		io.write("spawningVillager{ ")
 	end
 	
 	-- SPAWN THE ACTUAL VILLAGER ENTITY!!!!
@@ -262,11 +269,13 @@ function villagers.spawnVillager(pos, region, village_type, building_type, schem
 		gender = "female"
 	end
 	self.vGender = gender
+	if log then io.write(gender.." ") end
 	
 	--get AGE and save to 'vAge' object custom field
 	local age_chance = villagers.plots[building_type].age
 	local age = age_chance[math.random(#age_chance)]
 	self.vAge = age
+	if log then io.write(age.." ") end
 	
 	--get NAME and save to 'vName' object custom field
 	if region == "native" then
@@ -280,6 +289,7 @@ function villagers.spawnVillager(pos, region, village_type, building_type, schem
 			self.vName = villagers.getVillagerName(gender)
 		end
 	end
+	if log then io.write(string.upper(self.vName).." ") end
 	
 	--get TEXTURE, VISUAL SIZE, and COLLISION BOX and apply it to corresponding entity properties
 	local newTexture, newSize, collisionBox = villagers.getVillagerAppearance(building_type, region, gender, age)
@@ -338,11 +348,13 @@ function villagers.spawnVillager(pos, region, village_type, building_type, schem
 	
 	-- generate list of items this villager will trade depending on building_type
 	if trading_allowed == 1 then
+		if log then io.write("normalTrader ") end
 		self.vSell = villagers.getTradeInventory(self, village_type, schem_type, "sell")
 	elseif trading_allowed == 2 then
+		if log then io.write("smallJobsTrader ") end
 		self.vSell = villagers.getTradeInventory(self, village_type, schem_type, "smalljobs")
-		if villagers.log5 then io.write("\n      ## Smalljobs trader! ## ") end
 	else
+		if log then io.write("nonTrader ") end
 		self.vSell = "none"
 	end
 	
@@ -362,6 +374,7 @@ function villagers.spawnVillager(pos, region, village_type, building_type, schem
 	
 	-- set bed position
 	if bed_data then
+		if log then io.write("hasBeds} ") end
 		self.vBedPos = bed_data
 		infotext_string = infotext_string.. 
 		" bed("..bed_data.x..","..bed_data.y..","..bed_data.z..")"
@@ -390,10 +403,14 @@ function villagers.spawnVillager(pos, region, village_type, building_type, schem
 	return self
 end
 
-local function spawnOnBedPlot(bpos, region, village, building, schem)
-	local log = false
+
+
+
+
+local function spawnWithBeds(bpos, region, village, building, schem)
+	local log = true
 	
-	if log then io.write("spawnRes() ") end
+	if log then io.write("spawnWithBeds() ") end
 	
 	--local building_pos = {x=bpos.x, y=bpos.y, z=bpos.z}
 	local beds_data = bpos.beds
@@ -409,12 +426,14 @@ local function spawnOnBedPlot(bpos, region, village, building, schem)
 		local trading_allowed = 0
 		if bed_index == 1 and villagers.ITEMS[village][schem] then
 			trading_allowed = 1
+			if log then io.write("mainTrader ") end
 		
 		-- each building with a bed plot will have 33% chance that the last bed will
 		-- correspond to a villager that gives players coins for small resources.
 		-- this is a way for players to get started on accumulating some coins.
 		elseif bed_index == beds_count and (math.random(3) == 1) then
 			trading_allowed = 2
+			if log then io.write("simpleJobsTrader ") end
 		end
 		
 		local mob_spawner_data = handle_schematics.get_pos_in_front_of_house(bpos, bed_index)
@@ -432,40 +451,9 @@ local function spawnOnBedPlot(bpos, region, village, building, schem)
 		-- villager not yet spawned
 		else
 			
-			--[[
-			-- count how many players are in range of this mob spawner position
-			local players_in_range = 0
-			for _,player in ipairs(minetest.get_connected_players()) do
-				if player then			
-					-- calculate distance between this spawner position and current player position
-					local distance =  math.floor(vector.distance(player:getpos(), mob_spawner_pos) * 10 + 0.5) / 10
-					if distance < 50 then 
-						players_in_range = players_in_range + 1
-						if log then io.write("PlayerInRange ") end
-					else 
-						if log then io.write("PlayerOutOfRange ") end
-					end
-				else
-					if log then io.write("PlayerDespawned ") end
-				end
+			if bpos.traders == nil then
+				bpos.traders = {} 
 			end
-			
-			-- no players are near the mob spawner location. skip spawn.
-			if players_in_range == 0 then 
-				if log then io.write("No players in range of spawn location: "..minetest.pos_to_string(mob_spawner_pos).." ") end
-				
-			-- at least one player is near the spawn location. continue spawn.
-			else
-					
-				-- first villager in this building
-				local villager_number
-				if bpos.traders == nil then
-					bpos.traders = {} 
-					villager_number = 1
-				else
-					villager_number = #bpos.traders + 1
-				end
-			--]]
 				
 			-- spawn the villager
 			mob_spawner_pos.y = mob_spawner_pos.y + 0.5
@@ -476,32 +464,23 @@ local function spawnOnBedPlot(bpos, region, village, building, schem)
 				io.write("region="..region.." ")
 			end
 			local luaEntity = villagers.spawnVillager(mob_spawner_pos, region, village, building, schem, trading_allowed, mob_spawner_data.yaw, beds_data[bed_index])
-			if log then io.write("** SPAWNED!! "..luaEntity.vName.." "..luaEntity.vGender.." "..luaEntity.vAge.." ") end
+			if log then io.write("** SPAWNED ** ") end
 			
 			local traders = {mob_spawner_pos.x.."_"..mob_spawner_pos.y.."_"..mob_spawner_pos.z}
 			bpos.traders[bed_index] = luaEntity.vName
 				
-				
 			--end
-			
 		end
-		
 	end
-
-
 end
 
 
-local function spawnOnJobPlot(bpos, region, village, building, schem, player_dist)
-	local log = false
-	if log then io.write("spawnNonRes() ") end
-	
-	--[[
-	local function getDistance(pos1, pos2)			
-		local mult = 10
-		return math.floor(vector.distance(pos1, pos2) * mult + 0.5) / mult
-	end
-	--]]
+
+
+
+local function spawnWithNoBeds(bpos, region, village, building, schem)
+	local log = true
+	if log then io.write("spawnWithNoBeds() ") end
 	
 	local existing_villager_name
 	local function villagerAlreadySpawned()
@@ -512,49 +491,6 @@ local function spawnOnJobPlot(bpos, region, village, building, schem, player_dis
 			return false
 		end
 	end
-	
-	--[[
-	local function locationOutOfRange()
-		-- how many players are out of range
-		local count = 0
-		
-		-- cycle through all connected players
-		for _,player in ipairs(minetest.get_connected_players()) do
-			if player ~= nil then			
-				
-				-- calculate distance between villager spawn position and current player position
-				local distance = getDistance(player:getpos(), {x=bpos.x, y=bpos.y, z=bpos.z})
-				if distance > 50 then 
-					count = count + 1 
-				end
-				
-			else 
-				if log then io.write("noPlayersExist ") end
-			end
-		end
-		
-		if count > 0 then return true
-		else return false end
-	end
-	
-	local function invalidLocation()
-		if bpos.x > maxp.x then
-			print("ERROR bpos.x("..bpos.x..") > maxp.x("..maxp.x..")")
-			return true
-		elseif (bpos.x + bpos.bsizex) < minp.x then
-			print("ERROR bpos.x("..bpos.x..") + bpos.bsizex("..bpos.bsizex..") < minp.x("..minp.x..")" 
-			return true
-		elseif bpos.z > maxp.z then
-			print("ERROR bpos.z("..bpos.z..") > maxp.z("..maxp.z..")"
-			return true
-		elseif (bpos.z + bpos.bsizez) < minp.z then
-			print("ERROR bpos.z("..bpos.z..") + bpos.bsizez("..bpos.bsizez..") < minp.z("..minp.z..")"
-			return true
-		else
-			return false
-		end
-	end
-	--]]
 	
 	local function validateSpawnPosition(pos, checkNodeBelowVillager)
 		local node_name = villagers.getNodeName(pos)[2]
@@ -590,15 +526,9 @@ local function spawnOnJobPlot(bpos, region, village, building, schem, player_dis
 	
 	if villagerAlreadySpawned() then -- villager already spawned, skip.
 		if log then io.write(existing_villager_name.." already spawned @ "..bpos_str.." ") end
-	
-	--elseif notBuildingLocation() then -- not a building structure, but a road, etc.
-	--	if log then io.write("Not a building plot: "..bpos_str.." ") end
-		
-	--elseif player_dist > 50 then -- plot is too far away from player, skip.
-	--	if log then io.write("Distance to "..building.." "..bpos_str.." too far. ") end
 		
 	else
-		if log then io.write("Location OK so far. "..bpos_str.." ") end
+		if log then io.write("PosPassed"..bpos_str.." ") end
 		
 		local validSpawnPosFound = false
 		local valid_spawn_pos
@@ -622,7 +552,7 @@ local function spawnOnJobPlot(bpos, region, village, building, schem, player_dis
 		end
 		
 		if validSpawnPosFound then
-			if log then io.write("VALID SPAWN POS FOUND! ") end
+			if log then io.write("VALID POS FOUND! ") end
 			
 			-- calculate villager spawn position
 			local spawn_pos = {x=valid_spawn_pos[1], y=bpos.y+1.5, z=valid_spawn_pos[2]}
@@ -674,11 +604,12 @@ village and schem names.
 
 -- spawn traders in villages
 mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param2_data, a, cid )
-	local log = false
+	local log = true
 	
 	-- mg_villages mod is required and not installed
 	if not( minetest.get_modpath( 'mg_villages')) then return end	
 	
+	local MAX_DISTANCE = 40
 	local village_pos = {x=village.vx, y=village.vh, z=village.vz}
 	local village_pos_str = minetest.pos_to_string(village_pos)
 	local village_type = village.village_type
@@ -692,12 +623,12 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 		io.write("buildings="..#village.to_add_data.bpos.." ")
 	end 
 	
-	-- find player within max_distance blocks of village pos
-	local player_data = getValidPlayer(village_pos, max_distance)
+	-- find player within MAX_DISTANCE blocks of village pos
+	local player_data = getValidPlayer(village_pos, MAX_DISTANCE)
 	
 	-- all players out of range from current village pos
 	if player_data == nil then 
-		if log then io.write("  allPlayersOutOfRange SKIP\n") end
+		if log then io.write("allPlayersOutOfRange SKIP\n") end
 		return 
 	end
 	
@@ -705,7 +636,6 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 	local player_pos = player_data.pos
 	local player_dist = player_data.dist
 	if log then 
-		io.write("  ")
 		io.write("nearestPlayer="..string.upper(player_name).." ")
 		io.write("pos"..minetest.pos_to_string(player_pos, 1).." ")
 		io.write("dis="..villagers.round(player_dist, 1).." ")
@@ -733,9 +663,9 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 		attempts = 1
 		if log then 
 			io.write("[NEW] ")
-			io.write("savedMeta >> ")
+			io.write("savedMeta{")
 			io.write("pos"..village_pos_str.." ")
-			io.write("type="..village_type..", attempts=1 ")
+			io.write("type="..village_type.." attempts=1} ")
 		end
 	-- This village attempted to generate at a prior cycle
 	-- but didn't complete and so this is another attempt.
@@ -751,7 +681,7 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 		region_type = meta:get_string("region")
 		attempts = attempts + 1
 		meta:set_int("attempts", attempts)
-		if log then io.write("raisedAttemptsTo="..attempts.." ") end
+		if log then io.write("now.. attempts="..attempts.." ") end
 	end
 	
 	-- force this village generation attempt to cycle a number of
@@ -771,7 +701,7 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 	-- until region_type is calculated. This ensures the calculation
 	-- for region_type only needs to run once since getRegionFromArea()
 	-- can be fairly expensive.
-	if region_type == nil then
+	if region_type == "" then
 		-- certain village types directly determin the region type
 		-- without needing to examine surrounding node data
 		if village_type == "sandcity" then
@@ -794,30 +724,47 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 	
 	meta:set_string("region", region_type)
 	if log then io.write("## REGION TYPE = "..region_type) end
+	if log then io.write("\n## SPAWNING VILLAGERS!!") end
 	
 	-- for each building in the village
-	for building_index,bpos in pairs(village.to_add_data.bpos) do
+	for building_index, bpos in pairs(village.to_add_data.bpos) do
 		local building_data = mg_villages.BUILDINGS[bpos.btype]
 		local building_type = building_data.typ
 		local building_scm = building_data.scm
 		
-		if bpos.btype ~= "road" then
+		if log then io.write("\n  Building #"..building_index.." ") end
+		
+		if log then 
+			if building_type then 
+				io.write(string.upper(building_type).." ") 
+				io.write("("..building_scm..") ")
+			else 
+				io.write("N/A ") 
+				io.write("("..minetest.serialize(building_scm)..") ")
+			end
+		end
+		
+		if bpos.btype == "road" then
+			if log then io.write("SKIP ") end
+		else
+			if log then io.write("BEDS="..#bpos.beds.." ") end
 			if #bpos.beds > 0 then
-				spawnOnBedPlot(
+				
+				spawnWithBeds(
 					bpos, 
 					region_type, --passive
 					village_type, --used x1
 					building_type, --passive
-					building_scm, --used x1
+					building_scm --used x1
 				)
 			else
-				spawnOnJobPlot(
+				
+				spawnWithNoBeds(
 					bpos, 
 					region_type, --passive
 					village_type, --passive
 					building_type, --passive
-					building_scm, --passive
-					player_dist
+					building_scm --passive
 				)
 			end
 			
@@ -1055,8 +1002,9 @@ minetest.register_entity("villagers:villager", {
 		villagers.on_leftclick(self, puncher, time_from_last_punch)
 	end,
 	
-	on_rightclick = villagers.on_rightclick(self, clicker),
-	on_step = villagers.on_step(self, dtime),
+	on_rightclick = function(self, clicker) villagers.on_rightclick(self, clicker) end,
+	
+	on_step = function(self, dtime) villagers.on_step(self, dtime) end,
 	
 	get_staticdata = function(self)
 		local log = false
