@@ -2,6 +2,17 @@ COMPLETED:
 - completed code to determine region type based on surrounding nodes in village
 
 TODO:
+
+- ensure that once region_type is obtained to quick running the getRegionFromArea() on
+-- subsequent iterations of mg_villages.part_of_village_spawned()
+
+** or instead of below, device a diff way of assigning custom trade items to each villager, that does not
+depend on specific label for village, building or schem. instead based on regoin_type, surrounding trees,
+or other parameters provided by mg_villages 'village' object
+- ensure villagers.ITEMS[village] and villagers.ITEMS[schem] match exactly what mv_villages parameters contain
+-- or find some way to dynamically check for this 
+- ensure chat command validates village, building and schem type directly against mg_villages parameters
+
 - complete merging back prod version of spawning.lua to sandbox version... to complete village spawn
 - cascade any other changes down to other functions now that region type is found via geography
 - have mg_villages mapgen stop looping when all villagers have spawned.
@@ -84,4 +95,4 @@ ISSUES/BUGS:
 
 - player who initiated a chat or trade might have chat bubble stick when 
 -- another player chats same villager
-- on very rare occasions villagers seen to walk diagonally
+- on very rare occasions villagers seen to walk diagonally
