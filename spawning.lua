@@ -3,7 +3,6 @@
 --[[
 'village_pos' is the position of the village mg_villages mod is attempting
 to finish spawning.
-
 RETURNS the player data (name, pos, dist) that is nearest to the village
 position, but not more than 50 blocks. If no players are inside 50 block
 radius of village position, then function returns 'false'.
@@ -59,12 +58,7 @@ local function getValidPlayer(village_pos, distance_max)
 			end
 		end
 	end
-	
-	
-	if log then 
-		io.write("\n") 
-	end
-	
+	if log then io.write("\n") end
 	
 	if valid_player_name then 
 		return { name = valid_player_name, pos = player_pos, dist = dist_shortest }
@@ -244,339 +238,6 @@ acacia_bush_leaves, acacia_bush_sapling
 
 
 
--------------------------
--- ENTITY REGISTRATION --
--------------------------
-
-minetest.register_entity("villagers:villager", {
-	
-	-- Utilized Object Proerties
-	hp_max = 15,
-	collisionbox = {-0.25,-1.00,-0.25, 0.25,0.75,0.25},
-	physical = true,
-	weight = 5,
-	visual = "mesh",
-	visual_size = {x=1.0, y=1.0},
-	mesh = "character.b3d",
-	textures = {"character.png"},
-	animation = { 
-		stand_start = 0, stand_end = 79, 
-		walk_start = 168, walk_end = 187,
-		dig_start = 189, dig_end = 198,
-		walkdig_start = 200, walkdig_end = 219
-	},
-	animation_speed = 25,
-	infotext = "[uninitialized villager]",
-	
-	-- custom fields
-	vName = "no-name",
-	vGender = "no-gender",
-	vAge = "adult",
-	vTexture = "character.png",
-	vSize = 1,
-	vBox = {-0.25,-1.00,-0.25, 0.25,0.75,0.25},
-	vYaw = 0,
-	vYawSaved = 0,
-	vTimer = 0,
-	vAction = "STAND",
-	vDigging = nil,
-	vActionFrequency = 1, --rate in seconds villager updates action
-	vInitialChatDistance = 0,
-	vType = "UNASSIGNED",
-	vSchem = "UNASSIGNED",
-	vRegion = "UNASSIGNED",
-	vHudIds = {},
-	vSoundHandle = nil,
-	vSavepoints = {},
-	vDespawned = nil,
-	
-	-- pathfinding
-	vPos = {x=0,y=0,z=0},
-	vFacingDirection = "N",
-	vOriginPos = {x=0,y=0,z=0},
-	vOriginDistance = 0,
-	vOriginDistMax = 10,
-	vTargetPos = {x=0,y=0,z=0},
-	vSpawnHeight = 0,
-	vTargetHeight = 0,
-	vTurnPreference = "right",
-	vWalkReady = false,
-	vDigReady = false,
-	vBedPos = nil,
-	vDoorPos = nil,
-	vJobPos = nil,
-	
-	-- chatting
-	vChatting = nil,
-	vChatReady = true,
-	vScriptHi = nil,
-	vScriptHiSaved = nil,
-	vScriptBye = nil,
-	vScriptByeSaved = nil,
-	vScriptGtg = nil,
-	vScriptGtgSaved = nil,
-	vScriptMain = nil,
-	vScriptMainSaved = nil,
-	vScriptSmalltalk = nil,
-	vScriptSmalltalkSaved = nil,
-	vScriptSmalltalk = nil,
-	vScriptSmalltalkSaved = nil,
-	vScriptGameFacts = nil,
-	vScriptGameFactsSaved = nil,
-	
-	-- trading
-	vID = nil,
-	vIsTrader = false,
-	vTrading = nil,
-	vNodeMetaPos = {x=0,y=0,z=0},
-	vBuy = {},
-	vSell = {},
-	
-	-- debugging
-	vTextureString = nil,
-	
-	on_activate = function(self, staticdata, dtime_s)
-		
-		if villagers.log then io.write("\nACTIVATE ") end
-			
-		-- perform default action, whichi is standing idle animation
-		villagers.standVillager(self)
-		
-		if staticdata ~= "" then
-			if villagers.log then io.write("(existing) ") end
-			local customFields = minetest.deserialize(staticdata)
-			self.object:set_properties({textures={customFields.vTexture}})
-			self.object:set_properties({visual_size=customFields.vSize})
-			self.object:set_properties({collisionbox=customFields.vBox})
-			self.object:set_properties({infotext=customFields.vInfo})
-			self.object:set_properties({hp_max=customFields.vHP})
-			self.object:setpos(customFields.vPos)
-			self.object:set_yaw(customFields.vYaw)
-			
-			self.vName = customFields.vName
-			self.vAge = customFields.vAge
-			self.vTexture = customFields.vTexture
-			self.vSize = customFields.vSize
-			self.vBox = customFields.vBox
-			self.vYaw = customFields.vYaw
-			self.vYawSaved = customFields.vYawSaved
-			self.vGender = customFields.vGender
-			self.vAction = customFields.vAction
-			self.vDigging = customFields.vDigging
-			self.vActionFrequency = customFields.vActionFrequency
-			self.vInitialChatDistance = 0
-			self.vType = customFields.vType
-			self.vSchem = customFields.vSchem
-			self.vRegion = customFields.vRegion
-			self.vHudIds = customFields.vHudIds
-			self.vSoundHandle = customFields.vSoundHandle
-			self.vSavepoints = customFields.vSavepoints
-			self.vDespawned = nil
-			
-			-- pathfinding
-			self.vPos = customFields.vPos
-			self.vFacingDirection = customFields.vFacingDirection
-			self.vOriginPos = customFields.vOriginPos
-			self.vOriginDistance = customFields.vOriginDistance
-			self.vOriginDistMax = customFields.vOriginDistMax
-			self.vTargetPos = customFields.vTargetPos
-			self.vSpawnHeight = customFields.vSpawnHeight
-			self.vTargetHeight = customFields.vTargetHeight
-			self.vTurnPreference = customFields.vTurnPreference
-			self.vWalkReady = false
-			self.vDigReady = false
-			self.vBedPos = customFields.vBedPos
-			self.vDoorPos = customFields.vDoorPos
-			self.vJobPos = customFields.vJobPos
-			
-			-- chatting
-			self.vChatting = nil
-			self.vChatReady = true
-			self.vScriptHi = customFields.vScriptHi
-			self.vScriptHiSaved = customFields.vScriptHiSaved
-			self.vScriptBye = customFields.vScriptBye
-			self.vScriptByeSaved = customFields.vScriptByeSaved
-			self.vScriptGtg = customFields.vScriptGtg
-			self.vScriptGtgSaved = customFields.vScriptGtgSaved
-			self.vScriptMain = customFields.vScriptMain
-			self.vScriptMainSaved = customFields.vScriptMainSaved
-			self.vScriptSmalltalk = customFields.vScriptSmalltalk
-			self.vScriptSmalltalkSaved = customFields.vScriptSmalltalkSaved
-			self.vScriptGameFacts = customFields.vScriptGameFacts
-			self.vScriptGameFactsSaved = customFields.vScriptGameFactsSaved
-			
-			
-			-- trading
-			self.vID = customFields.vID
-			self.vIsTrader = customFields.vIsTrader
-			self.vTrading = nil
-			self.vNodeMetaPos = customFields.vNodeMetaPos
-			self.vBuy = customFields.vBuy
-			self.vSell = customFields.vSell
-			
-			-- debugging
-			self.vTextureString = customFields.vTextureString
-			
-			if villagers.log then io.write(string.upper(self.vName).." ") end
-			
-			if self.vDespawned then
-				if villagers.log then io.write("vDespawned="..tostring(self.vDespawned).." ") end
-			else
-				if villagers.log then io.write("vDespawned=NIL ") end
-			end
-			
-			local prior_saved_action = self.vAction
-			if prior_saved_action == "STAND" then
-				if villagers.log then io.write("loaded="..prior_saved_action.." ") end
-			elseif prior_saved_action == "TURN" then 
-				if villagers.log then io.write("loaded="..prior_saved_action.." ") end
-			elseif prior_saved_action == "DIG" then
-				if villagers.log then io.write("loaded="..prior_saved_action.." ") end
-				if villagers.log then io.write("set_vAction=RESUMEDIG ") end
-				self.vAction = "RESUMEDIG"
-			elseif prior_saved_action == "REPLACE" then
-				if villagers.log then io.write("loaded="..prior_saved_action.." ") end
-				if villagers.log then io.write("set_vAction=RESUMEDIG ") end
-				self.vAction = "RESUMEDIG"
-			elseif prior_saved_action == "WALK" then
-				if villagers.log then io.write("loaded="..prior_saved_action.." ") end
-			elseif prior_saved_action == "WALKING" then
-				if villagers.log then io.write("loaded="..prior_saved_action.." ") end
-				if villagers.log then io.write("set_vAction=WALK ") end
-				self.vAction = "WALK"
-				self.object:setvelocity({x=0,y=0,z=0})
-			elseif prior_saved_action == "TURNBACK" then
-				if villagers.log then io.write("loaded="..prior_saved_action.." ") end
-			elseif prior_saved_action == "WALKBACK" then
-				if villagers.log then io.write("loaded="..prior_saved_action.." ") end
-			elseif prior_saved_action == "CHAT" or prior_saved_action == "ENDCHAT" then
-				if villagers.log then io.write("loaded="..prior_saved_action.." ") end
-				if villagers.log then io.write("set_vAction=STAND ") end
-				self.vAction = "STAND"
-			elseif prior_saved_action == "TRADE" or prior_saved_action == "ENDTRADE" then
-				if villagers.log then io.write("loaded="..prior_saved_action.." ") end
-				if villagers.log then io.write("set_vAction=STAND ") end
-				self.vAction = "STAND"
-			else
-				if villagers.log then io.write("ERROR vAction="..prior_saved_action.." ") end
-			end
-			
-		else
-			if villagers.log then io.write("(new) "..string.upper(self.vName).." ") end
-		end
-		
-		if villagers.log then io.write("onActivateEND. ") end
-		
-	end,
-	
-	on_punch = function(self, puncher, time_from_last_punch, tool_capabilities, dir)
-		villagers.on_leftclick(self, puncher, time_from_last_punch)
-	end,
-	
-	on_rightclick = function(self, clicker)
-		villagers.on_rightclick(self, clicker)		
-	end,
-	
-	on_step = function(self, dtime)
-		villagers.on_step(self, dtime)
-	end, -- on_step function
-
-	
-	get_staticdata = function(self)
-		if villagers.log then io.write("\nGETSTATIC("..self.vName..") ") end
-		-- save all custom fields
-		
-		if self.vDespawned == false then
-			if villagers.log then io.write("DESPAWNED vAction="..self.vAction.."\n") end
-		else
-			self.vDespawned = false
-			if villagers.log then io.write("SPAWNED ") end
-			-- show standing animation while waiting
-			-- for the first action cycle to start
-			self.object:set_animation(
-				{x=self.animation["stand_start"], y=self.animation["stand_end"]},
-				self.animation_speed + math.random(10)
-			)
-		end
-		
-		local objProps = self.object:get_properties()
-		
-		local villager_data = {
-			vInfo = objProps.infotext,
-			vHP = objProps.hp_max,
-			
-			vName = self.vName,
-			vAge = self.vAge,
-			vTexture = self.vTexture,
-			vSize = self.vSize,
-			vBox = self.vBox,
-			vYaw = self.vYaw,
-			vYawSaved = self.vYawSaved,
-			vGender = self.vGender,
-			vTimer = self.vTimer,
-			vAction = self.vAction,
-			vDigging = self.vDigging,
-			vActionFrequency = self.vActionFrequency,
-			vInitialChatDistance = 0,
-			vType = self.vType,
-			vSchem = self.vSchem,
-			vRegion = self.vRegion,
-			vHudIds = self.vHudIds,
-			vSoundHandle = self.vSoundHandle,
-			vSavepoints = self.vSavepoints,
-			vDespawned = self.vDespawned,
-			
-			-- pathfinding
-			vPos = self.vPos,
-			vFacingDirection = self.vFacingDirection,
-			vOriginPos = self.vOriginPos,
-			vOriginDistance = self.vOriginDistance,
-			vOriginDistMax = self.vOriginDistMax,
-			vTargetPos = self.vTargetPos,
-			vSpawnHeight = self.vSpawnHeight,
-			vTargetHeight = self.vTargetHeight,
-			vTurnPreference = self.vTurnPreference,
-			vWalkReady = false,
-			vDigReady = false,
-			vBedPos = self.vBed,
-			vDoorPos = self.vDoor,
-			vJobPos = self.vDoor,
-			
-			-- chatting
-			vChatting = nil,
-			vChatReady = true,
-			vScriptHi = self.vScriptHi,
-			vScriptHiSaved = self.vScriptHiSaved,
-			vScriptBye = self.vScriptBye,
-			vScriptByeSaved = self.vScriptByeSaved,
-			vScriptGtg = self.vScriptGtg,
-			vScriptGtgSaved = self.vScriptGtgSaved,
-			vScriptMain = self.vScriptMain,
-			vScriptMainSaved = self.vScriptMainSaved,
-			vScriptSmalltalk = self.vScriptSmalltalk,
-			vScriptSmalltalkSaved = self.vScriptSmalltalkSaved,
-			vScriptGameFacts = self.vScriptGameFacts,
-			vScriptGameFactsSaved = self.vScriptGameFactsSaved,
-			
-			-- trading
-			vID = self.vID,
-			vIsTrader = self.vIsTrader,
-			vTrading = nil,
-			vNodeMetaPos = self.vNodeMetaPos,
-			vBuy = self.vBuy,
-			vSell = self.vSell,
-			
-			-- debugging
-			vTextureString = self.vTextureString,
-			
-		}
-		
-		return minetest.serialize(villager_data)
-	end,
-
-	
-})
-
 -- main villager spawning function
 function villagers.spawnVillager(pos, region, village_type, building_type, schem_type, trading_allowed, yaw_data, bed_data)
 	
@@ -727,121 +388,120 @@ function villagers.spawnVillager(pos, region, village_type, building_type, schem
 	self.vTextureString = newTexture
 
 	return self
-	
 end
 
-local function spawnOnBedPlot(bpos, region_type, village_type, building_type, schem_type, village_posx, village_posz)
+local function spawnOnBedPlot(bpos, region, village, building, schem)
+	local log = false
 	
-	if villagers.log5 then io.write("spawnRes() ") end
+	if log then io.write("spawnRes() ") end
 	
-	local building_pos = {x=bpos.x, y=bpos.y, z=bpos.z}
+	--local building_pos = {x=bpos.x, y=bpos.y, z=bpos.z}
 	local beds_data = bpos.beds
 	local beds_count = #beds_data
-	if beds_count > 0 then
 		
-		-- for each bed in the building
-		for bed_index = 1, beds_count do
-			if villagers.log5 then io.write("\n    spawn_pos #"..bed_index.." ") end
-			
-			-- ensure only one villager (the first one) from a village and schem type
-			-- that can trade goods, will actually have goods to trade. This prevents
-			-- all villagers belonging a single farm for example being able to trade.
-			local trading_allowed = 0
-			if bed_index == 1 and villagers.ITEMS[village_type][schem_type] then
-				trading_allowed = 1
-			
-			-- each building with a bed plot will have 33% chance that the last bed will
-			-- correspond to a villager that gives players coins for small resources.
-			-- this is a way for players to get started on accumulating some coins.
-			elseif bed_index == beds_count and (math.random(3) == 1) then
-				trading_allowed = 2
+	-- for each bed in the building
+	for bed_index = 1, beds_count do
+		if log then io.write("\n    spawn_pos #"..bed_index.." ") end
+		
+		-- ensure only one villager (the first one) from a village and schem type
+		-- that can trade goods, will actually have goods to trade. This prevents
+		-- all villagers belonging a single farm for example being able to trade.
+		local trading_allowed = 0
+		if bed_index == 1 and villagers.ITEMS[village][schem] then
+			trading_allowed = 1
+		
+		-- each building with a bed plot will have 33% chance that the last bed will
+		-- correspond to a villager that gives players coins for small resources.
+		-- this is a way for players to get started on accumulating some coins.
+		elseif bed_index == beds_count and (math.random(3) == 1) then
+			trading_allowed = 2
+		end
+		
+		local mob_spawner_data = handle_schematics.get_pos_in_front_of_house(bpos, bed_index)
+		local mob_spawner_pos = {x=mob_spawner_data.x, y=mob_spawner_data.y, z=mob_spawner_data.z}
+		if log then io.write(minetest.pos_to_string(mob_spawner_pos).." ") end
+		
+		-- if any trader has already spawned for this building AND a villager already
+		-- spawned in that specific spawn location 'bed_index' then skip.
+		if bpos.traders and bpos.traders[bed_index] then
+			if log then 
+				io.write(bpos.traders[bed_index].." already spawned @ ")
+				io.write(minetest.pos_to_string(mob_spawner_pos).." ")
 			end
 			
-			local mob_spawner_data = handle_schematics.get_pos_in_front_of_house(bpos, bed_index)
-			local mob_spawner_pos = {x=mob_spawner_data.x, y=mob_spawner_data.y, z=mob_spawner_data.z}
-			if villagers.log5 then io.write(minetest.pos_to_string(mob_spawner_pos).." ") end
+		-- villager not yet spawned
+		else
 			
-			-- if any trader has already spawned for this building AND a villager already
-			-- spawned in that specific spawn location 'bed_index' then skip.
-			if bpos.traders and bpos.traders[bed_index] then
-				if villagers.log5 then io.write(bpos.traders[bed_index].." already spawned @ "..minetest.pos_to_string(mob_spawner_pos).." ") end
-				
-			-- villager not yet spawned
-			else
-				
-				-- count how many players are in range of this mob spawner position
-				local players_in_range = 0
-				for _,player in ipairs(minetest.get_connected_players()) do
-					if player then			
-						-- calculate distance between this spawner position and current player position
-						local distance =  math.floor(vector.distance(player:getpos(), mob_spawner_pos) * 10 + 0.5) / 10
-						if distance < 50 then 
-							players_in_range = players_in_range + 1
-							if villagers.log5 then io.write("PlayerInRange ") end
-						else 
-							if villagers.log5 then io.write("PlayerOutOfRange ") end
-						end
-					else
-						if villagers.log5 then io.write("PlayerDespawned ") end
+			--[[
+			-- count how many players are in range of this mob spawner position
+			local players_in_range = 0
+			for _,player in ipairs(minetest.get_connected_players()) do
+				if player then			
+					-- calculate distance between this spawner position and current player position
+					local distance =  math.floor(vector.distance(player:getpos(), mob_spawner_pos) * 10 + 0.5) / 10
+					if distance < 50 then 
+						players_in_range = players_in_range + 1
+						if log then io.write("PlayerInRange ") end
+					else 
+						if log then io.write("PlayerOutOfRange ") end
 					end
-				end
-				
-				-- no players are near the mob spawner location. skip spawn.
-				if players_in_range == 0 then 
-					if villagers.log5 then io.write("No players in range of spawn location: "..minetest.pos_to_string(mob_spawner_pos).." ") end
-					
-				-- at least one player is near the spawn location. continue spawn.
 				else
-						
-					-- first villager in this building
-					local villager_number
-					if bpos.traders == nil then
-						bpos.traders = {} 
-						villager_number = 1
-					else
-						villager_number = #bpos.traders + 1
-					end
-						
-						
-					-- spawn the villager
-					mob_spawner_pos.y = mob_spawner_pos.y + 0.5
-					if villagers.log5 then 
-						io.write("pos"..minetest.pos_to_string(mob_spawner_pos).." ")
-						io.write("type="..building_type.." ")
-						io.write("scm="..schem_type.." ")
-						io.write("region="..region_type.." ")
-					end
-					local luaEntity = villagers.spawnVillager(mob_spawner_pos, region_type, village_type, building_type, schem_type, trading_allowed, mob_spawner_data.yaw, beds_data[bed_index])
-					if villagers.log5 then io.write("** SPAWNED!! "..luaEntity.vName.." "..luaEntity.vGender.." "..luaEntity.vAge.." ") end
-					
-					--setTradingMeta(luaEntity)  -- set metadata for later formspec use
-					
-					local villager_descriptor = "("..village_posx..","..village_posz..") "..
-					minetest.pos_to_string(building_pos).." "..minetest.pos_to_string(mob_spawner_pos)
-					
-					
-					local traders = {villager_descriptor}
-					bpos.traders[bed_index] = luaEntity.vName
-					
+					if log then io.write("PlayerDespawned ") end
 				end
-				
 			end
+			
+			-- no players are near the mob spawner location. skip spawn.
+			if players_in_range == 0 then 
+				if log then io.write("No players in range of spawn location: "..minetest.pos_to_string(mob_spawner_pos).." ") end
+				
+			-- at least one player is near the spawn location. continue spawn.
+			else
+					
+				-- first villager in this building
+				local villager_number
+				if bpos.traders == nil then
+					bpos.traders = {} 
+					villager_number = 1
+				else
+					villager_number = #bpos.traders + 1
+				end
+			--]]
+				
+			-- spawn the villager
+			mob_spawner_pos.y = mob_spawner_pos.y + 0.5
+			if log then 
+				io.write("pos"..minetest.pos_to_string(mob_spawner_pos).." ")
+				io.write("type="..building.." ")
+				io.write("scm="..schem.." ")
+				io.write("region="..region.." ")
+			end
+			local luaEntity = villagers.spawnVillager(mob_spawner_pos, region, village, building, schem, trading_allowed, mob_spawner_data.yaw, beds_data[bed_index])
+			if log then io.write("** SPAWNED!! "..luaEntity.vName.." "..luaEntity.vGender.." "..luaEntity.vAge.." ") end
+			
+			local traders = {mob_spawner_pos.x.."_"..mob_spawner_pos.y.."_"..mob_spawner_pos.z}
+			bpos.traders[bed_index] = luaEntity.vName
+				
+				
+			--end
 			
 		end
-	else
-		--io.write("notLivingStructure ")
+		
 	end
+
 
 end
 
-local function spawnOnJobPlot(bpos, region_type, village_type, building_type, schem_type, minp, maxp)
+
+local function spawnOnJobPlot(bpos, region, village, building, schem, player_dist)
+	local log = false
+	if log then io.write("spawnNonRes() ") end
 	
-	if villagers.log5 then io.write("spawnNonRes() ") end
-	
+	--[[
 	local function getDistance(pos1, pos2)			
 		local mult = 10
 		return math.floor(vector.distance(pos1, pos2) * mult + 0.5) / mult
 	end
+	--]]
 	
 	local existing_villager_name
 	local function villagerAlreadySpawned()
@@ -853,8 +513,8 @@ local function spawnOnJobPlot(bpos, region_type, village_type, building_type, sc
 		end
 	end
 	
+	--[[
 	local function locationOutOfRange()
-		
 		-- how many players are out of range
 		local count = 0
 		
@@ -869,7 +529,7 @@ local function spawnOnJobPlot(bpos, region_type, village_type, building_type, sc
 				end
 				
 			else 
-				if villagers.log5 then io.write("noPlayersExist ") end
+				if log then io.write("noPlayersExist ") end
 			end
 		end
 		
@@ -877,31 +537,24 @@ local function spawnOnJobPlot(bpos, region_type, village_type, building_type, sc
 		else return false end
 	end
 	
-	--[[
-	local function notBuildingLocation()
-		if building_type then return false 
-		else return true end
-	end
-	--]]
-	
-	local error_message
 	local function invalidLocation()
 		if bpos.x > maxp.x then
-			error_message = "bpos.x("..bpos.x..") > maxp.x("..maxp.x..")"
+			print("ERROR bpos.x("..bpos.x..") > maxp.x("..maxp.x..")")
 			return true
 		elseif (bpos.x + bpos.bsizex) < minp.x then
-			error_message = "bpos.x("..bpos.x..") + bpos.bsizex("..bpos.bsizex..") < minp.x("..minp.x..")" 
+			print("ERROR bpos.x("..bpos.x..") + bpos.bsizex("..bpos.bsizex..") < minp.x("..minp.x..")" 
 			return true
 		elseif bpos.z > maxp.z then
-			error_message = "bpos.z("..bpos.z..") > maxp.z("..maxp.z..")"
+			print("ERROR bpos.z("..bpos.z..") > maxp.z("..maxp.z..")"
 			return true
 		elseif (bpos.z + bpos.bsizez) < minp.z then
-			error_message = "bpos.z("..bpos.z..") + bpos.bsizez("..bpos.bsizez..") < minp.z("..minp.z..")"
+			print("ERROR bpos.z("..bpos.z..") + bpos.bsizez("..bpos.bsizez..") < minp.z("..minp.z..")"
 			return true
 		else
 			return false
 		end
 	end
+	--]]
 	
 	local function validateSpawnPosition(pos, checkNodeBelowVillager)
 		local node_name = villagers.getNodeName(pos)[2]
@@ -933,19 +586,19 @@ local function spawnOnJobPlot(bpos, region_type, village_type, building_type, sc
 	
 	local bpos_str = minetest.pos_to_string({x=bpos.x, y=bpos.y, z=bpos.z})
 	
-	if villagers.log5 then io.write("\n    spawn_pos #1 "..bpos_str.." ") end
+	if log then io.write("\n    spawn_pos #1 "..bpos_str.." ") end
 	
 	if villagerAlreadySpawned() then -- villager already spawned, skip.
-		if villagers.log5 then io.write(existing_villager_name.." already spawned @ "..bpos_str.." ") end
+		if log then io.write(existing_villager_name.." already spawned @ "..bpos_str.." ") end
 	
 	--elseif notBuildingLocation() then -- not a building structure, but a road, etc.
-	--	if villagers.log5 then io.write("Not a building plot: "..bpos_str.." ") end
+	--	if log then io.write("Not a building plot: "..bpos_str.." ") end
 		
-	elseif locationOutOfRange() then -- plot is too far away from player, skip.
-		if villagers.log5 then io.write("Distance to "..building_type.." "..bpos_str.." too far. ") end
+	--elseif player_dist > 50 then -- plot is too far away from player, skip.
+	--	if log then io.write("Distance to "..building.." "..bpos_str.." too far. ") end
 		
 	else
-		if villagers.log5 then io.write("Location OK so far. "..bpos_str.." ") end
+		if log then io.write("Location OK so far. "..bpos_str.." ") end
 		
 		local validSpawnPosFound = false
 		local valid_spawn_pos
@@ -969,30 +622,30 @@ local function spawnOnJobPlot(bpos, region_type, village_type, building_type, sc
 		end
 		
 		if validSpawnPosFound then
-			if villagers.log5 then io.write("VALID SPAWN POS FOUND! ") end
+			if log then io.write("VALID SPAWN POS FOUND! ") end
 			
 			-- calculate villager spawn position
 			local spawn_pos = {x=valid_spawn_pos[1], y=bpos.y+1.5, z=valid_spawn_pos[2]}
 			local spwan_pos_str = minetest.pos_to_string(spawn_pos,1)
 			
-			if villagers.log5 then 
+			if log then 
 				io.write("pos"..minetest.pos_to_string(spawn_pos).." ")
-				io.write("type="..building_type.." ")
-				io.write("scm="..schem_type.." ")
-				io.write("region="..region_type.." ")
+				io.write("type="..building.." ")
+				io.write("scm="..schem.." ")
+				io.write("region="..region.." ")
 			end
 			
 			-- spawn the actual villager entity
 			local trading_allowed = 1
-			local luaEntity = villagers.spawnVillager(spawn_pos, region_type, village_type, building_type, schem_type, trading_allowed)
+			local luaEntity = villagers.spawnVillager(spawn_pos, region, village, building, schem, trading_allowed)
 			local vName = luaEntity.vName
 			
 			--setTradingMeta(luaEntity) -- set metadata for later formspec use
 			
-			local traders = {vName.."_"..math.random(1000)}
+			local traders = {spawn_pos.x.."_"..spawn_pos.y.."_"..spawn_pos.z}
 			bpos.traders = vName
 		else
-			if villagers.log5 then io.write("Spawn POS blocked. Retry next cycle. ") end
+			if log then io.write("Spawn POS blocked. Retry next cycle. ") end
 		end
 		
 	end
@@ -1000,6 +653,24 @@ local function spawnOnJobPlot(bpos, region_type, village_type, building_type, sc
 end
 
 
+--[[
+- for villagers.VILLAGES, take mg_villages.village_types which contains the same
+- villagers.PLOTS is a bit more complicated and does seem to store all types of buildings. 
+You might want to iterate about all entries in the mg_villages.BUILDINGS list and store the 
+typ entry. A hash table could be helpful as the building types are the same for all buildings 
+of the same type.
+- for villagers.SCHEMS, take mg_villages.village_type_data[ village_type ][ 'building_list']. 
+It caches the building_nr of all buildings that may be found in that type of village. The ID 
+can then be turned into the name of the schematic by applying 
+mg_villages.BUILDINGS[ building_nr ].scm
+
+
+useful data to customize trading goods for each village w/out dependancy on
+village and schem names.
+-- village.artificial_snow
+-- region_type
+
+--]]
 
 -- spawn traders in villages
 mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param2_data, a, cid )
@@ -1021,8 +692,8 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 		io.write("buildings="..#village.to_add_data.bpos.." ")
 	end 
 	
-	-- found player within max 50 blocks of village pos
-	local player_data = getValidPlayer(village_pos, 50)
+	-- find player within max_distance blocks of village pos
+	local player_data = getValidPlayer(village_pos, max_distance)
 	
 	-- all players out of range from current village pos
 	if player_data == nil then 
@@ -1051,6 +722,7 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 	end
 	
 	local attempts
+	local region_type -- hot, cold, normal, native, desert
 	
 	-- Metadata key 'pos' is not set.
 	-- This is a 'new' village generate attempt
@@ -1068,21 +740,24 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 	-- This village attempted to generate at a prior cycle
 	-- but didn't complete and so this is another attempt.
 	else
-		
 		attempts = meta:get_int("attempts")
-		local type = meta:get_string("type")
-		local pos = meta:get_string("pos")
 		if log then
+			local type = meta:get_string("type")
+			local pos = meta:get_string("pos")
 			io.write("[RETRY] ")
 			io.write("LoadedMeta: pos"..pos.." ")
 			io.write("type="..type..", attempts="..attempts.." ")
 		end
+		region_type = meta:get_string("region")
 		attempts = attempts + 1
 		meta:set_int("attempts", attempts)
 		if log then io.write("raisedAttemptsTo="..attempts.." ") end
 	end
 	
-	local MIN_CYCLES_TO_WAIT = 5
+	-- force this village generation attempt to cycle a number of
+	-- times to ensure adequate number of map chucks loaded before
+	-- attempting to determine region type via getRegionFromArea().
+	local MIN_CYCLES_TO_WAIT = 4
 	if attempts < MIN_CYCLES_TO_WAIT then
 		if log then 
 			io.write("\n  stillTooSoon remainingCyclesToWait=")
@@ -1092,27 +767,388 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 		return
 	end
 	
-	local region_type
-	-- certain village types will have villagers look a
-	-- specific style/clothes regardless of surrounding nodes
-	-- clothing types: hot, cold, normal, native, desert
-	if village_type == "sandcity" then
-		region_type = "desert"
-	elseif village_type == "claytrader" then
-		region_type = "desert"
-	elseif village_type == "charachoal" then
-		region_type = "native"
-	elseif village_type == "gambit" then
-		region_type = "desert"
-	elseif village_snow == 1 then
-		region_type = "cold"
-		
-	-- remaining village types will have villagers clothes/look
-	-- based on the surrounding nodes
-	else
-		region_type = getRegionFromArea(village_pos,village_radius)
+	-- Region_type will always be NIL at each village generation cycle
+	-- until region_type is calculated. This ensures the calculation
+	-- for region_type only needs to run once since getRegionFromArea()
+	-- can be fairly expensive.
+	if region_type == nil then
+		-- certain village types directly determin the region type
+		-- without needing to examine surrounding node data
+		if village_type == "sandcity" then
+			region_type = "desert"
+		elseif village_type == "claytrader" then
+			region_type = "desert"
+		elseif village_type == "charachoal" then
+			region_type = "native"
+		elseif village_type == "gambit" then
+			region_type = "desert"
+		elseif village_snow == 1 then
+			region_type = "cold"
+			
+		-- remaining village types will have region type 
+		-- based upon the surrounding types of nodes
+		else
+			region_type = getRegionFromArea(village_pos,village_radius)
+		end
 	end
 	
+	meta:set_string("region", region_type)
 	if log then io.write("## REGION TYPE = "..region_type) end
 	
+	-- for each building in the village
+	for building_index,bpos in pairs(village.to_add_data.bpos) do
+		local building_data = mg_villages.BUILDINGS[bpos.btype]
+		local building_type = building_data.typ
+		local building_scm = building_data.scm
+		
+		if bpos.btype ~= "road" then
+			if #bpos.beds > 0 then
+				spawnOnBedPlot(
+					bpos, 
+					region_type, --passive
+					village_type, --used x1
+					building_type, --passive
+					building_scm, --used x1
+				)
+			else
+				spawnOnJobPlot(
+					bpos, 
+					region_type, --passive
+					village_type, --passive
+					building_type, --passive
+					building_scm, --passive
+					player_dist
+				)
+			end
+			
+		end
+		
+	end --end for loop
+	
 end
+
+-------------------------
+-- ENTITY REGISTRATION --
+-------------------------
+minetest.register_entity("villagers:villager", {
+	
+	-- Utilized Object Proerties
+	hp_max = 15,
+	collisionbox = {-0.25,-1.00,-0.25, 0.25,0.75,0.25},
+	physical = true,
+	weight = 5,
+	visual = "mesh",
+	visual_size = {x=1.0, y=1.0},
+	mesh = "character.b3d",
+	textures = {"character.png"},
+	animation = { 
+		stand_start = 0, stand_end = 79, 
+		walk_start = 168, walk_end = 187,
+		dig_start = 189, dig_end = 198,
+		walkdig_start = 200, walkdig_end = 219
+	},
+	animation_speed = 25,
+	infotext = "[uninitialized villager]",
+	
+	-- custom fields
+	vName = "no-name",
+	vGender = "no-gender",
+	vAge = "adult",
+	vTexture = "character.png",
+	vSize = 1,
+	vBox = {-0.25,-1.00,-0.25, 0.25,0.75,0.25},
+	vYaw = 0,
+	vYawSaved = 0,
+	vTimer = 0,
+	vAction = "STAND",
+	vDigging = nil,
+	vActionFrequency = 1, --rate in seconds villager updates action
+	vInitialChatDistance = 0,
+	vType = "UNASSIGNED",
+	vSchem = "UNASSIGNED",
+	vRegion = "UNASSIGNED",
+	vHudIds = {},
+	vSoundHandle = nil,
+	vSavepoints = {},
+	vDespawned = nil,
+	
+	-- pathfinding
+	vPos = {x=0,y=0,z=0},
+	vFacingDirection = "N",
+	vOriginPos = {x=0,y=0,z=0},
+	vOriginDistance = 0,
+	vOriginDistMax = 10,
+	vTargetPos = {x=0,y=0,z=0},
+	vSpawnHeight = 0,
+	vTargetHeight = 0,
+	vTurnPreference = "right",
+	vWalkReady = false,
+	vDigReady = false,
+	vBedPos = nil,
+	vDoorPos = nil,
+	vJobPos = nil,
+	
+	-- chatting
+	vChatting = nil,
+	vChatReady = true,
+	vScriptHi = nil,
+	vScriptHiSaved = nil,
+	vScriptBye = nil,
+	vScriptByeSaved = nil,
+	vScriptGtg = nil,
+	vScriptGtgSaved = nil,
+	vScriptMain = nil,
+	vScriptMainSaved = nil,
+	vScriptSmalltalk = nil,
+	vScriptSmalltalkSaved = nil,
+	vScriptSmalltalk = nil,
+	vScriptSmalltalkSaved = nil,
+	vScriptGameFacts = nil,
+	vScriptGameFactsSaved = nil,
+	
+	-- trading
+	vID = nil,
+	vIsTrader = false,
+	vTrading = nil,
+	vNodeMetaPos = {x=0,y=0,z=0},
+	vBuy = {},
+	vSell = {},
+	
+	-- debugging
+	vTextureString = nil,
+	
+	on_activate = function(self, staticdata, dtime_s)
+		local log = false
+		if log then io.write("\nACTIVATE ") end
+			
+		-- perform default action, whichi is standing idle animation
+		villagers.standVillager(self)
+		
+		if staticdata ~= "" then
+			if log then io.write("(existing) ") end
+			local data = minetest.deserialize(staticdata)
+			self.object:set_properties({textures={data.vTexture}})
+			self.object:set_properties({visual_size=data.vSize})
+			self.object:set_properties({collisionbox=data.vBox})
+			self.object:set_properties({infotext=data.vInfo})
+			self.object:set_properties({hp_max=data.vHP})
+			self.object:setpos(data.vPos)
+			self.object:set_yaw(data.vYaw)
+			
+			self.vName = data.vName
+			self.vAge = data.vAge
+			self.vTexture = data.vTexture
+			self.vSize = data.vSize
+			self.vBox = data.vBox
+			self.vYaw = data.vYaw
+			self.vYawSaved = data.vYawSaved
+			self.vGender = data.vGender
+			self.vAction = data.vAction
+			self.vDigging = data.vDigging
+			self.vActionFrequency = data.vActionFrequency
+			self.vInitialChatDistance = 0
+			self.vType = data.vType
+			self.vSchem = data.vSchem
+			self.vRegion = data.vRegion
+			self.vHudIds = data.vHudIds
+			self.vSoundHandle = data.vSoundHandle
+			self.vSavepoints = data.vSavepoints
+			self.vDespawned = nil
+			
+			-- pathfinding
+			self.vPos = data.vPos
+			self.vFacingDirection = data.vFacingDirection
+			self.vOriginPos = data.vOriginPos
+			self.vOriginDistance = data.vOriginDistance
+			self.vOriginDistMax = data.vOriginDistMax
+			self.vTargetPos = data.vTargetPos
+			self.vSpawnHeight = data.vSpawnHeight
+			self.vTargetHeight = data.vTargetHeight
+			self.vTurnPreference = data.vTurnPreference
+			self.vWalkReady = false
+			self.vDigReady = false
+			self.vBedPos = data.vBedPos
+			self.vDoorPos = data.vDoorPos
+			self.vJobPos = data.vJobPos
+			
+			-- chatting
+			self.vChatting = nil
+			self.vChatReady = true
+			self.vScriptHi = data.vScriptHi
+			self.vScriptHiSaved = data.vScriptHiSaved
+			self.vScriptBye = data.vScriptBye
+			self.vScriptByeSaved = data.vScriptByeSaved
+			self.vScriptGtg = data.vScriptGtg
+			self.vScriptGtgSaved = data.vScriptGtgSaved
+			self.vScriptMain = data.vScriptMain
+			self.vScriptMainSaved = data.vScriptMainSaved
+			self.vScriptSmalltalk = data.vScriptSmalltalk
+			self.vScriptSmalltalkSaved = data.vScriptSmalltalkSaved
+			self.vScriptGameFacts = data.vScriptGameFacts
+			self.vScriptGameFactsSaved = data.vScriptGameFactsSaved
+			
+			
+			-- trading
+			self.vID = data.vID
+			self.vIsTrader = data.vIsTrader
+			self.vTrading = nil
+			self.vNodeMetaPos = data.vNodeMetaPos
+			self.vBuy = data.vBuy
+			self.vSell = data.vSell
+			
+			-- debugging
+			self.vTextureString = data.vTextureString
+			
+			if log then io.write(string.upper(self.vName).." ") end
+			
+			if self.vDespawned then
+				if log then io.write("vDespawned="..tostring(self.vDespawned).." ") end
+			else
+				if log then io.write("vDespawned=NIL ") end
+			end
+			
+			local prior_saved_action = self.vAction
+			if prior_saved_action == "STAND" then
+				if log then io.write("loaded="..prior_saved_action.." ") end
+			elseif prior_saved_action == "TURN" then 
+				if log then io.write("loaded="..prior_saved_action.." ") end
+			elseif prior_saved_action == "DIG" then
+				if log then io.write("loaded="..prior_saved_action.." ") end
+				if log then io.write("set_vAction=RESUMEDIG ") end
+				self.vAction = "RESUMEDIG"
+			elseif prior_saved_action == "REPLACE" then
+				if log then io.write("loaded="..prior_saved_action.." ") end
+				if log then io.write("set_vAction=RESUMEDIG ") end
+				self.vAction = "RESUMEDIG"
+			elseif prior_saved_action == "WALK" then
+				if log then io.write("loaded="..prior_saved_action.." ") end
+			elseif prior_saved_action == "WALKING" then
+				if log then io.write("loaded="..prior_saved_action.." ") end
+				if log then io.write("set_vAction=WALK ") end
+				self.vAction = "WALK"
+				self.object:setvelocity({x=0,y=0,z=0})
+			elseif prior_saved_action == "TURNBACK" then
+				if log then io.write("loaded="..prior_saved_action.." ") end
+			elseif prior_saved_action == "WALKBACK" then
+				if log then io.write("loaded="..prior_saved_action.." ") end
+			elseif prior_saved_action == "CHAT" or prior_saved_action == "ENDCHAT" then
+				if log then io.write("loaded="..prior_saved_action.." ") end
+				if log then io.write("set_vAction=STAND ") end
+				self.vAction = "STAND"
+			elseif prior_saved_action == "TRADE" or prior_saved_action == "ENDTRADE" then
+				if log then io.write("loaded="..prior_saved_action.." ") end
+				if log then io.write("set_vAction=STAND ") end
+				self.vAction = "STAND"
+			else
+				if log then io.write("ERROR vAction="..prior_saved_action.." ") end
+			end
+			
+		else
+			if log then io.write("(new) "..string.upper(self.vName).." ") end
+		end
+		
+		if log then io.write("onActivateEND. ") end
+		
+	end,
+	
+	on_punch = function(self, puncher, time_from_last_punch, tool_capabilities, dir)
+		villagers.on_leftclick(self, puncher, time_from_last_punch)
+	end,
+	
+	on_rightclick = villagers.on_rightclick(self, clicker),
+	on_step = villagers.on_step(self, dtime),
+	
+	get_staticdata = function(self)
+		local log = false
+		if log then io.write("\nGETSTATIC("..self.vName..") ") end
+		-- save all custom fields
+		
+		if self.vDespawned == false then
+			if log then io.write("DESPAWNED vAction="..self.vAction.."\n") end
+		else
+			self.vDespawned = false
+			if log then io.write("SPAWNED ") end
+			-- show standing animation while waiting
+			-- for the first action cycle to start
+			self.object:set_animation(
+				{x=self.animation["stand_start"], y=self.animation["stand_end"]},
+				self.animation_speed + math.random(10)
+			)
+		end
+		
+		local objProps = self.object:get_properties()
+		
+		local villager_data = {
+			vInfo = objProps.infotext,
+			vHP = objProps.hp_max,
+			
+			vName = self.vName,
+			vAge = self.vAge,
+			vTexture = self.vTexture,
+			vSize = self.vSize,
+			vBox = self.vBox,
+			vYaw = self.vYaw,
+			vYawSaved = self.vYawSaved,
+			vGender = self.vGender,
+			vTimer = self.vTimer,
+			vAction = self.vAction,
+			vDigging = self.vDigging,
+			vActionFrequency = self.vActionFrequency,
+			vInitialChatDistance = 0,
+			vType = self.vType,
+			vSchem = self.vSchem,
+			vRegion = self.vRegion,
+			vHudIds = self.vHudIds,
+			vSoundHandle = self.vSoundHandle,
+			vSavepoints = self.vSavepoints,
+			vDespawned = self.vDespawned,
+			
+			-- pathfinding
+			vPos = self.vPos,
+			vFacingDirection = self.vFacingDirection,
+			vOriginPos = self.vOriginPos,
+			vOriginDistance = self.vOriginDistance,
+			vOriginDistMax = self.vOriginDistMax,
+			vTargetPos = self.vTargetPos,
+			vSpawnHeight = self.vSpawnHeight,
+			vTargetHeight = self.vTargetHeight,
+			vTurnPreference = self.vTurnPreference,
+			vWalkReady = false,
+			vDigReady = false,
+			vBedPos = self.vBed,
+			vDoorPos = self.vDoor,
+			vJobPos = self.vDoor,
+			
+			-- chatting
+			vChatting = nil,
+			vChatReady = true,
+			vScriptHi = self.vScriptHi,
+			vScriptHiSaved = self.vScriptHiSaved,
+			vScriptBye = self.vScriptBye,
+			vScriptByeSaved = self.vScriptByeSaved,
+			vScriptGtg = self.vScriptGtg,
+			vScriptGtgSaved = self.vScriptGtgSaved,
+			vScriptMain = self.vScriptMain,
+			vScriptMainSaved = self.vScriptMainSaved,
+			vScriptSmalltalk = self.vScriptSmalltalk,
+			vScriptSmalltalkSaved = self.vScriptSmalltalkSaved,
+			vScriptGameFacts = self.vScriptGameFacts,
+			vScriptGameFactsSaved = self.vScriptGameFactsSaved,
+			
+			-- trading
+			vID = self.vID,
+			vIsTrader = self.vIsTrader,
+			vTrading = nil,
+			vNodeMetaPos = self.vNodeMetaPos,
+			vBuy = self.vBuy,
+			vSell = self.vSell,
+			
+			-- debugging
+			vTextureString = self.vTextureString,
+			
+		}
+		
+		return minetest.serialize(villager_data)
+	end,
+
+})
