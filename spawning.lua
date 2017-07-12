@@ -463,7 +463,17 @@ local function spawnWithBeds(bpos, region, village, building, schem)
 				io.write("scm="..schem.." ")
 				io.write("region="..region.." ")
 			end
-			local luaEntity = villagers.spawnVillager(mob_spawner_pos, region, village, building, schem, trading_allowed, mob_spawner_data.yaw, beds_data[bed_index])
+			local luaEntity = villagers.spawnVillager(
+				mob_spawner_pos, 
+				region, 
+				village, 
+				building, 
+				schem, 
+				trading_allowed, 
+				meta,
+				mob_spawner_data.yaw, 
+				beds_data[bed_index]
+			)
 			if log then io.write("** SPAWNED ** ") end
 			
 			local traders = {mob_spawner_pos.x.."_"..mob_spawner_pos.y.."_"..mob_spawner_pos.z}
@@ -567,7 +577,15 @@ local function spawnWithNoBeds(bpos, region, village, building, schem)
 			
 			-- spawn the actual villager entity
 			local trading_allowed = 1
-			local luaEntity = villagers.spawnVillager(spawn_pos, region, village, building, schem, trading_allowed)
+			local luaEntity = villagers.spawnVillager(
+				spawn_pos, 
+				region, 
+				village, 
+				building, 
+				schem, 
+				trading_allowed,
+				meta
+			)
 			local vName = luaEntity.vName
 			
 			--setTradingMeta(luaEntity) -- set metadata for later formspec use
@@ -667,6 +685,7 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 			io.write("pos"..village_pos_str.." ")
 			io.write("type="..village_type.." attempts=1} ")
 		end
+		
 	-- This village attempted to generate at a prior cycle
 	-- but didn't complete and so this is another attempt.
 	else
@@ -755,7 +774,8 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 					region_type, --passive
 					village_type, --used x1
 					building_type, --passive
-					building_scm --used x1
+					building_scm, --used x1
+					meta,
 				)
 			else
 				
@@ -764,7 +784,8 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 					region_type, --passive
 					village_type, --passive
 					building_type, --passive
-					building_scm --passive
+					building_scm, --passive
+					meta,
 				)
 			end
 			
