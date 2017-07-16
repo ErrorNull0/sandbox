@@ -1,4 +1,43 @@
+-- OVERRIDES
+
+minetest.override_item("default:mese", {
+	
+	--[[ 
+		When villager is about to first spawn, check if distance from player
+		is greater than 30m. If not, spawn villager immediately. If so, 
+		save all spawning parameters into nodemeta of the mob spawner and
+		set a nodetimer for every 10s to check distance again. Once player
+		is finally in range, spawn villager, remove saved nodemeta for that
+		villager and stop nodetimer permanently.
+		
+		minetest.get_node_timer(pos) will execute when villager is first
+		spawned in order to start time via start(timeout) once timeout.
+	--]]
+	on_timer = function(pos, elapsed)
+		-- 
+		
+		
+	end
+})
+
 -- HELPER FUNCTIONS
+villagers.getNearestPlayer(pos)
+	local connected_players = minetest.get_connected_players()
+	local player
+	local player_distance = 0
+	local player_pos
+	for _, connected_player in ipairs(connected_players) do
+		player_pos = player:get_pos()
+		local dist = vector.distance(pos, player_pos)
+		if dist > player_distance then
+			player_distance = dist
+			player = connected_player
+		end
+	end
+	return {obj=player, pos=player_pos, dist=player_distance}
+end
+
+
 
 --[[
 'village_pos' is the position of the village mg_villages mod is attempting
@@ -461,7 +500,7 @@ end
 
 
 
-local function spawnWithBeds(bpos, homeplace, player_name)
+local function spawnWithBeds(bpos, homeplace)
 	local log = false
 	
 	if log then io.write("spawnWithBeds() ") end
@@ -494,24 +533,30 @@ local function spawnWithBeds(bpos, homeplace, player_name)
 		local mob_spawner_pos = {x=mob_spawner_data.x, y=mob_spawner_data.y, z=mob_spawner_data.z}
 		if log then io.write(minetest.pos_to_string(mob_spawner_pos).." ") end
 		
-		-- if any trader has already spawned for this building AND a villager already
-		-- spawned in that specific spawn location 'bed_index' then skip.
-		if bpos.traders and bpos.traders[bed_index] then
-			if log then 
-				io.write(bpos.traders[bed_index].." already spawned @ ")
-				io.write(minetest.pos_to_string(mob_spawner_pos).." ")
-			end
+		-- get data of nearest player from village pos
+		if log then io.write("\n  getNearestPlayer{ ") end
+		local player_data = villagers.getNearestPlayer(mob_spawner_pos)
+		if log then 
+			io.write("name="..string.upper(player_data.obj:get_player_name()).." ")
+			io.write("pos"..minetest.pos_to_string(player_data.pos, 1).." ")
+			io.write("dist="..villagers.round(player_data.dist, 1).." ")
+			io.write("} ")
+		end
+		
+		homeplace.bed = bed_index
+		mob_spawner_pos.y = mob_spawner_pos.y + 0.5
 			
-		-- villager not yet spawned
+		-- save villager's spawn parameters into the node metadata (in villager pos) to be
+		-- used by nodetimer (in mob spawner pos) to attempt and spawn villager later,
+		-- when player might be within this distance range.
+		if player_data.dist > 30 then
+			if log then io.write("distOutOfRange savingSpawnData.. ") end
+			
+			
+		-- Player is within range of villager's spawn pos. Spawn the villager now!
 		else
-			
-			if bpos.traders == nil then bpos.traders = {} end
-				
-			homeplace.bed = bed_index
-			
-			-- spawn the villager
-			mob_spawner_pos.y = mob_spawner_pos.y + 0.5
 			if log then 
+				if log then io.write("distOk spawnVillagerNow.. ") end
 				io.write("pos"..minetest.pos_to_string(mob_spawner_pos).." ")
 				io.write("type="..homeplace.building.." ")
 				io.write("scm="..homeplace.schem.." ")
@@ -520,21 +565,15 @@ local function spawnWithBeds(bpos, homeplace, player_name)
 			local luaEntity = villagers.spawnVillager(
 				mob_spawner_pos, 
 				homeplace,
-				player_name,
 				trading_allowed, 
 				mob_spawner_data.yaw, 
 				beds_data[bed_index]
 			)
 			if log then 
-				io.write("** SPAWNED ** ") 
+				io.write("** SPAWNED on mob spawner ** ") 
 			end
-			io.write("on a BED building ")
-			
-			local traders = {mob_spawner_pos.x.."_"..mob_spawner_pos.y.."_"..mob_spawner_pos.z}
-			bpos.traders[bed_index] = luaEntity.vName
-				
-			--end
 		end
+		
 	end
 end
 
@@ -542,7 +581,7 @@ end
 
 
 
-local function spawnWithNoBeds(bpos, homeplace, player_name)
+local function spawnWithNoBeds(bpos, homeplace, player_data)
 	local log = false
 	if log then io.write("spawnWithNoBeds() ") end
 	
@@ -616,7 +655,7 @@ local function spawnWithNoBeds(bpos, homeplace, player_name)
 		end
 		
 		if validSpawnPosFound then
-			if log then io.write("VALID POS FOUND! ") end
+			if log then io.write("validPosFound ") end
 			
 			-- calculate villager spawn position
 			local spawn_pos = {x=valid_spawn_pos[1], y=bpos.y+1.5, z=valid_spawn_pos[2]}
@@ -635,12 +674,12 @@ local function spawnWithNoBeds(bpos, homeplace, player_name)
 			
 			-- spawn the actual villager entity
 			local trading_allowed = 1
-			local luaEntity = villagers.spawnVillager(spawn_pos, homeplace, player_name, trading_allowed)
+			local luaEntity = villagers.spawnVillager(spawn_pos, homeplace, trading_allowed)
 			
 			local traders = {spawn_pos.x.."_"..spawn_pos.y.."_"..spawn_pos.z}
 			bpos.traders = luaEntity.vName
 			
-			io.write("on NO-Bed building ")
+			io.write("** SPAWNED near building pos ** ")
 		else
 			if log then io.write("Spawn POS blocked. Retry next cycle. ") end
 		end
@@ -653,19 +692,9 @@ end
 
 -- spawn traders in villages
 mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param2_data, a, cid )
+	if not( minetest.get_modpath( 'mg_villages')) then return end
+		
 	local log = true
-	
-	-- mg_villages mod is required and not installed
-	if not( minetest.get_modpath( 'mg_villages')) then return end	
-	
-	-- player must be within this distance from village position
-	-- to start analyzing surrounding nodes to determine region type
-	local MAX_DISTANCE = 200
-	
-	-- minimum number of times this mg_villages function must loop
-	-- for to this village position before surrounding nodes
-	-- are anyalyzed for villager spawning 
-	local MIN_CYCLES_TO_WAIT = 0
 		
 	local village_pos = {x=village.vx, y=village.vh, z=village.vz}
 	local village_pos_str = minetest.pos_to_string(village_pos)
@@ -680,122 +709,85 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 		io.write("builds="..#village.to_add_data.bpos.." ")
 	end 
 	
+	-- All villagers already spawned successfully for this village pos.
+	-- No need to process further villager spawn attempts. Skip.
 	local meta = minetest.get_meta(village_pos)
 	local success = meta:get_int("success")
 	if success == 1 then 
 		io.write("** ALREADY SPAWNED **")
 		return
 	end
-	--print("\n## VILLAGE SUCCESSFUL: "..success.."\n")
 	
-	-- find player within MAX_DISTANCE blocks of village pos
-	local player_data = getValidPlayer(village_pos, MAX_DISTANCE)
+	local meta_table = meta:to_table()
 	
-	-- all players out of range from current village pos
-	if player_data == nil then 
-		if log then io.write("allPlayersOutOfRange SKIP\n") end
-		return 
-	end
-	
-	local player_name = player_data.name
-	local player_pos = player_data.pos
-	local player_dist = player_data.dist
-	if log then 
-		io.write("nearestPlayer="..string.upper(player_name).." ")
-		io.write("pos"..minetest.pos_to_string(player_pos, 1).." ")
-		io.write("dis="..villagers.round(player_dist, 1).." ")
-	end
-	
-	-- Map chunk no loaded yet so cannot access any block metadata.
-	-- Wait for next cycle. Maybe player is just not facing in the
-	-- direction of village pos either.
-	if meta:to_table() == nil then
-		-- if log then io.write("chunkNotLoaded SKIP\n") end		
+	-- Map chunk no loaded yet so access to block metadata not possible.
+	-- Force map chunk to load while skipping village spawn attempt and 
+	-- wait for next cycle.
+	if meta_table == nil then	
 		local pos1 = {x = village_pos.x - village_radius - 5, y = village_pos.y - 5, z = village_pos.z - village_radius - 5}
 		local pos2 = {x = village_pos.x + village_radius + 5, y = village_pos.y + 5, z = village_pos.z + village_radius + 5}
 		if log then 
-			io.write("chunkNotLoaded forceloadingVillPos"..village_pos_str.." ") 
+			io.write("chunkNotLoaded skipVillagerSpawn forceEmergeVillPos ") 
 			io.write(">> pos1"..minetest.pos_to_string(pos1).." pos2"..minetest.pos_to_string(pos2).." ")
 		end
 		minetest.emerge_area(pos1, pos2)
 		return
 	end
 	
-	local attempts
-	local region_type = "" -- hot, cold, normal, native, desert
-	
-	-- Metadata key 'pos' is not set.
-	-- This is a 'new' village generate attempt
-	if meta:get_string("pos") == "" then
-		meta:set_string("pos", village_pos_str)
-		meta:set_string("type", village_type)
-		meta:set_int("attempts", 1)
-		meta:set_int("success", 0)
-		attempts = 1
-		if log then 
-			io.write("[NEW] ")
-			io.write("savedMeta{")
-			io.write("pos"..village_pos_str.." ")
-			io.write("type="..village_type.." attempts=1} ")
-		end
+	if log then io.write("** CHUNK LOADED ** ") end
+	--------------------------------------------------------------
+	-- ## AT THIS POINT THE MAP CHUNK SHOULD BE GENERATED OK ## --
+	--------------------------------------------------------------
 		
-	-- This village attempted to generate at a prior cycle
-	-- but didn't complete and so this is another attempt.
+	local region_type -- hot, cold, normal, native, desert
+
+	-- certain village types directly determine the region type
+	-- without needing to examine surrounding node data
+	if village_type == "sandcity" then
+		region_type = "desert"
+	elseif village_type == "claytrader" then
+		region_type = "desert"
+	elseif village_type == "charachoal" then
+		region_type = "native"
+	elseif village_type == "gambit" then
+		region_type = "desert"
+	elseif village_snow == 1 then
+		region_type = "cold"
+		
+	-- remaining village types will have region type 
+	-- based upon the surrounding types of nodes
 	else
-		attempts = meta:get_int("attempts")
-		if log then
-			local type = meta:get_string("type")
-			local pos = meta:get_string("pos")
-			io.write("[RETRY] ")
-			io.write("LoadedMeta: pos"..pos.." ")
-			io.write("type="..type..", attempts="..attempts.." ")
-		end
-		region_type = meta:get_string("region")
-		attempts = attempts + 1
-		meta:set_int("attempts", attempts)
-		if log then io.write("now.. attempts="..attempts.." ") end
+		region_type = getRegionFromArea(village_pos, village_radius)
+	end
+
+	
+	-- inialize and save new node metadata values
+	meta_table.fields = {
+		village = {
+			pos = village_pos,
+			name = village_type,
+			region = region_type,
+			success = 1
+		},
+		villagers = {}
+	}
+	
+	if log then 
+		io.write("metadata: "..minetest.serialize(meta_table.fields).." ") 
+		local meta_save_result
 	end
 	
-	-- force this village generation attempt to cycle a number of
-	-- times to ensure adequate number of map chucks loaded before
-	-- attempting to determine region type via getRegionFromArea().
-	if attempts < MIN_CYCLES_TO_WAIT then
-		if log then 
-			io.write("\n  stillTooSoon remainingCyclesToWait=")
-			io.write((MIN_CYCLES_TO_WAIT - attempts).." ")
-			io.write("SKIP\n")
-		end
-		return
-	end
-	
-	-- Region_type will always be NIL at each village generation cycle
-	-- until region_type is calculated. This ensures the calculation
-	-- for region_type only needs to run once since getRegionFromArea()
-	-- can be fairly expensive.
-	if region_type == "" then
-		-- certain village types directly determin the region type
-		-- without needing to examine surrounding node data
-		if village_type == "sandcity" then
-			region_type = "desert"
-		elseif village_type == "claytrader" then
-			region_type = "desert"
-		elseif village_type == "charachoal" then
-			region_type = "native"
-		elseif village_type == "gambit" then
-			region_type = "desert"
-		elseif village_snow == 1 then
-			region_type = "cold"
-			
-		-- remaining village types will have region type 
-		-- based upon the surrounding types of nodes
+	-- save
+	meta_save_result = meta:from_table(meta_table)
+	if log then 
+		if meta_save_result then
+			io.write("metadataSavedOK! ") 
 		else
-			region_type = getRegionFromArea(village_pos,village_radius)
+			io.write("metadataSaveFAILED. ") 
 		end
 	end
 	
-	meta:set_string("region", region_type)
-	if log then io.write("  REGION TYPE = "..region_type) end
-	if log then io.write(" ** SPAWNING VILLAGERS!! ** ...") end
+	if log then io.write(" ** SPAWNING VILLAGERS ** ...") end
 	
 	-- for each building in the village
 	for building_index, bpos in pairs(village.to_add_data.bpos) do
@@ -828,15 +820,14 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 		else
 			if log then io.write("BEDS="..#bpos.beds.." ") end
 			if #bpos.beds > 0 then
-				spawnWithBeds(bpos, homeplace, player_name)
+				spawnWithBeds(bpos, homeplace)
 			else
-				spawnWithNoBeds(bpos, homeplace, player_name)
+				spawnWithNoBeds(bpos, homeplace)
 			end
 			
 		end
 		
 	end --end for loop
-	meta:set_int("success", 1)
 	
 end
 
