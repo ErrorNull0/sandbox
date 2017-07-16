@@ -3,12 +3,11 @@ COMPLETED:
 - reworked and optimized villager spawning algorithm 
 - better error handling of NIL error crashes when auto generating 
 -- 1) villager appearance attributes and 2) villager trading goods
-
 - once region_type is obtained, each 'attempt' cycle no longer recalculates region_type
 - created villager list chat command with ability to teleport to any villager
 
-
 TODO:
+- finish redoing spawning.lua for nodetimers..
 - forceloading seems to  work via minetest.emerge_area() though villagers despawn immediately
 -- for those villager who immediately despawn upon first-time spawning, do a recurring
 -- nodetime to continually check when a player is within 40m, then spawn that vilager
