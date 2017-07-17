@@ -14,8 +14,23 @@ minetest.override_item("default:mese", {
 		spawned in order to start time via start(timeout) once timeout.
 	--]]
 	on_timer = function(pos, elapsed)
-		-- 
+		local log = true
 		
+		io.write("\n## TIMEOUT ")
+		io.write("@"..minetest.pos_to_string(pos).." ")
+		
+		local meta = minetest.get_meta(pos)
+		local meta_table = meta:to_table()
+		
+		io.write("metadata: "..minetest.serialize(meta_table.fields.spawn).." ")
+		
+		io.write("\n")
+		-- check player distance
+		-- if too far, recalibrate timer = (player_dist / 30) * 10
+		-- if player dist ok...
+		--- get spawn data from nodemeta at spawn position
+		--- execute spawnVillager()
+		--- turn off nodetimer at spawn position
 		
 	end
 })
@@ -536,25 +551,69 @@ local function spawnWithBeds(bpos, homeplace)
 		-- get data of nearest player from village pos
 		if log then io.write("\n  getNearestPlayer{ ") end
 		local player_data = villagers.getNearestPlayer(mob_spawner_pos)
+		local player_dist = player_data.dist
 		if log then 
 			io.write("name="..string.upper(player_data.obj:get_player_name()).." ")
 			io.write("pos"..minetest.pos_to_string(player_data.pos, 1).." ")
-			io.write("dist="..villagers.round(player_data.dist, 1).." ")
+			io.write("dist="..villagers.round(player_dist, 1).." ")
 			io.write("} ")
 		end
-		
-		homeplace.bed = bed_index
-		mob_spawner_pos.y = mob_spawner_pos.y + 0.5
 			
 		-- save villager's spawn parameters into the node metadata (in villager pos) to be
 		-- used by nodetimer (in mob spawner pos) to attempt and spawn villager later,
 		-- when player might be within this distance range.
-		if player_data.dist > 30 then
+		if player_dist > 30 then
 			if log then io.write("distOutOfRange savingSpawnData.. ") end
+			local meta = minetest.get_meta(mob_spawner_pos)
+			local meta_table = meta:to_table()
+			meta_table.fields.spawn = {
+				pos = {
+					x = mob_spawner_pos.x, 
+					y = mob_spawner_pos.y + 0.5, 
+					z = mob_spawner_pos.z
+				},
+				home = {
+					region = homeplace.region,
+					village = homeplace.village,
+					plot_num = homeplace.plot, -- plot number
+					building = homeplace.building,
+					schem = homeplace.schem,
+					bed_num = bed_index, -- bed number
+				},
+				trading = trading_allowed,
+				yaw = mob_spawner_data.yaw,
+				bed_data = beds_data[bed_index],
+				complete = 0
+			}
+			if log then 
+				io.write("metadata: "..minetest.serialize(meta_table.fields.spawn).." ") 
+			end
+			
+			-- save metadata
+			local meta_save_result = meta:from_table(meta_table)
+
+			if meta_save_result then
+				if log then io.write("metadataSavedOK! ") end
+				
+				local saved_meta = minetest.get_meta(village_pos)
+				local saved_meta_table = meta:to_table()
+				if log then io.write(minetest.serialize(saved_meta_table).." ") end
+				
+				local timeout = (player_dist / 30) * 10
+				if log then io.write("settingNodeTimer="..timeout.." ") end
+				
+				local nodetimer = minetest.get_node_timer(mob_spawner_pos)
+				nodetimer:start(timeout)
+			else
+				if log then io.write("metadataSaveFAILED. ") end
+			end
+
 			
 			
 		-- Player is within range of villager's spawn pos. Spawn the villager now!
 		else
+			mob_spawner_pos.y = mob_spawner_pos.y + 0.5
+			homeplace.bed = bed_index
 			if log then 
 				if log then io.write("distOk spawnVillagerNow.. ") end
 				io.write("pos"..minetest.pos_to_string(mob_spawner_pos).." ")
@@ -774,14 +833,16 @@ mg_villages.part_of_village_spawned = function( village, minp, maxp, data, param
 	
 	if log then 
 		io.write("metadata: "..minetest.serialize(meta_table.fields).." ") 
-		local meta_save_result
 	end
 	
 	-- save
-	meta_save_result = meta:from_table(meta_table)
+	local meta_save_result = meta:from_table(meta_table)
 	if log then 
 		if meta_save_result then
-			io.write("metadataSavedOK! ") 
+			io.write("metadataSavedOK! RecalledMeta: ") 
+			local saved_meta = minetest.get_meta(village_pos)
+			local saved_meta_table = meta:to_table()
+			io.write(minetest.serialize(saved_meta_table).." ")
 		else
 			io.write("metadataSaveFAILED. ") 
 		end
