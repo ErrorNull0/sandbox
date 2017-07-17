@@ -317,8 +317,6 @@ function villagers.spawnVillager(pos, homeplace, player_name, trading_allowed, y
 	local objectRef = minetest.add_entity(pos, "villagers:villager")
 	local self = objectRef:get_luaentity()	
 	
-	local dialogue_for_unknowns = ""
-	
 	-- If village type is unknown in ITEMS table,
 	-- apply 'nore' as the default village type
 	local v_type = homeplace.village
@@ -1257,3 +1255,128 @@ minetest.register_entity("villagers:villager", {
 	end,
 
 })
+
+
+local function spawnVillager(
+	pos, 
+	region_type,
+	village_type,
+	plot_number, 
+	building_type, 
+	schem_type, 
+	bed_num
+)
+	
+	-- SPAWN THE ACTUAL VILLAGER ENTITY!!!!
+	local objectRef = minetest.add_entity(pos, "villagers:villager")
+	local self = objectRef:get_luaentity()	
+
+	self.vRegion = region_type
+	self.vVillage = village_type
+	self.vPlot = plot_number
+	self.vType = building_type
+	self.vSchem = schem_type
+	self.vBed = bed_num
+	
+	-- If village type is unknown in ITEMS table,
+	-- apply 'nore' as the default village type
+	if villagers.ITEMS[village_type] == nil then
+		table.insert(self.vUnknown, "Unknown village: "..village_type.."\n")
+		village_type = "nore"
+	end
+	
+	-- If building type is unknown in plots table,
+	-- apply 'field' as the default building type
+	if villagers.plots[building_type] == nil then
+		table.insert(self.vUnknown, "Unknown building: "..building_type.."\n")
+		building_type = "field"
+	end
+	
+	-- this parameter is set within getRegionFromArea() when the rated top node
+	-- after analyzing surrounding nodes is an unexpected type
+	if villagers.error then
+		table.insert(self.vUnknown, "Unknown topnode: "..villagers.error.."\n")
+		villagers.error = nil -- reset for next villager spawning
+	end
+	
+	--get GENDER and save to 'vGender' object custom field
+	local gender = "male"
+	if math.random(villagers.plots[building_type].female) == 1 then
+		gender = "female"
+	end
+	self.vGender = gender
+	
+	--get AGE and save to 'vAge' object custom field
+	local age_chance = villagers.plots[building_type].age
+	local age = age_chance[math.random(#age_chance)]
+	self.vAge = age
+	
+	--get NAME and save to 'vName' object custom field
+	if region_type == "native" then
+		self.vName = villagers.getVillagerName(gender, region_type)
+	elseif region_type == "desert" then
+		self.vName = villagers.getVillagerName(gender, region_type)
+	else
+		if age == "young" then
+			self.vName = villagers.getVillagerName(gender, age)
+		else
+			self.vName = villagers.getVillagerName(gender)
+		end
+	end
+
+	--### update below function to incorporate above 3 functions in there
+	--and simply pass in 'self' and no need to return values
+	--get TEXTURE, VISUAL SIZE, and COLLISION BOX and apply it to corresponding entity properties
+	villagers.setVillagerAttributes(self)
+	objectRef:set_properties({textures={newTexture}})
+	objectRef:set_properties({visual_size={x=newSize,y=newSize}})
+	objectRef:set_properties({collisionbox=collisionBox})
+	-- ^ move these statements into getVillagerAppearance()
+	
+	
+	
+	
+	
+	return self
+end
+
+minetest.register_lbm({
+	label = "Spawn Villager",
+	name = "villagers:spawn_villager",
+	nodenames = {"mg_villages:mob_spawner"},
+	run_at_every_load = true,
+	action = function(pos, node)
+		
+		--[[
+		-- check mode metadata at this pos
+		-- check key 'spawned'
+		-- if 
+		
+		
+		local mob_spawner_data = handle_schematics.get_pos_in_front_of_house(bpos, bed_index)
+		local yaw_data = mob_spawner_data.yaw
+		villagers.spawnVillager(
+			pos, 
+			homeplace = {
+				region,
+				village,
+				plot_num,
+				building,
+				schem,
+				bed_num
+			}, 
+			player_name, 
+			trading_allowed, 
+			yaw_data, 
+			bed_pos
+		)
+		--]]
+	end
+})
+
+
+
+
+
+
+
