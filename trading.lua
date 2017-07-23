@@ -1,5 +1,5 @@
 -- Costs and Stock of all goods: index 1 is cost, index 2 is stock
-local CS = {
+local GOODS_DATA = {
 	["default:apple"] 			= {"villagers:coins", 2, math.random(70,90)},
 	["flowers:mushroom_red"] 	= {"villagers:coins", 5, math.random(50,70)},
 	["flowers:mushroom_brown"] 	= {"villagers:coins", 5, math.random(50,70)},
@@ -181,25 +181,42 @@ local CS = {
 }
 
 
--- temporary default goods for villagers until appropriate
--- items are assigned
-local DEFAULT_GOODS = {
-	{split=0, min=1, max=1},
-	{"default:dirt", 1, CS["default:dirt"][1], CS["default:dirt"][2], CS["default:dirt"][3]},
-}
+-- temporary default goods for villagers until appropriate items are assigned
+local DEFAULT_GOODS = { {split=0, min=1, max=1}, getGoodsData("default:dirt", 1) }
+
+local function getGoodsData(item_name, quant_per_sale)
+	local item_description = minetest.registered_items[item_name].description
+	if minetest.registered_items[item_name] == nil then 
+		return {"invalid_item", item_name}
+	end
+	if minetest.registered_items[item_name].description == nil then
+		return {"no_description", item_name}
+	end
+	if GOODS_DATA[item_name] == nil then
+		return {"naming_error", item_name}
+	end
+	return {
+		item_name,
+		item_description,
+		quant_per_sale,
+		GOODS_DATA[item_name][1],
+		GOODS_DATA[item_name][2],
+		GOODS_DATA[item_name][3]
+	}
+end
 
 villagers.GOODS = {
 	
 	baker = {
 		{split=2, min=3, max=4},			
-		{"farming:bread", 1, CS["farming:bread"][1], CS["farming:bread"][2], CS["farming:bread"][3]},
-		{"farming:flour", 1, CS["farming:flour"][1], CS["farming:flour"][2], CS["farming:flour"][3]},
+		getGoodsData("farming:bread", 1),
+		getGoodsData("farming:flour", 1),
 		-- split --
-		{"farming:wheat", 1, CS["farming:wheat"][1], CS["farming:wheat"][2], CS["farming:wheat"][3]}, 
-		{"default:apple", 1, CS["default:apple"][1], CS["default:apple"][2], CS["default:apple"][3]},
-		{"flowers:mushroom_red", 	1, CS["flowers:mushroom_red"][1], 	CS["flowers:mushroom_red"][2], 		CS["flowers:mushroom_red"][3]},
-		{"flowers:mushroom_brown", 	1, CS["flowers:mushroom_brown"][1], CS["flowers:mushroom_brown"][2], 	CS["flowers:mushroom_brown"][3]}, 
-	},
+		getGoodsData("farming:flour", 1),
+		getGoodsData("default:apple", 1),
+		getGoodsData("flowers:mushroom_red", 1),
+		getGoodsData("flowers:mushroom_brown", 1),
+		},
 	barkeeper = {
 		{split=1, min=1, max=3},
 		{"vessels:drinking_glass", 1, CS["vessels:drinking_glass"][1], CS["vessels:drinking_glass"][2], CS["vessels:drinking_glass"][3]},
@@ -525,9 +542,11 @@ function villagers.getTradingFormspec(self, player_name)
 		
 		local sell_data = self.vSell[item_index]
 		local item_name = sell_data[1]
-		local item_stock = sell_data[2]
-		local cost_name = sell_data[3]
-		local cost_amount = sell_data[4]
+		local item_desc = sell_data[2]	-- NEW PARAMETER!
+		local item_quant = sell_data[3]	-- NEW PARAMETER!
+		local cost_name = sell_data[4]
+		local cost_amount = sell_data[5]
+		local item_stock = sell_data[6]
 		if log then io.write("sell_data #"..item_index..": "..minetest.serialize(sell_data).." ") end
 		
 		local quantity_inv = 0
@@ -657,29 +676,48 @@ function villagers.getTradeInventory(title, plot, bed, errors)
 	while( item_count > 0 ) do
 		local index_to_pop = math.random(#all_items)
 		local popped_item = table.remove(all_items, index_to_pop)
-		local param1 = popped_item[1]
-		local param2 = popped_item[2]
-		local param3 = popped_item[3]
-		local param4 = popped_item[4]
 		
-		if param1 == nil or param2 == nil or param3 == nil or param4 == nil then
-			io.write(" #ERROR IN Getting Trade Item# ")
-			local error_message = "getTradeInventory(): Invalid trade item detail for "..
-				"plot#"..plot.." bed#"..bed.." villager\n    "..minetest.serialize(popped_item)
+		-- error handling
+		if popped_item[1] == "invalid_item" then
+			if log then 
+				io.write(" #ERROR getTradeItem #"..item_count.." - invalid item name '"..popped_item[2].."'.") 
+			end
+			local error_message = "getTradeInventory(): Error trade item #"..item_count.." "
+				"unknown item_name='"..popped_item[2].."' for villager @ plot#"..plot.." bed#"..bed
 			table.insert(errors, error_message)
-			popped_item = {"default:dirt", 1, "villagers:coins", 1}
+			popped_item = {"default:dirt", "Dirt [error]", 1, "villagers:coins", 1, 1}
+		elseif popped_item[1] == "no_description" then
+			if log then 
+				io.write(" #ERROR getTradeItem #"..item_count.." - no item desc for '"..popped_item[2].."'.") 
+			end
+			local error_message = "getTradeInventory(): Error trade item #"..item_count.." "
+				"no desc item_name='"..popped_item[2].."' for villager @ plot#"..plot.." bed#"..bed
+			table.insert(errors, error_message)
+			popped_item = {"default:dirt", "Dirt [error]", 1, "villagers:coins", 1, 1}
+		elseif popped_item[1] == "naming_error" then
+			if log then 
+				io.write(" #ERROR getTradeItem #"..item_count.." - '"..popped_item[2].."' not found in GOODS_DATA.") 
+			end
+			local error_message = "getTradeInventory(): Error trade item #"..item_count.." "
+				"not in GOODS_DATA item_name='"..popped_item[2].."' for villager @ plot#"..plot.." bed#"..bed
+			table.insert(errors, error_message)
+			popped_item = {"default:dirt", "Dirt [error]", 1, "villagers:coins", 1, 1}
+		elseif popped_item == nil then
+			if log then 
+				io.write(" #ERROR getTradeItem #"..item_count..", it is NIL.") 
+			end
+			local error_message = "getTradeInventory(): Error trade item #"..item_count.." "
+				"is NIL for villager @ plot#"..plot.." bed#"..bed
+			table.insert(errors, error_message)
+			popped_item = {"default:dirt", "Dirt [error]", 1, "villagers:coins", 1, 1}
 		end
 		
-		if log then 
-			io.write("\n  adding: "..minetest.serialize(popped_item).." ") 
-		end
-		
+		if log then  io.write("\n  adding: "..minetest.serialize(popped_item).." ") end
 		table.insert(new_trade_inventory, popped_item)
 		item_count = item_count - 1
 	end
 	if log then io.write("\n") end
 
-	
 	return new_trade_inventory
 end
 
