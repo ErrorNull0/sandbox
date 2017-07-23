@@ -1,22 +1,25 @@
 COMPLETED:
 - modified villagers.GOODS table to allow receiving more than one quatity of a purchased item
+- created getGoodsData()
 
 TODO:
-- update trading to allow player to receive more than 1 quantity of an item (like coins from villager)
-- modify villagers.GOODS or local CS table to represent item and costs via itemstring notation "default:dirt 12" 
-- add item name under each trade item
+- update all villagers.GOODS to use new function getGoodsData()
+- finish details trade items for remaining job titles
+- add support for farming redo in trading goods
+- add support for 3d armor in trading goods
+- incorporate new params item_desc and item_quant into trading formspec
 
 - remove references to villagers.villager_ids
 - finish detailing villagers.GOODS table for all other job titles
-- change /villagers spawn command into formspec
+
+- redo /villagers spawn chat command into formspec instead
+- remove dependancy on mg_villagers mod.
+
 - make unique chat for 'single' houses and for region type
-- enable villager 'list' command to sort by village and then by plot#
 
 -- use the nodemetadata to track how many mystery and simplejob traders will spawn..
 -- then can spawn mystery trader and coin exchange trader
 - create mystery merchants that sell only one valueable items at a time (only one in each village)
-
-- ensure chat command validates village, building and schem type directly against mg_villages parameters
 
 - add 'rosetta stone' item. if player does not hold in inventory, speeach from native and desert 
 -- villagers will not display in a legible format
