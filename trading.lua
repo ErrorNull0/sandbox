@@ -15,8 +15,10 @@ local GOODS_DATA = {
 	["default:paper"] 		= {"villagers:coins", 6, math.random(30,50)},
 	["default:book"]		= {"villagers:coins", 20, math.random(20,40)},
 	
+	["farming:seed_cotton"] = {"villagers:coins", 2, math.random(80,99)},
 	["farming:cotton"] 		= {"villagers:coins", 3, math.random(80,99)},
 	["farming:string"] 		= {"villagers:coins", 3, math.random(90,99)},
+	["farming:seed_wheat"]	= {"villagers:coins", 2, math.random(80,99)},
 	["farming:wheat"] 		= {"villagers:coins", 2, math.random(60,80)},
 	["farming:straw"] 		= {"villagers:coins", 7, math.random(60,80)},
 	
@@ -175,8 +177,9 @@ local GOODS_DATA = {
 	["dye:magenta"] 	= {"villagers:coins", 8, math.random(30,50)},
 	["dye:pink"] 		= {"villagers:coins", 8, math.random(30,50)},
 	
+	
 	["villagers:coins_gold"] = {"villagers:coins", 10, math.random(70,90)},	
-	["villagers:coins"] = {"villagers:coins_gold", 1, math.random(70,90)},	
+	["villagers:coins"] = {"villagers:coins_gold", 1, math.random(70,90)},
 	
 }
 
@@ -184,7 +187,8 @@ local GOODS_DATA = {
 -- temporary default goods for villagers until appropriate items are assigned
 local DEFAULT_GOODS = { {split=0, min=1, max=1}, getGoodsData("default:dirt", 1) }
 
-local function getGoodsData(item_name, quant_per_sale)
+local function getGoodsData(item_name, quantity, buyback)
+	local goods
 	local item_description = minetest.registered_items[item_name].description
 	if minetest.registered_items[item_name] == nil then 
 		return {"invalid_item", item_name}
@@ -195,14 +199,32 @@ local function getGoodsData(item_name, quant_per_sale)
 	if GOODS_DATA[item_name] == nil then
 		return {"naming_error", item_name}
 	end
-	return {
-		item_name,
-		item_description,
-		quant_per_sale,
-		GOODS_DATA[item_name][1],
-		GOODS_DATA[item_name][2],
-		GOODS_DATA[item_name][3]
-	}
+	if buyback then
+		goods = {
+			local purchase_item = GOODS_DATA[item_name][1]
+			local itemDescription = minetest.registered_items[purchase_item].description
+			local quant_received = villagers.round(GOODS_DATA[item_name][2] / 3)
+			if quant_received == 0 then quantity = 1 end
+			purchase_item, -- registered item name that will be purchased
+			itemDescription, -- description of the item name
+			quant_received, -- quantity of the item to receive for each purchase
+			item_name, 	-- cost item that player must give
+			quantity,	-- quantity of the cost item player must give
+			GOODS_DATA[purchase_item][3]	-- stock quantity of the item to be purchased
+		}
+	else
+		goods = {
+			item_name, -- registered item name that will be purchased
+			item_description, -- description of the item name
+			quantity, -- quantity of the item to receive for each purchase
+			GOODS_DATA[item_name][1], 	-- cost item that player must give
+			GOODS_DATA[item_name][2],	-- quantity of the cost item player must give
+			GOODS_DATA[item_name][3]	-- stock quantity of the itme to be purchased
+		}
+	end
+	
+	return goods
+
 end
 
 villagers.GOODS = {
@@ -211,218 +233,207 @@ villagers.GOODS = {
 		{split=2, min=3, max=4},			
 		getGoodsData("farming:bread", 1),
 		getGoodsData("farming:flour", 1),
-		-- split --
 		getGoodsData("farming:flour", 1),
 		getGoodsData("default:apple", 1),
 		getGoodsData("flowers:mushroom_red", 1),
 		getGoodsData("flowers:mushroom_brown", 1),
-		},
+	},
 	barkeeper = {
 		{split=1, min=1, max=3},
-		{"vessels:drinking_glass", 1, CS["vessels:drinking_glass"][1], CS["vessels:drinking_glass"][2], CS["vessels:drinking_glass"][3]},
-		-- split --
-		{"default:apple", 1, CS["default:apple"][1], CS["default:apple"][2], CS["default:apple"][3]}, 
-		{"farming:bread", 1, CS["farming:bread"][1], CS["farming:bread"][2], CS["farming:bread"][3]}, 
+		getGoodsData("vessels:drinking_glass", 1),
+		getGoodsData("default:apple", 1),
+		getGoodsData("farming:bread", 1),
 	},
 	blacksmith = {
 		{split=1, min=3, max=4},
-		{"default:sword_steel", 	1, CS["default:sword_steel"][1], 	"villagers:coins_gold", CS["default:sword_steel"][3]},
-		-- split --
-		{"default:axe_steel", 		1, CS["default:axe_steel"][1], 		"villagers:coins_gold", CS["default:axe_steel"][3]},
-		{"default:pick_steel", 		1, CS["default:pick_steel"][1], 	"villagers:coins_gold", CS["default:pick_steel"][3]},
-		{"default:shovel_steel", 	1, CS["default:shovel_steel"][1], 	"villagers:coins_gold", CS["default:shovel_steel"][3]},
-		{"farming:hoe_steel", 		1, CS["farming:hoe_steel"][1], 		"villagers:coins_gold", CS["farming:hoe_steel"][3]},
+		getGoodsData("default:sword_steel", 1),
+		getGoodsData("default:axe_steel", 1),
+		getGoodsData("default:pick_steel", 1),
+		getGoodsData("default:shovel_steel", 1),
+		getGoodsData("farming:hoe_steel", 1),
 	},
 	bricklayer = {
 		{split=2, min=2, max=3},
-		{"default:stonebrick", 		1, CS["default:stonebrick"][1], 	CS["default:stonebrick"][2], 		CS["default:stonebrick"][3]},
-		{"default:sandstonebrick", 	1, CS["default:sandstonebrick"][1], CS["default:sandstonebrick"][2], 	CS["default:sandstonebrick"][3]},
-		-- split --
-		{"default:clay_brick", 				1, CS["default:clay_brick"][1], 			CS["default:clay_brick"][2], 				CS["default:clay_brick"][3]},
-		{"default:desert_stonebrick", 		1, CS["default:desert_stonebrick"][1], 		CS["default:desert_stonebrick"][2], 		CS["default:desert_stonebrick"][3]},
-		{"default:desert_sandstone_brick", 	1, CS["default:desert_sandstone_brick"][1], CS["default:desert_sandstone_brick"][2], 	CS["default:desert_sandstone_brick"][3]},
-		{"default:silver_sandstone_brick", 	1, CS["default:silver_sandstone_brick"][1], CS["default:silver_sandstone_brick"][2], 	CS["default:silver_sandstone_brick"][3]},
+		getGoodsData("default:stonebrick", 1),
+		getGoodsData("default:sandstonebrick", 1),
+		getGoodsData("default:clay_brick", 1),
+		getGoodsData("default:desert_stonebrick", 1),
+		getGoodsData("default:desert_sandstone_brick", 1),
+		getGoodsData("default:silver_sandstone_brick", 1),
 	},
 	carpenter = {
 		{split=3, min=4, max=5},
-		{"default:ladder_wood", 	1, CS["default:ladder_wood"][1], 	CS["default:ladder_wood"][2], 		CS["default:ladder_wood"][3]},
-		{"default:fence_wood", 		1, CS["default:fence_wood"][1], 	CS["default:fence_wood"][2], 		CS["default:fence_wood"][3]},
-		{"doors:gate_wood_closed", 	1, CS["doors:gate_wood_closed"][1], CS["doors:gate_wood_closed"][2], 	CS["doors:gate_wood_closed"][3]},
-		-- split --
-		{"cottages:gate_closed", 	1, CS["cottages:gate_closed"][1], 	CS["cottages:gate_closed"][2], 		CS["cottages:gate_closed"][3]},
-		{"default:sign_wall_wood", 	1, CS["default:sign_wall_wood"][1], CS["default:sign_wall_wood"][2], 	CS["default:sign_wall_wood"][3]},
-		{"doors:trapdoor", 			1, CS["doors:trapdoor"][1], 		CS["doors:trapdoor"][2], 			CS["doors:trapdoor"][3]},
-		{"boats:boat", 				1, CS["boats:boat"][1], 			CS["boats:boat"][2], 				CS["boats:boat"][3]},
-		{"default:chest", 			1, CS["default:chest"][1], 			CS["default:chest"][2], 			CS["default:chest"][3]},
+		getGoodsData("default:ladder_wood", 1),
+		getGoodsData("default:fence_wood", 1),
+		getGoodsData("doors:gate_wood_closed", 1),
+		getGoodsData("cottages:gate_closed", 1),
+		getGoodsData("default:sign_wall_wood", 1),
+		getGoodsData("doors:trapdoor", 1),
+		getGoodsData("boats:boat", 1),
+		getGoodsData("default:chest", 1),
 	},
 	charachoal_burner = {
 		{split=1, min=2, max=3},
-		{"default:coal_lump", 	1, CS["default:coal_lump"][1], 	CS["default:coal_lump"][2], CS["default:coal_lump"][3]},
-		-- split --
-		{"default:sand", 		1, CS["default:sand"][1], 		CS["default:sand"][2], 		CS["default:sand"][3]},
-		{"default:dirt", 		1, CS["default:dirt"][1], 		CS["default:dirt"][2], 		CS["default:dirt"][3]},
-		{"default:gravel", 		1, CS["default:gravel"][1], 	CS["default:gravel"][2], 	CS["default:gravel"][3]},
+		getGoodsData("default:coal_lump", 1),
+		getGoodsData("default:sand", 1),
+		getGoodsData("default:dirt", 1),
+		getGoodsData("default:gravel", 1),
 	},
 	cooper = {
 		{split=1, min=1, max=2},
-		{"cottages:barrel", 		1, CS["cottages:barrel"][1], 		CS["cottages:barrel"][2], 		CS["cottages:barrel"][3]},
-		-- split --
-		{"cottages:tub", 			1, CS["cottages:tub"][1], 			CS["cottages:tub"][2], 			CS["cottages:tub"][3]},
-		{"cottages:barrel_lying", 	1, CS["cottages:barrel_lying"][1], 	CS["cottages:barrel_lying"][2], CS["cottages:barrel_lying"][3]},
+		getGoodsData("cottages:barrel", 1),
+		getGoodsData("cottages:tub", 1),
+		getGoodsData("cottages:barrel_lying", 1),
 	},
 	coppersmith = {
 		{split=1, min=3, max=4},
-		{"default:sword_bronze", 	1, CS["default:sword_bronze"][1], 	CS["default:sword_bronze"][2], 	CS["default:sword_bronze"][3]},
-		-- split --
-		{"default:axe_bronze", 		1, CS["default:axe_bronze"][1], 	CS["default:axe_bronze"][2], 	CS["default:axe_bronze"][3]},
-		{"default:pick_bronze", 	1, CS["default:pick_bronze"][1], 	CS["default:pick_bronze"][2], 	CS["default:pick_bronze"][3]},
-		{"default:shovel_bronze", 	1, CS["default:shovel_bronze"][1], 	CS["default:shovel_bronze"][2], CS["default:shovel_bronze"][3]},
-		{"farming:hoe_bronze", 		1, CS["farming:hoe_bronze"][1], 	CS["farming:hoe_bronze"][2], 	CS["farming:hoe_bronze"][3]},
+		getGoodsData("default:sword_bronze", 1),
+		getGoodsData("default:axe_bronze", 1),
+		getGoodsData("default:pick_bronze", 1),
+		getGoodsData("default:shovel_bronze", 1),
+		getGoodsData("farming:hoe_bronze", 1),
 	},
 	doormaker = {
 		{split=1, min=1, max=3},
-		{"doors:door_wood_a", 		1, CS["doors:door_wood_a"][1], 		CS["doors:door_wood_a"][2], 		CS["doors:door_wood_a"][3]},
-		-- split --
-		{"doors:trapdoor", 			1, CS["doors:trapdoor"][1], 		CS["doors:trapdoor"][2], 			CS["doors:trapdoor"][3]},
-		{"doors:gate_wood_closed", 	1, CS["doors:gate_wood_closed"][1], CS["doors:gate_wood_closed"][2], 	CS["doors:gate_wood_closed"][3]},
+		getGoodsData("doors:door_wood_a", 1),
+		getGoodsData("doors:trapdoor", 1),
+		getGoodsData("doors:gate_wood_closed", 1),
 	},
 	dyemaker = {
 		{split=5, min=6, max=8},
-		{"dye:brown", 		1, CS["dye:brown"][1], 		CS["dye:brown"][2], 		CS["dye:brown"][3]},
-		{"dye:dark_green", 	1, CS["dye:dark_green"][1], CS["dye:dark_green"][2], 	CS["dye:dark_green"][3]},
-		{"dye:black", 		1, CS["dye:black"][1], 		CS["dye:black"][2], 		CS["dye:black"][3]},
-		{"dye:grey", 		1, CS["dye:grey"][1], 		CS["dye:grey"][2], 			CS["dye:grey"][3]},
-		{"dye:dark_grey", 	1, CS["dye:dark_grey"][1], 	CS["dye:dark_grey"][2], 	CS["dye:dark_grey"][3]},
-		-- split --
-		{"dye:white", 	1, CS["dye:white"][1], 		CS["dye:white"][2], 	CS["dye:white"][3]},
-		{"dye:violet", 	1, CS["dye:violet"][1], 	CS["dye:violet"][2], 	CS["dye:violet"][3]},
-		{"dye:blue", 	1, CS["dye:blue"][1], 		CS["dye:blue"][2], 		CS["dye:blue"][3]},
-		{"dye:cyan", 	1, CS["dye:cyan"][1], 		CS["dye:cyan"][2], 		CS["dye:cyan"][3]},
-		{"dye:green",	1, CS["dye:green"][1], 		CS["dye:green"][2], 	CS["dye:green"][3]},
-		{"dye:yellow", 	1, CS["dye:yellow"][1], 	CS["dye:yellow"][2], 	CS["dye:yellow"][3]},
-		{"dye:orange", 	1, CS["dye:orange"][1], 	CS["dye:orange"][2], 	CS["dye:orange"][3]},
-		{"dye:red", 	1, CS["dye:red"][1], 		CS["dye:red"][2], 		CS["dye:red"][3]},
-		{"dye:magenta", 1, CS["dye:magenta"][1], 	CS["dye:magenta"][2], 	CS["dye:magenta"][3]},
-		{"dye:pink", 	1, CS["dye:pink"][1], 		CS["dye:pink"][2], 		CS["dye:pink"][3]},
+		getGoodsData("dye:brown", 1),
+		getGoodsData("dye:dark_green", 1),
+		getGoodsData("dye:black", 1),
+		getGoodsData("dye:grey", 1),
+		getGoodsData("dye:dark_grey", 1),
+		getGoodsData("dye:white", 1),
+		getGoodsData("dye:violet", 1),
+		getGoodsData("dye:blue", 1),
+		getGoodsData("dye:cyan", 1),
+		getGoodsData("dye:green", 1),
+		getGoodsData("dye:yellow", 1),
+		getGoodsData("dye:orange", 1),
+		getGoodsData("dye:red", 1),
+		getGoodsData("dye:magenta", 1),
+		getGoodsData("dye:pink", 1),
 	},
 	farmer = {
 		{split=4, min=6, max=8},
-		{"default:apple", 	1, CS["default:apple"][1], 	CS["default:apple"][2], 	CS["default:apple"][3]},
-		{"farming:bread", 	1, CS["farming:bread"][1], 	CS["farming:bread"][2], 	CS["farming:bread"][3]},
-		{"farming:wheat", 	1, CS["farming:wheat"][1], 	CS["farming:wheat"][2], 	CS["farming:wheat"][3]}, 
-		{"farming:cotton", 	1, CS["farming:cotton"][1], CS["farming:cotton"][2], 	CS["farming:cotton"][3]}, 
-		-- split --
-		{"flowers:mushroom_red", 	1, CS["flowers:mushroom_red"][1], 	CS["flowers:mushroom_red"][2], 		CS["flowers:mushroom_red"][3]},
-		{"flowers:mushroom_brown", 	1, CS["flowers:mushroom_brown"][1], CS["flowers:mushroom_brown"][2], 	CS["flowers:mushroom_brown"][3]}, 						
-		{"farming:straw", 			1, CS["farming:straw"][1], 			CS["farming:straw"][2], 			CS["farming:straw"][3]}, 
-		{"farming:string", 			1, CS["farming:string"][1], 		CS["farming:string"][2], 			CS["farming:string"][3]},
+		getGoodsData("default:apple", 1),
+		getGoodsData("farming:bread", 1),
+		getGoodsData("farming:wheat", 1),
+		getGoodsData("farming:cotton", 1),
+		getGoodsData("flowers:mushroom_red", 1),
+		getGoodsData("flowers:mushroom_brown", 1),
+		getGoodsData("flowers:straw", 1),
+		getGoodsData("flowers:string", 1),
 	},
 	flower_seller = {
 		{split=0, min=4, max=6},
-		{"flowers:rose", 				1, CS["flowers:rose"][1], 				CS["flowers:rose"][2], 				CS["flowers:rose"][3]},
-		{"flowers:tulip", 				1, CS["flowers:tulip"][1], 				CS["flowers:tulip"][2], 			CS["flowers:tulip"][3]},
-		{"flowers:dandelion_yellow", 	1, CS["flowers:dandelion_yellow"][1], 	CS["flowers:dandelion_yellow"][2], 	CS["flowers:dandelion_yellow"][3]},
-		{"flowers:geranium", 			1, CS["flowers:geranium"][1], 			CS["flowers:geranium"][2], 			CS["flowers:geranium"][3]},
-		{"flowers:viola", 				1, CS["flowers:viola"][1], 				CS["flowers:viola"][2], 			CS["flowers:viola"][3]},
-		{"flowers:dandelion_white", 	1, CS["flowers:dandelion_white"][1],	CS["flowers:dandelion_white"][2], 	CS["flowers:dandelion_white"][3]},
+		getGoodsData("flowers:rose", 1),
+		getGoodsData("flowers:tulip", 1),
+		getGoodsData("flowers:dandelion_yellow", 1),
+		getGoodsData("flowers:geranium", 1),
+		getGoodsData("flowers:viola", 1),
+		getGoodsData("flowers:dandelion_white", 1),
 	},
 	fruit_trader = {
 		{split=0, min=1, max=1},
-		{"default:apple", 1, CS["default:apple"][1], CS["default:apple"][2], CS["default:apple"][3]},
+		getGoodsData("default:apple", 1),
 	},
 	furnituremaker = {
 		{split=3, min=3, max=5},
-		{"cottages:table", 	1, CS["cottages:table"][1], CS["cottages:table"][2], 	CS["cottages:table"][3]},
-		{"cottages:bench", 	1, CS["cottages:bench"][1], CS["cottages:bench"][2], 	CS["cottages:bench"][3]},
-		{"beds:bed", 		1, CS["beds:bed"][1], 		CS["beds:bed"][2], 			CS["beds:bed"][3]},
+		getGoodsData("cottages:table", 1),
+		getGoodsData("cottages:bench", 1),
+		getGoodsData("beds:bed", 1),
 		-- split --
-		{"cottages:shelf", 		1, CS["cottages:shelf"][1], 	CS["cottages:shelf"][2], 	CS["cottages:shelf"][3]},
-		{"default:bookshelf", 	1, CS["default:bookshelf"][1], 	CS["default:bookshelf"][2], CS["default:bookshelf"][3]},
-		{"default:chest", 		1, CS["default:chest"][1], 		CS["default:chest"][2], 	CS["default:chest"][3]},
-		{"beds:fancy_bed", 		1, CS["beds:fancy_bed"][1], 	CS["beds:fancy_bed"][2], 	CS["beds:fancy_bed"][3]},
-		{"vessels:shelf", 		1, CS["vessels:shelf"][1], 		CS["vessels:shelf"][2], 	CS["vessels:shelf"][3]},
+		getGoodsData("cottages:shelf", 1),
+		getGoodsData("default:bookshelf", 1),
+		getGoodsData("default:chest", 1),
+		getGoodsData("beds:fancy_bed", 1),
+		getGoodsData("vessels:shelf", 1),
 	},
 	glassmaker = {
 		{split=0, min=3, max=5},
-		{"default:glass", 				1, CS["default:glass"][1], 				CS["default:glass"][2], 			CS["default:glass"][3]},
-		{"vessels:glass_bottle", 		1, CS["vessels:glass_bottle"][1], 		CS["vessels:glass_bottle"][2], 		CS["vessels:glass_bottle"][3]},
-		{"vessels:drinking_glass", 		1, CS["vessels:drinking_glass"][1], 	CS["vessels:drinking_glass"][2], 	CS["vessels:drinking_glass"][3]},
-		{"xpanes:pane_flat", 			1, CS["xpanes:pane_flat"][1], 			CS["xpanes:pane_flat"][2], 			CS["xpanes:pane_flat"][3]},
-		{"cottages:glass_pane", 		1, CS["cottages:glass_pane"][1], 		CS["cottages:glass_pane"][2], 		CS["cottages:glass_pane"][3]},
-		{"cottages:glass_pane_side",	1, CS["cottages:glass_pane_side"][1], 	CS["cottages:glass_pane_side"][2], 	CS["cottages:glass_pane_side"][3]},
+		getGoodsData("default:xxx", 1),
+		getGoodsData("vessels:xxx", 1),
+		getGoodsData("vessels:xxx", 1),
+		getGoodsData("xpanes:xxx", 1),
+		getGoodsData("cottages:xxx", 1),
+		getGoodsData("cottages:xxx", 1),
 	},
 	goldsmith = {
 		{split=1, min=1, max=3},
-		{"default:goldblock", 		1, CS["default:goldblock"][1], 		CS["default:goldblock"][2], 		CS["default:goldblock"][3]},
-		-- split --
-		{"stairs:stair_goldblock", 	1, CS["stairs:stair_goldblock"][1], CS["stairs:stair_goldblock"][2], 	CS["stairs:stair_goldblock"][3]},
-		{"stairs:slab_goldblock", 	1, CS["stairs:slab_goldblock"][1], 	CS["stairs:slab_goldblock"][2], 	CS["stairs:slab_goldblock"][3]},
+		getGoodsData("default:goldblock", 1),
+		getGoodsData("stairs:stair_goldblock", 1),
+		getGoodsData("stairs:slab_goldblock", 1),
 	},
 	guard = {
 		{split=0, min=1, max=1},
-		{"default:sword_steel", 2, CS["default:sword_steel"][2], CS["default:sword_steel"][3]},
+		getGoodsData("default:sword_steel", 1),
 	},
 	horsekeeper = {
-		{split=0, min=1, max=2},			
-		{"farming:straw", 	1, CS["farming:straw"][1], 	CS["farming:straw"][2], 	CS["farming:straw"][3]}, 
-		{"farming:string", 	1, CS["farming:string"][1], CS["farming:string"][2], 	CS["farming:string"][3]},
+		{split=0, min=1, max=2},
+		getGoodsData("farming:straw", 1),
+		getGoodsData("farming:string", 1),
 	},
 	iceman = {
-		{split=0, min=1, max=2},			
-		{"stairs:slab_ice", 	1, CS["stairs:slab_ice"][1], 	CS["stairs:slab_ice"][2],	CS["stairs:slab_ice"][3]}, 
-		{"stairs:stair_ice", 	1, CS["stairs:stair_ice"][1], 	CS["stairs:stair_ice"][2], 	CS["stairs:stair_ice"][3]},
+		{split=0, min=1, max=2},
+		getGoodsData("stairs:slab_ice", 1),
+		getGoodsData("stairs:stair_ice", 1),
 	},
 	innkeeper = {
 		{split=1, min=2, max=3},
-		{"beds:bed", 		1, CS["beds:bed"][1], 		CS["beds:bed"][2], 		CS["beds:bed"][3]}, 
-		-- split --
-		{"default:chest", 	1, CS["default:chest"][1], 	CS["default:chest"][2], CS["default:chest"][3]},
-		{"default:paper", 	1, CS["default:paper"][1], 	CS["default:paper"][2], CS["default:paper"][3]}, 
-		{"default:torch", 	1, CS["default:torch"][1], 	CS["default:torch"][2], CS["default:torch"][3]},
-		{"default:book", 	1, CS["default:book"][1], 	CS["default:book"][2], 	CS["default:book"][3]}, 
+		getGoodsData("beds:bed", 1),
+		getGoodsData("default:chest", 1),
+		getGoodsData("default:paper", 1),
+		getGoodsData("default:torch", 1),
+		getGoodsData("default:book", 1),
 	},
 	librarian = {
 		{split=1, min=1, max=2},
-		{"default:book", 	1, CS["default:book"][1], 	CS["default:book"][2], 	CS["default:book"][3]}, 
-		-- split --
-		{"default:paper", 	1, CS["default:paper"][1], 	CS["default:paper"][2], CS["default:paper"][3]}, 
+		getGoodsData("default:book", 1),
+		getGoodsData("default:paper", 1),
 	},
 	lumberjack = {
 		{split=0, min=1, max=2},
-		{"default:wood", 1, CS["default:wood"][1], CS["default:wood"][2], CS["default:wood"][3]}, 
-		{"default:tree", 1, CS["default:tree"][1], CS["default:tree"][2], CS["default:tree"][3]}, 
+		getGoodsData("default:wood", 1),
+		getGoodsData("default:tree", 1),
 	}, 
 	miller = {
 		{split=1, min=1, max=2},
-		{"farming:flour", 1, CS["farming:flour"][1], CS["farming:flour"][2], CS["farming:flour"][3]}, 
-		-- split --
-		{"farming:straw", 1, CS["farming:straw"][1], CS["farming:straw"][2], CS["farming:straw"][3]}, 
+		getGoodsData("farming:flour", 1),
+		getGoodsData("farming:straw", 1),
 	}, 
 	
 	priest = DEFAULT_GOODS,
+	
 	roofer = DEFAULT_GOODS,
 	
 	sawmill_owner = {
 		{split=2, min=3, max=4},
-		{"default:wood", 		1, CS["default:wood"][1], 		CS["default:wood"][2], 		CS["default:wood"][3]}, 
-		{"default:tree", 		1, CS["default:tree"][1], 		CS["default:tree"][2], 		CS["default:tree"][3]}, 
-		-- split --
-		{"default:stick", 		1, CS["default:stick"][1], 		CS["default:stick"][2], 	CS["default:stick"][3]}, 
-		{"stairs:slab_wood", 	1, CS["stairs:slab_wood"][1], 	CS["stairs:slab_wood"][2], 	CS["stairs:slab_wood"][3]},
+		getGoodsData("default:wood", 1),
+		getGoodsData("default:tree", 1),
+		getGoodsData("default:stick", 1),
+		getGoodsData("stairs:slab_wood", 1),
 	}, 
 	saddler = DEFAULT_GOODS,
-	seed_seller = DEFAULT_GOODS,
+	
+	seed_seller = {
+		{split=0, min=1, max=2},
+		getGoodsData("farming:seed_cotton", 1),
+		getGoodsData("farming:seed_wheat", 1),
+	}, 
 	
 	shopkeeper = DEFAULT_GOODS,
 	
 	smith = {
 		{split=1, min=3, max=4},
-		{"default:sword_steel", 	1, CS["default:sword_steel"][1], 	CS["default:sword_steel"][2], 	CS["default:sword_steel"][3]},
-		-- split --
-		{"default:axe_steel", 		1, CS["default:axe_steel"][1], 		CS["default:axe_steel"][2], 	CS["default:axe_steel"][3]},
-		{"default:pick_steel", 		1, CS["default:pick_steel"][1], 	CS["default:pick_steel"][2], 	CS["default:pick_steel"][3]},
-		{"default:shovel_steel", 	1, CS["default:shovel_steel"][1], 	CS["default:shovel_steel"][2], 	CS["default:shovel_steel"][3]},
-		{"farming:hoe_steel", 		1, CS["farming:hoe_steel"][1], 		CS["farming:hoe_steel"][2], 	CS["farming:hoe_steel"][3]},
+		getGoodsData("default:sword_steel", 1),
+		getGoodsData("default:axe_steel", 1),
+		getGoodsData("default:pick_steel", 1),
+		getGoodsData("default:shovel_steel", 1),
+		getGoodsData("farming:hoe_steel", 1),
 	},
 	
 	stairmaker = DEFAULT_GOODS,
@@ -430,66 +441,73 @@ villagers.GOODS = {
 	
 	tinsmith = {
 		{split=0, min=1, max=1},
-		{"default:tin_ingot", 1, CS["default:tin_ingot"][1], CS["default:tin_ingot"][2], CS["default:tin_ingot"][3]},
+		getGoodsData("default:tin_ingot", 1),
 	}, 
 	
-	toolmaker = DEFAULT_GOODS,
+	toolmaker = {
+		{split=1, min=2, max=2},
+		getGoodsData("screwdriver:screwdriver", 1),
+		getGoodsData("default:shovel_steel", 1),
+		getGoodsData("farming:hoe_steel", 1),
+		getGoodsData("default:skeleton_key", 1),
+	},
 	
 	trader = DEFAULT_GOODS,
 	
 	wheelwright = {
 		{split=1, min=1, max=2},
-		{"cottages:wagon_wheel", 	1, CS["cottages:wagon_wheel"][1], 	CS["cottages:wagon_wheel"][2], 	CS["cottages:wagon_wheel"][3]},
-		-- split -- 
-		{"default:stick", 			1, CS["default:stick"][1], 			CS["default:stick"][2], 		CS["default:stick"][3]}, 
+		getGoodsData("cottages:wagon_wheel", 1),
+		getGoodsData("default:stick", 1),
 	}, 
 	wood_trader = {
 		{split=1, min=3, max=4},
-		{"default:stick", 		1, CS["default:stick"][1], 			CS["default:stick"][2], 		CS["default:stick"][3]}, 
-		-- split --
-		{"default:wood", 		1, CS["default:wood"][1], 			CS["default:wood"][2], 			CS["default:wood"][3]}, 
-		{"stairs:slab_wood", 	1, CS["stairs:slab_wood"][1], 		CS["stairs:slab_wood"][2], 		CS["stairs:slab_wood"][3]}, 
-		{"cottages:wood_flat", 	1, CS["cottages:wood_flat"][1], 	CS["cottages:wood_flat"][2], 	CS["cottages:wood_flat"][3]}, 
-		{"cottages:hatch_wood", 1, CS["cottages:hatch_wood"][1], 	CS["cottages:hatch_wood"][2], 	CS["cottages:hatch_wood"][3]}, 
+		getGoodsData("default:stick", 1),
+		getGoodsData("default:wood", 1),
+		getGoodsData("stairs:slab_wood", 1),
+		getGoodsData("cottages:wood_flat", 1),
+		getGoodsData("cottages:hatch_wood", 1),
 	}, 
 	
 	-- gives coins to players for items
 	major = {
 		{split=0, min=2, max=2},
-		{"villagers:coins_gold", 	1, 	CS["villagers:coins_gold"][1], 	CS["villagers:coins_gold"][2], 	CS["villagers:coins_gold"][3]},
-		{"villagers:coins", 		10, CS["villagers:coins"][1], 		CS["villagers:coins"][2], 		CS["villagers:coins"][3]},
+		{"villagers:coins_gold", "Gold Coin", 1, "villagers:coins", 11, math.random(800,999)},
+		{"villagers:coins", "Coins", 9, "villagers:coins_gold", 1, math.random(800,999)},
 	}, 
 	ore_seller = {
 		{split=0, min=1, max=3},
-		{"villagers:coins", 		1, "default:coal_lump", math.random(40,60)},
-		{"villagers:coins_gold", 	1, "default:iron_lump", math.random(40,60)},
-		{"villagers:coins_gold", 	1, "default:copper_lump", math.random(40,60)},
-		{"villagers:coins_gold", 	1, "default:tin_lump", math.random(40,60)},
-		{"villagers:coins_gold", 	1, "default:gold_lump", math.random(40,60)},
-		{"villagers:coins_gold", 	1, "default:mese_crystal_fragment", math.random(40,60)},
+		{split=0, min=1, max=3},
+		getGoodsData("default:coal_lump", 1, true),
+		getGoodsData("default:iron_lump", 1, true),
+		getGoodsData("default:copper_lump", 1, true),
+		getGoodsData("default:tin_lump", 1, true),
+		getGoodsData("default:gold_lump", 1, true),
+		getGoodsData("default:mese_crystal_fragment", 1, true),
 	}, 
 	potterer = {
 		{split=0, min=1, max=2},
-		{"villagers:coins", 1, "default:clay_lump", math.random(40,60)},
-		{"villagers:coins", 1, "default:clay", math.random(40,60)},
+		getGoodsData("default:clay_lump", 1, true),
+		getGoodsData("default:clay", 1, true),
 	}, 
 	stoneminer = {
 		{split=0, min=1, max=2},
-		{"villagers:coins", 1, "default:stone", math.random(40,60)},
-		{"villagers:coins", 1, "default:desert_stone", math.random(40,60)},
-		{"villagers:coins", 1, "default:sandstone", math.random(40,60)},
-		{"villagers:coins", 1, "default:desert_sandstone", math.random(40,60)},
-		{"villagers:coins", 1, "default:silver_sandstone", math.random(40,60)},
+		getGoodsData("default:stone", 1, true),
+		getGoodsData("default:desert_stone", 1, true),
+		getGoodsData("default:sandstone", 1, true),
+		getGoodsData("default:desert_sandstone", 1, true),
+		getGoodsData("default:silver_sandstone", 1, true),
 	}, 
 	servant = {
 		{split=0, min=1, max=2},
-		{"villagers:coins_gold", 1, "bucket:bucket_empty", math.random(40,60)},
-		{"villagers:coins", 1, "default:torch", math.random(40,60)},
-		{"villagers:coins", 1, "vessels:drinking_glass", math.random(40,60)},
-		{"villagers:coins", 1, "default:ice", math.random(40,60)},
+		getGoodsData("bucket:bucket_empty", 1, true),
+		getGoodsData("default:torch", 1, true),
+		getGoodsData("vessels:drinking_glass", 1, true),
+		getGoodsData("default:ice", 1, true),
 	}, 
 	schoolteacher = {
 		{split=0, min=1, max=2},
+		getGoodsData("default:paper", 1, true),
+		getGoodsData("default:book", 1, true),
 		{"villagers:coins", 1, "default:paper", math.random(40,60)},
 		{"villagers:coins", 1, "default:book", math.random(40,60)},
 	}, 
