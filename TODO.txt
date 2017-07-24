@@ -1,9 +1,8 @@
 COMPLETED:
 - modified villagers.GOODS table to allow receiving more than one quatity of a purchased item
-- created getGoodsData()
+- updated all villagers.GOODS to use getGoodsData()
 
 TODO:
-- update all villagers.GOODS to use new function getGoodsData()
 - finish details trade items for remaining job titles
 - add support for farming redo in trading goods
 - add support for 3d armor in trading goods
