@@ -1,8 +1,13 @@
 COMPLETED:
 - modified villagers.GOODS table to allow receiving more than one quatity of a purchased item
 - updated all villagers.GOODS to use getGoodsData()
+- created getRandomItemName() to deal with case when cottages mod not installed 
 
 TODO:
+- try/test tooltip[] parameter for formspecs
+- finish getGoodsData() function
+- test with cottages mod removed
+
 - finish details trade items for remaining job titles
 - add support for farming redo in trading goods
 - add support for 3d armor in trading goods
