@@ -112,7 +112,7 @@ local GOODS_DATA = {
 	
 	["default:coal_lump"] 		= {"villagers:coins", 20, math.random(60,80)},
 	["default:coalblock"] 		= {"villagers:coins_gold", 19, math.random(30,50)},
-	["default:torch"] 			= {"villagers:coins"10, math.random(30,50)},
+	["default:torch"] 			= {"villagers:coins", 10, math.random(30,50)},
 	["tnt:gunpowder"] 			= {"villagers:coins_gold", 25, math.random(30,50)},
 	["tnt:tnt"] 				= {"villagers:coins_gold", 15, math.random(20,40)},
 	
@@ -182,27 +182,36 @@ local GOODS_DATA = {
 	
 }
 
+io.write("\n## Creating DEFAULT_ITEM_NAMES table..\n")
+local goodsDataCount = 1
 local DEFAULT_ITEM_NAMES = {}
-for key,value in pairs(GOODS_DATA) do
+for key,_ in pairs(GOODS_DATA) do
 	local modname = string.split(key, ":")[1]
-	if villagers.mods.cottages and modname == "cottages" then	
-	else
-		table.insert(DEFAULT_ITEM_NAMES, value)
+	io.write("\n  #"..goodsDataCount.." key="..key.." modname="..modname.." ")
+	if (modname == "cottages") or (modname == "farming") then
+		-- do nothing
+		io.write("Skipped. ")
+	else 
+		table.insert(DEFAULT_ITEM_NAMES, key)
+		io.write("Added. ")
 	end
+	goodsDataCount = goodsDataCount + 1
 end
 
+io.write("\n  Complete. Resulting table data: ")
+for i=1, #DEFAULT_ITEM_NAMES do
+	io.write("\n  #"..i.." "..DEFAULT_ITEM_NAMES[i])
+end
+io.write("\n")
 
--- temporary default goods for villagers until appropriate items are assigned
-local DEFAULT_GOODS = { {split=0, min=1, max=1}, getGoodsData("default:dirt", 1) }
 
 local function getGoodsData(item_name, quantity, buyback)
-	local goods
-	local modname = string.split(item_name, ":")[1]
-	if villagers.mods.cottages and modname == "cottages" then
-
-	end
+	local log = true
+	io.write("\ngetGoodsData() ")
+	if buyback then io.write("playerSell ")
+	else io.write("villagerSell ") end
+	io.write("item_name="..item_name.." ")
 	
-	local item_description = minetest.registered_items[item_name].description
 	if minetest.registered_items[item_name] == nil then 
 		return {"invalid_item", item_name}
 	end
@@ -213,39 +222,56 @@ local function getGoodsData(item_name, quantity, buyback)
 		return {"naming_error", item_name}
 	end
 	
+	-- if the item that villager is selling to player (or player is selling to villager)
+	-- is from an optional mod but that is not installed, then use a random item from 
+	-- minetest_game instead
+	local modname = string.split(item_name, ":")[1]
+	io.write("modname="..modname.." ")
+	if (villagers.mods.cottages == nil and modename == "cottages") or
+		(villagers.mods.farming == nil and modename == "farming") then
+		item_name = DEFAULT_ITEM_NAMES[math.random(#DEFAULT_ITEM_NAMES)]
+		io.write("optionalModMissing gotRandomItem="..modname.." ")
+	end
+	
 	-- item for player to sell villager for coins
+	local goods
 	if buyback then
+		local purchase_item = GOODS_DATA[item_name][1]
+		local itemDescription = minetest.registered_items[purchase_item].description
+		local quant_received = villagers.round(GOODS_DATA[item_name][2] / 3)
+		if quant_received == 0 then quantity = 1 end
 		goods = {
-			local purchase_item = GOODS_DATA[item_name][1]
-			local itemDescription = minetest.registered_items[purchase_item].description
-			local quant_received = villagers.round(GOODS_DATA[item_name][2] / 3)
-			if quant_received == 0 then quantity = 1 end
-			purchase_item, -- registered item name that will be purchased
-			itemDescription, -- description of the item name
-			quant_received, -- quantity of the item to receive for each purchase
-			item_name, 	-- cost item that player must give
-			quantity,	-- quantity of the cost item player must give
+			purchase_item, 		-- registered item name that villager is purchasing (eg. coins)
+			itemDescription, 	-- description of the above item
+			quant_received, 	-- quantity of the above item to receive for each purchase (typically > 1)
+			item_name, 			-- cost item that player must give
+			quantity,			-- quantity of the cost item player must give
 			GOODS_DATA[purchase_item][3]	-- stock quantity of the item to be purchased
 		}
 		
 	-- item for villager to sell player
-	else
+	else		
 		goods = {
-			item_name, -- registered item name that will be purchased
-			item_description, -- description of the item name
-			quantity, -- quantity of the item to receive for each purchase
-			GOODS_DATA[item_name][1], 	-- cost item that player must give
-			GOODS_DATA[item_name][2],	-- quantity of the cost item player must give
-			GOODS_DATA[item_name][3]	-- stock quantity of the itme to be purchased
+			item_name, -- registered item name that villager is purchasing
+			minetest.registered_items[item_name].description, -- description of the above item
+			quantity, -- quantity of the above item to receive for each purchase (typically 1)
+			GOODS_DATA[item_name][1], 	-- cost item that player must give (eg. coins)
+			GOODS_DATA[item_name][2], 	-- quantity of the cost item player must give (typically > 1)
+			GOODS_DATA[item_name][3] 	-- stock quantity of the itme to be purchased
 		}
 	end
 	
+	io.write("returnVal: "..minetest.serialize(goods).." ")
+	--io.write("\ngetGoodsDataEND ")
 	return goods
 
 end
 
+-- temporary default goods for villagers until appropriate items are assigned
+local DEFAULT_GOODS = { {split=0, min=1, max=1}, getGoodsData("default:dirt", 1) }
+
+io.write("\n## Creating villagers.GOODS table..\n")
 villagers.GOODS = {
-	
 	baker = {
 		{split=2, min=3, max=4},			
 		getGoodsData("farming:bread", 1),
@@ -727,7 +753,7 @@ function villagers.getTradeInventory(title, plot, bed, errors)
 			if log then 
 				io.write(" #ERROR getTradeItem #"..item_count.." - invalid item name '"..popped_item[2].."'.") 
 			end
-			local error_message = "getTradeInventory(): Error trade item #"..item_count.." "
+			local error_message = "getTradeInventory(): Error trade item #"..item_count.." "..
 				"unknown item_name='"..popped_item[2].."' for villager @ plot#"..plot.." bed#"..bed
 			table.insert(errors, error_message)
 			popped_item = {"default:dirt", "Dirt [error]", 1, "villagers:coins", 1, 1}
@@ -735,7 +761,7 @@ function villagers.getTradeInventory(title, plot, bed, errors)
 			if log then 
 				io.write(" #ERROR getTradeItem #"..item_count.." - no item desc for '"..popped_item[2].."'.") 
 			end
-			local error_message = "getTradeInventory(): Error trade item #"..item_count.." "
+			local error_message = "getTradeInventory(): Error trade item #"..item_count.." "..
 				"no desc item_name='"..popped_item[2].."' for villager @ plot#"..plot.." bed#"..bed
 			table.insert(errors, error_message)
 			popped_item = {"default:dirt", "Dirt [error]", 1, "villagers:coins", 1, 1}
@@ -743,7 +769,7 @@ function villagers.getTradeInventory(title, plot, bed, errors)
 			if log then 
 				io.write(" #ERROR getTradeItem #"..item_count.." - '"..popped_item[2].."' not found in GOODS_DATA.") 
 			end
-			local error_message = "getTradeInventory(): Error trade item #"..item_count.." "
+			local error_message = "getTradeInventory(): Error trade item #"..item_count.." "..
 				"not in GOODS_DATA item_name='"..popped_item[2].."' for villager @ plot#"..plot.." bed#"..bed
 			table.insert(errors, error_message)
 			popped_item = {"default:dirt", "Dirt [error]", 1, "villagers:coins", 1, 1}
@@ -751,7 +777,7 @@ function villagers.getTradeInventory(title, plot, bed, errors)
 			if log then 
 				io.write(" #ERROR getTradeItem #"..item_count..", it is NIL.") 
 			end
-			local error_message = "getTradeInventory(): Error trade item #"..item_count.." "
+			local error_message = "getTradeInventory(): Error trade item #"..item_count.." "..
 				"is NIL for villager @ plot#"..plot.." bed#"..bed
 			table.insert(errors, error_message)
 			popped_item = {"default:dirt", "Dirt [error]", 1, "villagers:coins", 1, 1}
