@@ -3,6 +3,7 @@ villagers.mods = {}
 --villagers.villager_ids = {}
 
 if minetest.get_modpath("cottages") then villagers.mods["cottages"] = true end
+if minetest.get_modpath("farming") then villagers.mods["farming"] = true end
 
 local modpaths = minetest.get_modpath("villagers")
 dofile(modpaths.."/constants.lua")
