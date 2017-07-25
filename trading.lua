@@ -177,11 +177,19 @@ local GOODS_DATA = {
 	["dye:magenta"] 	= {"villagers:coins", 8, math.random(30,50)},
 	["dye:pink"] 		= {"villagers:coins", 8, math.random(30,50)},
 	
-	
 	["villagers:coins_gold"] = {"villagers:coins", 10, math.random(70,90)},	
 	["villagers:coins"] = {"villagers:coins_gold", 1, math.random(70,90)},
 	
 }
+
+local DEFAULT_ITEM_NAMES = {}
+for key,value in pairs(GOODS_DATA) do
+	local modname = string.split(key, ":")[1]
+	if villagers.mods.cottages and modname == "cottages" then	
+	else
+		table.insert(DEFAULT_ITEM_NAMES, value)
+	end
+end
 
 
 -- temporary default goods for villagers until appropriate items are assigned
@@ -189,6 +197,11 @@ local DEFAULT_GOODS = { {split=0, min=1, max=1}, getGoodsData("default:dirt", 1)
 
 local function getGoodsData(item_name, quantity, buyback)
 	local goods
+	local modname = string.split(item_name, ":")[1]
+	if villagers.mods.cottages and modname == "cottages" then
+
+	end
+	
 	local item_description = minetest.registered_items[item_name].description
 	if minetest.registered_items[item_name] == nil then 
 		return {"invalid_item", item_name}
@@ -199,6 +212,8 @@ local function getGoodsData(item_name, quantity, buyback)
 	if GOODS_DATA[item_name] == nil then
 		return {"naming_error", item_name}
 	end
+	
+	-- item for player to sell villager for coins
 	if buyback then
 		goods = {
 			local purchase_item = GOODS_DATA[item_name][1]
@@ -212,6 +227,8 @@ local function getGoodsData(item_name, quantity, buyback)
 			quantity,	-- quantity of the cost item player must give
 			GOODS_DATA[purchase_item][3]	-- stock quantity of the item to be purchased
 		}
+		
+	-- item for villager to sell player
 	else
 		goods = {
 			item_name, -- registered item name that will be purchased
@@ -355,12 +372,12 @@ villagers.GOODS = {
 	},
 	glassmaker = {
 		{split=0, min=3, max=5},
-		getGoodsData("default:xxx", 1),
-		getGoodsData("vessels:xxx", 1),
-		getGoodsData("vessels:xxx", 1),
-		getGoodsData("xpanes:xxx", 1),
-		getGoodsData("cottages:xxx", 1),
-		getGoodsData("cottages:xxx", 1),
+		getGoodsData("default:glass", 1),
+		getGoodsData("vessels:glass_bottle", 1),
+		getGoodsData("vessels:drinking_glass", 1),
+		getGoodsData("xpanes:pane_flat", 1),
+		getGoodsData("cottages:glass_pane", 1),
+		getGoodsData("cottages:glass_pane_side", 1),
 	},
 	goldsmith = {
 		{split=1, min=1, max=3},
@@ -468,12 +485,14 @@ villagers.GOODS = {
 		getGoodsData("cottages:hatch_wood", 1),
 	}, 
 	
-	-- gives coins to players for items
+	-- offers players to exchange coins for gold coins and vice versa
 	major = {
 		{split=0, min=2, max=2},
 		{"villagers:coins_gold", "Gold Coin", 1, "villagers:coins", 11, math.random(800,999)},
 		{"villagers:coins", "Coins", 9, "villagers:coins_gold", 1, math.random(800,999)},
 	}, 
+	
+	-- villagers who give coins to players for items
 	ore_seller = {
 		{split=0, min=1, max=3},
 		{split=0, min=1, max=3},
@@ -575,6 +594,14 @@ function villagers.getTradingFormspec(self, player_name)
 				quantity_inv = quantity_inv + stack_count
 			end
 		end
+		
+		--[[
+			tooltip[<gui_element_name>;<tooltip_text>;<bgcolor>;<fontcolor>]
+			* Adds tooltip for an element
+			* `<bgcolor>` tooltip background color as `ColorString` (optional)
+			* `<fontcolor>` tooltip font color as `ColorString` (optional)
+		--]]
+		
 		
 		formspec = formspec..
 			-- items
