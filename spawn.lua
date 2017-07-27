@@ -45,8 +45,10 @@ function getRegionFromArea(pos, radius, errors)
 			if nodename == "ROAD" or 
 				nodename == "DIRT" or 
 				nodename == "STONE" or 
+				nodename == "STONEBRICK" or 
 				nodename == "COBBLE" or 
 				nodename == "AIR" or 
+				nodename == "WATER_SOURCE" or 
 				nodename == "IGNORE" then
 				if log then io.write("[skipped] ") end
 			else 
@@ -139,23 +141,22 @@ function getRegionFromArea(pos, radius, errors)
 		region_type = "cold"
 	elseif top_nodename == "DIRT_WITH_DRY_GRASS" then 
 		region_type = "hot"
-	elseif top_nodename == "SAND" then 
-		region_type = "hot"
 	elseif top_nodename == "DIRT_WITH_GRASS" then 
 		region_type = "normal"
 	elseif top_nodename == "DIRT_WITH_RAINFOREST_LITTER" then 
 		region_type = "native"
 	elseif top_nodename == "SOIL_WET" then 
 		region_type = "native"
-	elseif top_nodename == "DESERT_SAND" then 
-		if math.random(3) == 1 then region_type = "hot"
-		else region_type = "desert" end
-	elseif top_nodename == "DESERT_STONE" then 
-		if math.random(3) == 1 then region_type = "hot"
-		else region_type = "desert" end
-	elseif top_nodename == "SILVER_SAND" then 
-		if math.random(3) == 1 then region_type = "hot"
-		else region_type = "desert" end
+	elseif top_nodename == "SAND" or
+		top_nodename == "DESERT_SAND" or
+		top_nodename == "SILVER_SAND" or
+		top_nodename == "DESERT_STONE" or
+		top_nodename == "SANDSTONE" then 
+		if math.random(2) == 1 then 
+			region_type = "hot"
+		else 
+			region_type = "desert" 
+		end
 	else 
 		io.write(" #ERROR IN getRegionFromArea()# ")
 		local error_message = "getRegionFromArea(): Unrecognized value for top_nodename = "..top_nodename.." "..
