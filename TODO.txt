@@ -1,4 +1,7 @@
 TODO:
+- figure out how string and cotton should be separated - causing issues with trading
+- create function that auto calculates cost of item based on crafting recipes
+- update all long descriptions to short ones
 - finish adding trade items for remaining job titles and refer to registered_items
 - add support for farming redo in trading goods
 - add support for 3d armor in trading goods
