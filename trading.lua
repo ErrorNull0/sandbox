@@ -17,6 +17,18 @@ getGoodsData("cottages:roof_flat_straw", 1),
 getGoodsData("cottages:roof_flat_wood", 1),
 
 ]]
+
+local function getCost(item_name)
+	local recipe = minetest.get_craft_recipe(item_name)
+	local items = recipe.items
+	local total_cost
+	for i, #items do
+		local item_stack = items[i]
+		local name = item_stack:get_name()
+		if name == ""
+	end
+end
+
 local GOODS_DATA = {
 	["default:apple"] 			= {"villagers:coins", 2, math.random(70,90)},
 	["flowers:mushroom_red"] 	= {"villagers:coins", 5, math.random(50,70)},
