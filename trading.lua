@@ -1,233 +1,67 @@
 -- Costs and Stock of all goods: index 1 is cost, index 2 is stock
 
---[[ DETAIL COSTS FOR THE FOLLOWING...
-getGoodsData("cottages:roof_black", 1),
-getGoodsData("cottages:roof_brown", 1),
-getGoodsData("cottages:roof_wood", 1),
-getGoodsData("cottages:roof_straw", 1),
-getGoodsData("cottages:roof_slate", 1),
-getGoodsData("cottages:roof_reet", 1),
-getGoodsData("cottages:roof_red", 1),
-getGoodsData("cottages:roof_flat_black", 1),
-getGoodsData("cottages:roof_flat_brown", 1),
-getGoodsData("cottages:roof_flat_red", 1),
-getGoodsData("cottages:roof_flat_reet", 1),
-getGoodsData("cottages:roof_flat_slate", 1),
-getGoodsData("cottages:roof_flat_straw", 1),
-getGoodsData("cottages:roof_flat_wood", 1),
-
-]]
-
-local function getCost(item_name)
-	local recipe = minetest.get_craft_recipe(item_name)
-	local items = recipe.items
-	local total_cost
-	for i, #items do
-		local item_stack = items[i]
-		local name = item_stack:get_name()
-		if name == ""
+-- assigns the cost (in silver coins)
+-- of the listed 'base items' below
+local function getBaseCost(item_name)
+	local item_cost
+	if item_name == "air" then item_cost = 0
+	elseif item_name == "" then item_cost = xxx
+	elseif item_name == "" then item_cost = xxx
+	elseif item_name == "" then item_cost = xxx
+	elseif item_name == "" then item_cost = xxx
+	elseif item_name == "" then item_cost = xxx
+	elseif item_name == "" then item_cost = xxx
+	elseif item_name == "" then item_cost = xxx
+	elseif item_name == "" then item_cost = xxx
+	elseif item_name == "" then item_cost = xxx
+	elseif item_name == "" then item_cost = xxx
+	elseif item_name == "" then item_cost = xxx
 	end
 end
 
-local GOODS_DATA = {
-	["default:apple"] 			= {"villagers:coins", 2, math.random(70,90)},
-	["flowers:mushroom_red"] 	= {"villagers:coins", 5, math.random(50,70)},
-	["flowers:mushroom_brown"] 	= {"villagers:coins", 5, math.random(50,70)},
+-- returns the cost item name and cost quantity for the item to be
+-- traded as well as how much stock a villager will have of that item
+local function getGoodsData(item_name)
+	local recipe = minetest.get_craft_recipe(item_name)
+	local items = recipe.items
+	local amount_in_stock = math.random(villagers.stock_min_items, villagers.stock_max_items)
 	
-	["flowers:rose"] 				= {"villagers:coins", 5, math.random(30,50)},
-	["flowers:tulip"] 				= {"villagers:coins", 5, math.random(30,50)},
-	["flowers:dandelion_yellow"]	= {"villagers:coins", 5, math.random(30,50)},
-	["flowers:geranium"] 			= {"villagers:coins", 5, math.random(30,50)},
-	["flowers:viola"] 				= {"villagers:coins", 5, math.random(30,50)},
-	["flowers:dandelion_white"] 	= {"villagers:coins", 5, math.random(30,50)},
-	
-	["default:papyrus"] 	= {"villagers:coins", 2, math.random(30,50)},
-	["default:paper"] 		= {"villagers:coins", 6, math.random(30,50)},
-	["default:book"]		= {"villagers:coins", 20, math.random(20,40)},
-	
-	["farming:seed_cotton"] = {"villagers:coins", 2, math.random(80,99)},
-	["farming:cotton"] 		= {"villagers:coins", 3, math.random(80,99)},
-	["farming:string"] 		= {"villagers:coins", 3, math.random(90,99)},
-	["farming:seed_wheat"]	= {"villagers:coins", 2, math.random(80,99)},
-	["farming:wheat"] 		= {"villagers:coins", 2, math.random(60,80)},
-	["farming:straw"] 		= {"villagers:coins", 7, math.random(60,80)},
-	
-	["farming:flour"] 		= {"villagers:coins", 9, math.random(60,80)},
-	["farming:bread"] 		= {"villagers:coins", 17, math.random(30,40)},
-	
-	["default:ice"] 		= {"villagers:coins", 5, math.random(70,90)},
-	["group:wool"] 			= {"villagers:coins", 999, math.random(60,80)},
-	
-	["default:dirt"] 			= {"villagers:coins", 1, math.random(70,90)},
-	["default:gravel"] 			= {"villagers:coins", 2, math.random(70,90)},
-	
-	["default:sand"] 			= {"villagers:coins", 2, math.random(70,90)},
-	["default:desert_sand"] 	= {"villagers:coins", 2, math.random(70,90)},
-	["default:silver_sand"] 	= {"villagers:coins", 2, math.random(70,90)},
-	
-	["default:glass"] 				= {"villagers:coins", 4, math.random(40,60)},
-	["vessels:glass_bottle"] 		= {"villagers:coins", 1, math.random(30,40)},
-	["vessels:drinking_glass"] 		= {"villagers:coins", 8, math.random(20,30)},
-	["cottages:glass_pane"] 		= {"villagers:coins", 2, math.random(30,50)},
-	["xpanes:pane_flat"] 			= {"villagers:coins", 14, math.random(30,50)},
-	["cottages:glass_pane_side"]	= {"villagers:coins", 14, math.random(30,50)},
-	
-	["default:clay_lump"] 	= {"villagers:coins", 5, math.random(60,80)},
-	["default:clay"] 		= {"villagers:coins", 22, math.random(40,60)},
-	["default:clay_brick"] 	= {"villagers:coins", 23, math.random(40,60)},
-	["default:cobble"] 		= {"villagers:coins", 3, math.random(60,80)},
-	["default:stone"] 		= {"villagers:coins", 6, math.random(60,80)},
-	
-	["default:desert_stone"] 		= {"villagers:coins", 7, math.random(60,80)},
-	["default:sandstone"] 			= {"villagers:coins", 8, math.random(60,80)},
-	["default:desert_sandstone"] 	= {"villagers:coins", 7, math.random(60,80)},
-	["default:silver_sandstone"] 	= {"villagers:coins", 7, math.random(60,80)},
-	
-	["default:stonebrick"] 				= {"villagers:coins", 25, math.random(60,80)},
-	["default:sandstonebrick"] 			= {"villagers:coins", 30, math.random(60,80)},
-	["default:desert_stonebrick"] 		= {"villagers:coins", 30, math.random(60,80)},
-	["default:desert_sandstone_brick"] 	= {"villagers:coins", 30, math.random(60,80)},
-	["default:silver_sandstone_brick"] 	= {"villagers:coins", 30, math.random(60,80)},
-	["default:brick"] 					= {"villagers:coins", 100, math.random(60,80)},
-	
-	["default:stick"] 		= {"villagers:coins", 1, math.random(80,99)},
-	["default:wood"] 		= {"villagers:coins", 5, math.random(60,70)},
-	["default:tree"] 		= {"villagers:coins", 23, math.random(50,60)},
-	["default:ladder_wood"] = {"villagers:coins", 3, math.random(40,50)},
-	["cottages:table"] 		= {"villagers:coins", 5, math.random(20,30)},
-	["cottages:bench"] 		= {"villagers:coins", 8, math.random(20,30)},
-	
-	["default:fence_wood"] 		= {"villagers:coins", 24, math.random(40,60)},
-	["doors:gate_wood_closed"] 	= {"villagers:coins", 16, math.random(30,50)},
-	["doors:door_wood_a"] 		= {"villagers:coins", 33, math.random(30,50)},
-	["default:sign_wall_wood"] 	= {"villagers:coins", 11, math.random(40,60)},
-	["doors:trapdoor"] 			= {"villagers:coins", 16, math.random(40,60)},
-	["default:chest"] 			= {"villagers:coins", 44, math.random(30,50)},
-	["boats:boat"] 				= {"villagers:coins", 28, math.random(20,30)},
-	["beds:bed"] 				= {"villagers:coins", 34, math.random(20,30)},
-	["beds:fancy_bed"] 			= {"villagers:coins", 40, math.random(10,20)},
-	["default:bookshelf"] 		= {"villagers:coins", 10, math.random(30,40)},
-	["cottages:shelf"] 			= {"villagers:coins", 18, math.random(30,40)},
-	["vessels:shelf"] 			= {"villagers:coins", 50, math.random(30,40)},
-	["cottages:tub"] 			= {"villagers:coins", 20, math.random(50,70)},
-	["cottages:barrel"] 		= {"villagers:coins", 40, math.random(60,80)},
-	["cottages:barrel_lying"] 	= {"villagers:coins", 40, math.random(60,80)},
-	["cottages:wood_flat"] 		= {"villagers:coins", 1, math.random(70,90)},
-	["cottages:hatch_wood"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["cottages:wagon_wheel"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["cottages:gate_closed"] 	= {"villagers:coins", 12, math.random(30,50)},
-	
-	-- STAIRS --
-	["stairs:stair_wood"]	 		= {"villagers:coins", 7, math.random(30,50)},
-	["stairs:stair_pine_wood"] 		= {"villagers:coins", 9, math.random(30,50)},
-	["stairs:stair_junglewood"] 	= {"villagers:coins", 10, math.random(30,50)},
-	["stairs:stair_acacia_wood"] 	= {"villagers:coins", 10, math.random(30,50)},
-	
-	["stairs:slab_wood"] 			= {"villagers:coins", 3, math.random(60,80)},
-	
-	["stairs:slab_straw"] 			= {"villagers:coins", 4, math.random(40,60)},
-	["stairs:stair_straw"] 			= {"villagers:coins", 7, math.random(30,50)},
-	
-	["stairs:slab_ice"] 			= {"villagers:coins", 3, math.random(70,90)},
-	["stairs:stair_ice"] 			= {"villagers:coins", 5, math.random(40,60)},
-	
-	["stairs:stair_sandstone"] 					= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_sandstone_block"] 			= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_sandstonebrick"] 			= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_desert_sandstone"] 			= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_desert_sandstone_block"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_desert_sandstone_brick"] 	= {"villagers:coins", 5, math.random(40,60)},
-	
-	["stairs:stair_desert_stone_block"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_silver_sandstone_block"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_desert_stonebrick"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_silver_sandstone_brick"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_snowblock"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_cobble"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_stone"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_brick"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_stonebrick"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_bronzeblock"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_copperblock"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_steelblock"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_desert_cobble"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_desert_stone"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_silver_sandstone"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_loam"] 	= {"villagers:coins", 5, math.random(40,60)},
-	["stairs:stair_mossycobble"] 	= {"villagers:coins", 5, math.random(40,60)},
-	
-	
-	["default:coal_lump"] 		= {"villagers:coins", 20, math.random(60,80)},
-	["default:coalblock"] 		= {"villagers:coins_gold", 19, math.random(30,50)},
-	["default:torch"] 			= {"villagers:coins", 10, math.random(30,50)},
-	["tnt:gunpowder"] 			= {"villagers:coins_gold", 25, math.random(30,50)},
-	["tnt:tnt"] 				= {"villagers:coins_gold", 15, math.random(20,40)},
-	
-	["default:iron_lump"] 				= {"villagers:coins", 80, math.random(70,90)},
-	["default:copper_lump"] 			= {"villagers:coins_gold", 16, math.random(60,80)},
-	["default:tin_lump"] 				= {"villagers:coins_gold", 16, math.random(60,80)},
-	["default:gold_lump"] 				= {"villagers:coins_gold", 28, math.random(30,40)},
-	["default:mese_crystal_fragment"] 	= {"villagers:coins_gold", 7, math.random(70,90)},
-	["default:steel_ingot"] 			= {"villagers:coins_gold", 10, math.random(60,80)},
-	["default:copper_ingot"] 			= {"villagers:coins_gold", 18, math.random(60,80)},
-	["default:tin_ingot"] 				= {"villagers:coins_gold", 18, math.random(60,80)},
-	["default:bronze_ingot"] 			= {"villagers:coins_gold", 20, math.random(60,80)},
-	["default:gold_ingot"] 				= {"villagers:coins_gold", 30, math.random(30,50)},	
-	["default:mese_crystal"] 			= {"villagers:coins_gold", 55, math.random(20,40)},
-	["default:diamond"] 				= {"villagers:coins_gold", 99, math.random(20,40)},
-	
-	["default:goldblock"] 		= {"villagers:coins_gold", 280, math.random(20,30)},
-	["stairs:stair_goldblock"] 	= {"villagers:coins_gold", 100, math.random(20,30)},
-	["stairs:slab_goldblock"] 	= {"villagers:coins_gold", 140, math.random(20,30)},
-	
-	["screwdriver:screwdriver"] = {"villagers:coins_gold", 11, math.random(30,50)},
-	["default:chest_locked"] 	= {"villagers:coins_gold", 15, math.random(30,50)},
-	["default:skeleton_key"] 	= {"villagers:coins_gold", 19, math.random(30,50)},
-	--["bucket:bucket_empty"] 	= {"villagers:coins_gold", 28, math.random(40,60)},
-	["default:door_steel"] 		= {"villagers:coins_gold", 62, math.random(20,40)},
-	["vessels:steel_bottle"] 	= {"villagers:coins_gold", 55, math.random(20,40)},
-	
-	["default:shovel_wood"] 	= {"villagers:coins", 8, math.random(30,50)},
-	["default:shovel_stone"] 	= {"villagers:coins", 9, math.random(30,50)},
-	["default:shovel_steel"] 	= {"villagers:coins_gold", 11, math.random(30,50)},
-	["default:shovel_bronze"] 	= {"villagers:coins_gold", 19, math.random(30,50)},
-	["default:pick_wood"] 		= {"villagers:coins", 16, math.random(30,50)},
-	["default:pick_stone"] 		= {"villagers:coins", 21, math.random(30,50)},
-	["default:pick_steel"] 		= {"villagers:coins_gold", 31, math.random(30,50)},
-	["default:pick_bronze"] 	= {"villagers:coins_gold", 56, math.random(30,50)},
-	["default:sword_wood"] 		= {"villagers:coins", 12, math.random(20,40)},
-	["default:sword_stone"] 	= {"villagers:coins", 14, math.random(20,40)},
-	["default:sword_steel"] 	= {"villagers:coins_gold", 21, math.random(20,40)},
-	["default:sword_bronze"] 	= {"villagers:coins_gold", 37, math.random(20,40)},
-	["default:axe_wood"] 		= {"villagers:coins", 18, math.random(20,40)},
-	["default:axe_stone"] 		= {"villagers:coins", 21, math.random(20,40)},
-	["default:axe_steel"] 		= {"villagers:coins_gold", 31, math.random(20,40)},
-	["default:axe_bronze"] 		= {"villagers:coins_gold", 57, math.random(20,40)},
-	["farming:hoe_wood"] 		= {"villagers:coins", 13, math.random(30,50)},
-	["farming:hoe_stone"] 		= {"villagers:coins", 15, math.random(30,50)},
-	["farming:hoe_steel"] 		= {"villagers:coins_gold", 21, math.random(30,50)},
-	["farming:hoe_bronze"] 		= {"villagers:coins_gold", 37, math.random(30,50)},
-	
-	["dye:white"] 		= {"villagers:coins", 3, math.random(30,50)},
-	["dye:grey"] 		= {"villagers:coins", 8, math.random(30,50)},
-	["dye:dark_grey"] 	= {"villagers:coins", 8, math.random(30,50)},
-	["dye:black"] 		= {"villagers:coins", 6, math.random(30,50)},
-	["dye:violet"] 		= {"villagers:coins", 8, math.random(30,50)},
-	["dye:blue"] 		= {"villagers:coins", 8, math.random(30,50)},
-	["dye:cyan"] 		= {"villagers:coins", 8, math.random(30,50)},
-	["dye:dark_green"] 	= {"villagers:coins", 8, math.random(30,50)},
-	["dye:green"] 		= {"villagers:coins", 8, math.random(30,50)},
-	["dye:yellow"] 		= {"villagers:coins", 3, math.random(30,50)},
-	["dye:brown"] 		= {"villagers:coins", 8, math.random(30,50)},
-	["dye:orange"] 		= {"villagers:coins", 8, math.random(30,50)},
-	["dye:red"] 		= {"villagers:coins", 8, math.random(30,50)},
-	["dye:magenta"] 	= {"villagers:coins", 8, math.random(30,50)},
-	["dye:pink"] 		= {"villagers:coins", 8, math.random(30,50)},
-	
-	["villagers:coins_gold"] = {"villagers:coins", 10, math.random(70,90)},	
-	["villagers:coins"] = {"villagers:coins_gold", 1, math.random(70,90)},
-	
-}
+	-- item has a craft recipe, sum up the cost
+	-- of each individual item in the recipe
+	if items then
+		local total_cost
+		for i, #items do
+			local base_item_name = items[i]:get_name()
+			total_cost = total_cost + getGoodsData(base_item_name)
+		end
+		return {"villagers:coins", total_cost, amount_in_stock}
+		
+	-- item has no craft recipe and thus a 'base' item
+	else
+		if item_name == "villagers:coins" or 
+			item_name == "villagers:coins_gold" then
+			amount_in_stock = math.random(villagers.stock_min_coins, villagers.stock_max_coins)
+		end
+		local base_cost = getBaseCost(item_name)
+		if base_cost == nil then
+			-- add error handling here for display on village formspec
+			print("\n## "..item_name.." has no recipe - base cost undefined.")
+			base_cost = 0
+		end
+		return {"villagers:coins", base_cost, amount_in_stock}
+	end
+
+end 
+
+-- creates the main table to holds the cost item name and cost quantity
+-- of all registered items that villagers will trade as well as the 
+-- stock quantity of the corresponding trade item
+local GOODS_DATA = {}
+for itemName, def in pairs(minetest.registered_items) do
+	-- itemName: "default:dirt"
+	-- def:	{"villagers:coins", coins_quant, stock_quant"}
+	GOODS_DATA[itemName] = getGoodsData(itemName)
+end
 
 
 local goodsDataCount = 1
@@ -276,31 +110,44 @@ local function getGoodsData(item_name, quantity, buyback)
 	-- item for player to sell villager for coins
 	local goods
 	if buyback then
-		local purchase_item = GOODS_DATA[item_name][1]
-		local itemDescription = minetest.registered_items[purchase_item].description
-		local quant_received = villagers.round(GOODS_DATA[item_name][2] / 3)
-		if quant_received == 0 then quantity = 1 end
+		local quant_received = GOODS_DATA[item_name][2] / 3
+		local purch_item
+		if quant_received < 1 then quant_received = 1 
+		else if quant_received > 99 then
+			quant_received = math.floor(quant_received/100)
+			purch_item = "villagers:coins_gold"
+		else
+			quant_received = math.floor(quant_received)
+			purch_item = "villagers:coins"
+		end
+		local purch_desc = minetest.registered_items[purch_item].description
+		
 		goods = {
-			purchase_item, 		-- registered item name that villager is purchasing (eg. coins)
-			itemDescription, 	-- description of the above item
-			quant_received, 	-- quantity of the above item to receive for each purchase (typically > 1)
+			purch_item, 		-- registered item name that player is purchasing (eg. coins)
+			purch_desc, 	-- description of the above item
+			quant_received, 	-- quantity of the above item player gets (typically coins and > 1)
 			item_name, 			-- cost item that player must give
 			minetest.registered_items[item_name].description, 	-- description of the cost item
-			quantity,			-- quantity of the cost item player must give
-			GOODS_DATA[purchase_item][3]	-- stock quantity of the item to be purchased
+			quantity,			-- quantity of the cost item player must give (typically 1)
+			GOODS_DATA[purch_item][3]	-- stock quantity of purch item (typically coins and lots of stock)
 		}
 		
 	-- item for villager to sell player
 	else		
 		--print("\n\n##item_name="..item_name)
-		local cost_item_name = GOODS_DATA[item_name][1]
+		local cost_item_amnt = GOODS_DATA[item_name][2]
+		
+		local cost_item
+		if cost_item_amnt > 99 then cost_item = "villagers:coins_gold"
+		else cost_item = "villagers:coins" end
+		
 		goods = {
-			item_name, 		-- registered item name that villager is purchasing
+			item_name, 			-- registered item name that villager is purchasing
 			minetest.registered_items[item_name].description, -- description of the above item
-			quantity, 		-- quantity of the above item to receive for each purchase (typically 1)
-			GOODS_DATA[item_name][1], 	-- cost item that player must give (eg. coins)
-			minetest.registered_items[cost_item_name].description, 	-- description of the cost item
-			GOODS_DATA[item_name][2], 	-- quantity of the cost item player must give (typically > 1)
+			quantity, 			-- quantity of the above item to receive for each purchase (typically 1)
+			cost_item, 			-- cost item that player must give (eg. coins)
+			minetest.registered_items[cost_item].description, 	-- description of the cost item
+			cost_item_amnt, 	-- quantity of the cost item player must give (typically > 1)
 			GOODS_DATA[item_name][3] 	-- stock quantity of the itme to be purchased
 		}
 	end
@@ -1197,3 +1044,608 @@ function villagers.endVillagerTrading(self, player)
 	end
 	
 end
+
+--[[
+air								Air (you hacker you!)
+beds:bed_bottom					Simple Bed
+beds:bed_top		
+beds:fancy_bed_bottom			Fancy Bed
+beds:fancy_bed_top		
+cottages:anvil					anvil
+cottages:barrel_lying_open		barrel (opened)		 lying somewhere
+cottages:barrel_lying			barrel (closed)		 lying somewhere
+cottages:barrel_open			barrel (open)
+cottages:barrel					barrel (closed)
+cottages:bed_foot				Bed (foot region)
+cottages:bed_head				Bed (head region)
+cottages:bench					simple wooden bench
+cottages:feldweg_crossing		dirt road crossing
+cottages:feldweg_curve			dirt road curve
+cottages:feldweg_end			dirt road end
+cottages:feldweg_slope_long		dirt road slope long
+cottages:feldweg_slope			dirt road slope
+cottages:feldweg_t_junction		dirt road t junction
+cottages:feldweg				dirt road
+cottages:fence_corner			small fence corner
+cottages:fence_end				small fence end
+cottages:fence_small			small fence
+cottages:gate_closed			closed fence gate
+cottages:gate_open				opened fence gate
+cottages:glass_pane_side		simple glass pane
+cottages:glass_pane				simple glass pane (centered)
+cottages:half_door_inverted		half door inverted
+cottages:half_door				half door
+cottages:hammer					Steel hammer for repairing tools on the anvil
+cottages:handmill				mill		 powered by punching
+cottages:hatch_steel			metal hatch
+cottages:hatch_wood				wooden hatch
+cottages:ladder_with_rope_and_rail		Ladder with rail support
+cottages:loam					loam
+cottages:reet					Reet for thatching
+cottages:roof_black				Roof black
+cottages:roof_brown				Roof brown
+cottages:roof_connector_black	Roof connector black
+cottages:roof_connector_brown	Roof connector brown
+cottages:roof_connector_red		Roof connector red
+cottages:roof_connector_reet	Roof connector reet
+cottages:roof_connector_slate	Roof connector slate
+cottages:roof_connector_straw	Roof connector straw
+cottages:roof_connector_wood	Roof connector wood
+cottages:roof_flat_black		Roof (flat) black
+cottages:roof_flat_brown		Roof (flat) brown
+cottages:roof_flat_red			Roof (flat) red
+cottages:roof_flat_reet			Roof (flat) reet
+cottages:roof_flat_slate		Roof (flat) slate
+cottages:roof_flat_straw		Roof (flat) straw
+cottages:roof_flat_wood			Roof (flat) wood
+cottages:roof_red				Roof red
+cottages:roof_reet				Roof reet
+cottages:roof_slate				Roof slate
+cottages:roof_straw				Roof straw
+cottages:roof_wood				Roof wood
+cottages:rope					rope for climbing
+cottages:shelf					open storage shelf
+cottages:slate_vertical			Vertical Slate
+cottages:sleeping_mat_head		sleeping mat with pillow
+cottages:sleeping_mat			sleeping mat
+cottages:stovepipe				stovepipe
+cottages:straw_bale				straw bale
+cottages:straw_ground			straw ground for animals
+cottages:straw_mat				layer of straw
+cottages:straw					straw
+cottages:table					table
+cottages:threshing_floor		threshing floor
+cottages:tub					tub
+cottages:wagon_wheel			wagon wheel
+cottages:washing				washing place
+cottages:window_shutter_closed	closed window shutters
+cottages:window_shutter_open	opened window shutters
+cottages:wood_flat				flat wooden planks
+cottages:wool_tent				wool for tents
+cottages:wool					Wool
+craftguide:book					Crafting Guide
+craftguide:sign					Crafting Guide Sign
+
+default:acacia_bush_leaves		Acacia Bush Leaves
+default:acacia_bush_sapling		Acacia Bush Sapling
+default:acacia_bush_stem		Acacia Bush Stem
+default:acacia_leaves			Acacia Leaves
+default:acacia_sapling			Acacia Tree Sapling
+default:acacia_tree				Acacia Tree
+default:acacia_wood				Acacia Wood Planks
+default:apple					Apple
+default:aspen_leaves			Aspen Leaves
+default:aspen_sapling			Aspen Tree Sapling
+default:aspen_tree				Aspen Tree
+default:aspen_wood				Aspen Wood Planks
+default:axe_bronze				Bronze Axe
+default:axe_diamond				Diamond Axe
+default:axe_mese				Mese Axe
+default:axe_steel				Steel Axe
+default:axe_stone				Stone Axe
+default:axe_wood				Wooden Axe
+default:book_written			Book With Text
+default:book					Book
+default:bookshelf				Bookshelf
+default:brick					Brick Block
+default:bronze_ingot			Bronze Ingot
+default:bronzeblock				Bronze Block
+default:bush_leaves				Bush Leaves
+default:bush_sapling			Bush Sapling
+default:bush_stem				Bush Stem
+default:cactus					Cactus
+default:chest_locked_open		Locked Chest
+default:chest_locked			Locked Chest
+default:chest_open				Chest
+default:chest					Chest
+default:clay_brick				Clay Brick
+default:clay_lump				Clay Lump
+default:clay					Clay
+default:cloud					Cloud
+default:coal_lump				Coal Lump
+default:coalblock				Coal Block
+default:cobble					Cobblestone
+default:copper_ingot			Copper Ingot
+default:copper_lump				Copper Lump
+default:copperblock				Copper Block
+default:coral_brown				Brown Coral
+default:coral_orange			Orange Coral
+default:coral_skeleton			Coral Skeleton
+default:desert_cobble			Desert Cobblestone
+default:desert_sand				Desert Sand
+default:desert_sandstone_block		Desert Sandstone Block
+default:desert_sandstone_brick		Desert Sandstone Brick
+default:desert_sandstone		Desert Sandstone
+default:desert_stone_block		Desert Stone Block
+default:desert_stone			Desert Stone
+default:desert_stonebrick		Desert Stone Brick
+default:diamond					Diamond
+default:diamondblock			Diamond Block
+default:dirt_with_dry_grass		Dirt with Dry Grass
+default:dirt_with_grass_footsteps		Dirt with Grass and Footsteps
+default:dirt_with_grass			Dirt with Grass
+default:dirt_with_rainforest_litter		Dirt with Rainforest Litter
+default:dirt_with_snow			Dirt with Snow
+default:dirt					Dirt
+default:dry_grass_1				Dry Grass
+default:dry_grass_2				Dry Grass
+default:dry_grass_3				Dry Grass
+default:dry_grass_4				Dry Grass
+default:dry_grass_5				Dry Grass
+default:dry_shrub				Dry Shrub
+default:fence_acacia_wood		Acacia Fence
+default:fence_aspen_wood		Aspen Fence
+default:fence_junglewood		Jungle Wood Fence
+default:fence_pine_wood			Pine Fence
+default:fence_wood				Wooden Fence
+default:flint					Flint
+default:furnace_active			Furnace
+default:furnace					Furnace
+default:glass					Glass
+default:gold_ingot				Gold Ingot
+default:gold_lump				Gold Lump
+default:goldblock				Gold Block
+default:grass_1					Grass
+default:grass_2					Grass
+default:grass_3					Grass
+default:grass_4					Grass
+default:grass_5					Grass
+default:gravel					Gravel
+default:ice						Ice
+default:iron_lump				Iron Lump
+default:junglegrass				Jungle Grass
+default:jungleleaves			Jungle Leaves
+default:junglesapling			Jungle Sapling
+default:jungletree				Jungle Tree
+default:junglewood				Jungle Wood Planks
+default:key						Key
+default:ladder_steel			Steel Ladder
+default:ladder_wood				Wooden Ladder
+default:lava_flowing			Flowing Lava
+default:lava_source				Lava Source
+default:leaves					Leaves
+default:mese_crystal_fragment	Mese Crystal Fragment
+default:mese_crystal			Mese Crystal
+default:mese_post_light			Mese Post Light
+default:mese					Mese Block
+default:meselamp				Mese Lamp
+default:mossycobble				Mossy Cobblestone
+default:obsidian_block			Obsidian Block
+default:obsidian_glass			Obsidian Glass
+default:obsidian_shard			Obsidian Shard
+default:obsidian				Obsidian
+default:obsidianbrick			Obsidian Brick
+default:paper					Paper
+default:papyrus					Papyrus
+default:pick_bronze			Bronze Pickaxe
+default:pick_diamond		Diamond Pickaxe
+default:pick_mese			Mese Pickaxe
+default:pick_steel			Steel Pickaxe
+default:pick_stone			Stone Pickaxe
+default:pick_wood			Wooden Pickaxe
+default:pine_needles		Pine Needles
+default:pine_sapling		Pine Sapling
+default:pine_tree			Pine Tree
+default:pine_wood			Pine Wood Planks
+default:river_water_flowing		Flowing River Water
+default:river_water_source		River Water Source
+default:sand				Sand
+default:sandstone_block		Sandstone Block
+default:sandstone			Sandstone
+default:sandstonebrick		Sandstone Brick
+default:sapling				Sapling
+default:shovel_bronze		Bronze Shovel
+default:shovel_diamond		Diamond Shovel
+default:shovel_mese			Mese Shovel
+default:shovel_steel		Steel Shovel
+default:shovel_stone		Stone Shovel
+default:shovel_wood			Wooden Shovel
+default:sign_wall_steel		Steel Sign
+default:sign_wall_wood		Wooden Sign
+default:silver_sand			Silver Sand
+default:silver_sandstone_block		Silver Sandstone Block
+default:silver_sandstone_brick		Silver Sandstone Brick
+default:silver_sandstone		Silver Sandstone
+default:skeleton_key		Skeleton Key
+default:snow				Snow
+default:snowblock			Snow Block
+default:steel_ingot			Steel Ingot
+default:steelblock			Steel Block
+default:stick				Stick
+default:stone_block			Stone Block
+default:stone_with_coal		Coal Ore
+default:stone_with_copper	Copper Ore
+default:stone_with_diamond	Diamond Ore
+default:stone_with_gold		Gold Ore
+default:stone_with_iron		Iron Ore
+default:stone_with_mese		Mese Ore
+default:stone_with_tin		Tin Ore
+default:stone				Stone
+default:stonebrick			Stone Brick
+default:sword_bronze		Bronze Sword
+default:sword_diamond		Diamond Sword
+default:sword_mese			Mese Sword
+default:sword_steel			Steel Sword
+default:sword_stone			Stone Sword
+default:sword_wood			Wooden Sword
+default:tin_ingot			Tin Ingot
+default:tin_lump			Tin Lump
+default:tinblock			Tin Block
+default:torch_ceiling		
+default:torch_wall		
+default:torch				Torch
+default:tree				Tree
+default:water_flowing		Flowing Water
+default:water_source		Water Source
+default:wood				Wooden Planks
+doors:door_glass_a			Glass Door
+doors:door_glass_b			Glass Door
+doors:door_glass			Glass Door
+doors:door_obsidian_glass_a		Obsidian Glass Door
+doors:door_obsidian_glass_b		Obsidian Glass Door
+doors:door_obsidian_glass		Obsidian Glass Door
+doors:door_steel_a			Steel Door
+doors:door_steel_b			Steel Door
+doors:door_steel			Steel Door
+doors:door_wood_a			Wooden Door
+doors:door_wood_b			Wooden Door
+doors:door_wood				Wooden Door
+doors:gate_acacia_wood_closed	Acacia Fence Gate
+doors:gate_acacia_wood_open		Acacia Fence Gate
+doors:gate_aspen_wood_closed	Aspen Fence Gate
+doors:gate_aspen_wood_open		Aspen Fence Gate
+doors:gate_junglewood_closed	Jungle Wood Fence Gate
+doors:gate_junglewood_open		Jungle Wood Fence Gate
+doors:gate_pine_wood_closed		Pine Fence Gate
+doors:gate_pine_wood_open		Pine Fence Gate
+doors:gate_wood_closed		Wooden Fence Gate
+doors:gate_wood_open		Wooden Fence Gate
+doors:hidden				Hidden Door Segment
+doors:trapdoor_open			Trapdoor
+doors:trapdoor_steel_open	Steel Trapdoor
+doors:trapdoor_steel		Steel Trapdoor
+doors:trapdoor				Trapdoor
+dye:black					Black dye
+dye:blue					Blue dye
+dye:brown					Brown dye
+dye:cyan					Cyan dye
+dye:dark_green			Dark green dye
+dye:dark_grey			Dark grey dye
+dye:green				Green dye
+dye:grey				Grey dye
+dye:magenta				Magenta dye
+dye:orange				Orange dye
+dye:pink				Pink dye
+dye:red					Red dye
+dye:violet				Violet dye
+dye:white				White dye
+dye:yellow				Yellow dye
+ethereal:banana			Banana
+ethereal:orange			Orange
+ethereal:strawberry		Strawberry
+farming:baked_potato	Baked Potato
+farming:barley_1		
+farming:barley_2		
+farming:barley_3		
+farming:barley_4		
+farming:barley_5		
+farming:barley_6		
+farming:barley_7		
+farming:barley			Barley
+farming:beanbush		
+farming:beanpole_1		
+farming:beanpole_2		
+farming:beanpole_3		
+farming:beanpole_4		
+farming:beanpole_5		
+farming:beanpole		Bean Pole (place on soil before planting beans)
+farming:beans			Green Beans
+farming:blueberries		Blueberries
+farming:blueberry_1		
+farming:blueberry_2		
+farming:blueberry_3		
+farming:blueberry_4		
+farming:bottle_ethanol	Bottle of Ethanol
+farming:bread			Bread
+farming:carrot_1		
+farming:carrot_2		
+farming:carrot_3		
+farming:carrot_4		
+farming:carrot_5		
+farming:carrot_6		
+farming:carrot_7		
+farming:carrot_8		
+farming:carrot_gold		Golden Carrot
+farming:carrot			Carrot
+farming:chocolate_dark	Bar of Dark Chocolate
+farming:cocoa_1		
+farming:cocoa_2		
+farming:cocoa_3		
+farming:cocoa_beans		Cocoa Beans
+farming:coffee_1		
+farming:coffee_2		
+farming:coffee_3		
+farming:coffee_4		
+farming:coffee_5		
+farming:coffee_beans		Coffee Beans
+farming:coffee_cup_hot		Hot Cup of Coffee
+farming:coffee_cup			Cold Cup of Coffee
+farming:cookie				Cookie
+farming:corn_1		
+farming:corn_2		
+farming:corn_3		
+farming:corn_4		
+farming:corn_5		
+farming:corn_6		
+farming:corn_7		
+farming:corn_8		
+farming:corn_cob			Corn on the Cob
+farming:corn				Corn
+farming:cotton_1		
+farming:cotton_2		
+farming:cotton_3		
+farming:cotton_4		
+farming:cotton_5		
+farming:cotton_6		
+farming:cotton_7		
+farming:cotton_8		
+farming:cotton				Cotton
+farming:cucumber_1		
+farming:cucumber_2		
+farming:cucumber_3		
+farming:cucumber_4		
+farming:cucumber			Cucumber
+farming:donut_apple			Apple Donut
+farming:donut_chocolate		Chocolate Donut
+farming:donut				Donut
+farming:drinking_cup		Drinking Cup (empty)
+farming:flour				Flour
+farming:grapebush		
+farming:grapes_1		
+farming:grapes_2		
+farming:grapes_3		
+farming:grapes_4		
+farming:grapes_5		
+farming:grapes_6		
+farming:grapes_7		
+farming:grapes_8		
+farming:grapes				Grapes
+farming:hemp_1		
+farming:hemp_2		
+farming:hemp_3		
+farming:hemp_4		
+farming:hemp_5		
+farming:hemp_6		
+farming:hemp_7		
+farming:hemp_8		
+farming:hemp_fibre			Hemp Fibre
+farming:hemp_leaf			Hemp Leaf
+farming:hemp_oil			Bottle of Hemp Oil
+farming:hemp_rope			Hemp Rope
+farming:hoe_bronze			Bronze Hoe
+farming:hoe_diamond			Diamond Hoe
+farming:hoe_mese			Mese Hoe
+farming:hoe_steel			Steel Hoe
+farming:hoe_stone			Stone Hoe
+farming:hoe_wood			Wooden Hoe
+farming:jackolantern_on		
+farming:jackolantern		Jack 'O Lantern (punch to turn on and off)
+farming:melon_1		
+farming:melon_2		
+farming:melon_3		
+farming:melon_4		
+farming:melon_5		
+farming:melon_6		
+farming:melon_7		
+farming:melon_8				Melon
+farming:melon_slice			Melon Slice
+farming:muffin_blueberry	Blueberry Muffin
+farming:potato_1		
+farming:potato_2		
+farming:potato_3		
+farming:potato_4		
+farming:potato				Potato
+farming:pumpkin_1		
+farming:pumpkin_2		
+farming:pumpkin_3		
+farming:pumpkin_4		
+farming:pumpkin_5		
+farming:pumpkin_6		
+farming:pumpkin_7		
+farming:pumpkin_8		
+farming:pumpkin_bread		Pumpkin Bread
+farming:pumpkin_dough		Pumpkin Dough
+farming:pumpkin_slice		Pumpkin Slice
+farming:pumpkin				Pumpkin
+farming:raspberries			Raspberries
+farming:raspberry_1		
+farming:raspberry_2		
+farming:raspberry_3		
+farming:raspberry_4		
+farming:rhubarb_1		
+farming:rhubarb_2		
+farming:rhubarb_3		
+farming:rhubarb_pie			Rhubarb Pie
+farming:rhubarb				Rhubarb
+farming:seed_barley			Barley Seed
+farming:seed_cotton			Cotton Seed
+farming:seed_hemp			Hemp Seed
+farming:seed_wheat			Wheat Seed
+farming:smoothie_raspberry	Raspberry Smoothie
+farming:soil_wet			Wet Soil
+farming:soil				Soil
+farming:straw				Straw
+farming:sugar				Sugar
+farming:tomato_1		
+farming:tomato_2		
+farming:tomato_3		
+farming:tomato_4		
+farming:tomato_5		
+farming:tomato_6		
+farming:tomato_7		
+farming:tomato_8		
+farming:tomato				Tomato
+farming:trellis				Trellis (place on soil before planting grapes)
+farming:wheat_1		
+farming:wheat_2		
+farming:wheat_3		
+farming:wheat_4		
+farming:wheat_5		
+farming:wheat_6		
+farming:wheat_7		
+farming:wheat_8		
+farming:wheat				Wheat
+fire:basic_flame		
+fire:flint_and_steel		Flint and Steel
+fire:permanent_flame		Permanent Flame
+flowers:dandelion_white		White dandelion
+flowers:dandelion_yellow	Yellow Dandelion
+flowers:geranium			Blue Geranium
+flowers:mushroom_brown		Brown Mushroom
+flowers:mushroom_red		Red Mushroom
+flowers:rose		Rose
+flowers:tulip		Orange Tulip
+flowers:viola		Viola
+flowers:waterlily		Waterlily
+handle_schematics:build		Building-Spawner
+handle_schematics:dig_here		dig the node below this one
+handle_schematics:support_setup		support structure for buildings (configured)
+handle_schematics:support		support structure for buildings
+ignore		Ignore (you hacker you!)
+mg_villages:desert_sand_soil		Desert Sand
+mg_villages:lava_flowing_tamed		Flowing Lava (tame)
+mg_villages:lava_source_tamed		Lava Source (tame)
+mg_villages:mob_spawner		Mob spawner
+mg_villages:plotmarker		Plot marker
+mg_villages:road			village road
+mg_villages:soil			Soil found on a field
+screwdriver:screwdriver		Screwdriver (left-click rotates face		 right-click rotates axis)
+stairs:slab_acacia_wood		Acacia Wood Slab
+stairs:slab_aspen_wood		Aspen Wood Slab
+stairs:slab_brick			Brick Slab
+stairs:slab_bronzeblock		Bronze Block Slab
+stairs:slab_clay			Clay Slab
+stairs:slab_cobble			Cobblestone Slab
+stairs:slab_copperblock		Copper Block Slab
+stairs:slab_desert_cobble		Desert Cobblestone Slab
+stairs:slab_desert_sandstone_block		Desert Sandstone Block Slab
+stairs:slab_desert_sandstone_brick		Desert Sandstone Brick Slab
+stairs:slab_desert_sandstone		Desert Sandstone Slab
+stairs:slab_desert_stone_block		Desert Stone Block Slab
+stairs:slab_desert_stone			Desert Stone Slab
+stairs:slab_desert_stonebrick		Desert Stone Brick Slab
+stairs:slab_feldweg					Dirt Road		 half height
+stairs:slab_goldblock				Gold Block Slab
+stairs:slab_ice						Ice Slab
+stairs:slab_junglewood			Jungle Wood Slab
+stairs:slab_loam				Loam Slab
+stairs:slab_mossycobble			Mossy Cobblestone Slab
+stairs:slab_obsidian_block		Obsidian Block Slab
+stairs:slab_obsidian			Obsidian Slab
+stairs:slab_obsidianbrick		Obsidian Brick Slab
+stairs:slab_pine_wood			Pine Wood Slab
+stairs:slab_sandstone_block		Sandstone Block Slab
+stairs:slab_sandstone			Sandstone Slab
+stairs:slab_sandstonebrick		Sandstone Brick Slab
+stairs:slab_silver_sandstone_block		Silver Sandstone Block Slab
+stairs:slab_silver_sandstone_brick		Silver Sandstone Brick Slab
+stairs:slab_silver_sandstone		Silver Sandstone Slab
+stairs:slab_snowblock		Snow Block Slab
+stairs:slab_steelblock		Steel Block Slab
+stairs:slab_stone_block		Stone Block Slab
+stairs:slab_stone			Stone Slab
+stairs:slab_stonebrick		Stone Brick Slab
+stairs:slab_straw			Straw Slab
+stairs:slab_wood			Wooden Slab
+stairs:stair_acacia_wood	Acacia Wood Stair
+stairs:stair_aspen_wood		Aspen Wood Stair
+stairs:stair_brick			Brick Stair
+stairs:stair_bronzeblock	Bronze Block Stair
+stairs:stair_clay			Clay Stairs
+stairs:stair_cobble			Cobblestone Stair
+stairs:stair_copperblock		Copper Block Stair
+stairs:stair_desert_cobble		Desert Cobblestone Stair
+stairs:stair_desert_sandstone_block		Desert Sandstone Block Stair
+stairs:stair_desert_sandstone_brick		Desert Sandstone Brick Stair
+stairs:stair_desert_sandstone		Desert Sandstone Stair
+stairs:stair_desert_stone_block		Desert Stone Block Stair
+stairs:stair_desert_stone		Desert Stone Stair
+stairs:stair_desert_stonebrick		Desert Stone Brick Stair
+stairs:stair_feldweg		Dirt Road Stairs
+stairs:stair_goldblock		Gold Block Stair
+stairs:stair_ice		Ice Stair
+stairs:stair_junglewood		Jungle Wood Stair
+stairs:stair_loam		Loam Stairs
+stairs:stair_mossycobble		Mossy Cobblestone Stair
+stairs:stair_obsidian_block		Obsidian Block Stair
+stairs:stair_obsidian		Obsidian Stair
+stairs:stair_obsidianbrick		Obsidian Brick Stair
+stairs:stair_pine_wood		Pine Wood Stair
+stairs:stair_sandstone_block		Sandstone Block Stair
+stairs:stair_sandstone		Sandstone Stair
+stairs:stair_sandstonebrick		Sandstone Brick Stair
+stairs:stair_silver_sandstone_block		Silver Sandstone Block Stair
+stairs:stair_silver_sandstone_brick		Silver Sandstone Brick Stair
+stairs:stair_silver_sandstone		Silver Sandstone Stair
+stairs:stair_snowblock		Snow Block Stair
+stairs:stair_steelblock		Steel Block Stair
+stairs:stair_stone_block		Stone Block Stair
+stairs:stair_stone		Stone Stair
+stairs:stair_stonebrick		Stone Brick Stair
+stairs:stair_straw		Straw Stair
+stairs:stair_wood		Wooden Stair
+tnt:boom		
+tnt:gunpowder_burning		
+tnt:gunpowder			Gun Powder
+tnt:tnt_burning		
+unknown						Unknown Item
+vessels:drinking_glass		Drinking Glass (empty)
+vessels:glass_bottle		Glass Bottle (empty)
+vessels:glass_fragments		Pile of Glass Fragments
+vessels:shelf				Vessels Shelf
+vessels:steel_bottle		Heavy Steel Bottle (empty)
+villagers:coins_gold		Gold Coin
+villagers:coins				Silver Coin
+walls:cobble				Cobblestone Wall
+walls:desertcobble			Desert Cobblestone Wall
+walls:mossycobble			Mossy Cobblestone Wall
+wool:black		Black Wool
+wool:blue		Blue Wool
+wool:brown		Brown Wool
+wool:cyan		Cyan Wool
+wool:dark_green		Dark Green Wool
+wool:dark_grey		Dark Grey Wool
+wool:green		Green Wool		
+wool:grey		Grey Wool
+wool:magenta		Magenta Wool
+wool:orange		Orange Wool
+wool:pink		Pink Wool
+wool:red		Red Wool
+wool:violet		Violet Wool
+wool:white		White Wool
+wool:yellow		Yellow Wool
+xpanes:bar_flat		Iron bar
+xpanes:bar		Iron bar
+xpanes:pane_flat		Glass Pane
+xpanes:pane		Glass Pane
+]]
