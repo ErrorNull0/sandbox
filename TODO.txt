@@ -1,6 +1,14 @@
+COMPLETED:
+- automatically generate cost (in coins) and stock quantity of all registered items
+
 TODO:
+- run code and expect getGoodsData() to print errors of all registered items that have
+-- no recipe and also no base cost assigned. use this error list as the master 'base' items
+- test new code that dynamically creates GOODS_DATA table as well as
+-- the new supporting functions getGoodsData() and getBaseCost()
+- see if DEFAULT_ITEM_NAMES table is necessary now that all trade items are dynamically
+-- created based on items that are actually registered via minetest.registered_items
 - figure out how string and cotton should be separated - causing issues with trading
-- create function that auto calculates cost of item based on crafting recipes
 - update all long descriptions to short ones
 - finish adding trade items for remaining job titles and refer to registered_items
 - add support for farming redo in trading goods
