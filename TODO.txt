@@ -2,10 +2,12 @@ COMPLETED:
 - automatically generate cost (in coins) and stock quantity of all registered items
 
 TODO:
+
 - run code and expect getGoodsData() to print errors of all registered items that have
 -- no recipe and also no base cost assigned. use this error list as the master 'base' items
 - test new code that dynamically creates GOODS_DATA table as well as
 -- the new supporting functions getGoodsData() and getBaseCost()
+- item stock seems to be updated/accessed globally for same job titles? and not locally for each individual trader?
 - see if DEFAULT_ITEM_NAMES table is necessary now that all trade items are dynamically
 -- created based on items that are actually registered via minetest.registered_items
 - figure out how string and cotton should be separated - causing issues with trading
@@ -32,10 +34,7 @@ TODO:
 
 - prevent manual spawning if in water
 - villagers in snowy region will offer some snow for free
-- create custom main dialogue for traders
 - make metalsmith use only mineral and metal related dialogue from 'game facts'
-- make chat dialogue based on scm type and not building type anymore
--- for now, only librarians, smith, tower gaurds, and house residents give random game facts.
 - slightly reduce the chance for smalltalk chat for each villager
 - make item stock based on the item type: expensive items have less stock, but bigger villages have more stock.
 
