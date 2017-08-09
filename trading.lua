@@ -436,11 +436,6 @@ cottages:barrel
 		getGoodsData("stairs:slab_goldblock", 1),
 	},
 	
-	guard = {
-		{prob=1, split=0, min=1, max=1},
-		getGoodsData("default:sword_steel", 1),
-	},
-	
 	iceman = {
 		{prob=1, split=0, min=1, max=2},
 		getGoodsData("stairs:slab_ice", 1),
@@ -668,6 +663,12 @@ cottages:barrel
 		},
 	},
 	
+	guard = {
+		{prob=2, split=0, min=1, max=1},
+		getGoodsData("default:sword_steel", 1, true),
+		getGoodsData("default:sword_stone", 1, true),
+	},
+	
 	guest = {
 		{prob=4, split=0, min=1, max=1},
 		getGoodsData("flowers:mushroom_red", 1, true),
@@ -747,6 +748,12 @@ cottages:barrel
 		getGoodsData("vessels:drinking_glass", 1, true),
 		getGoodsData("vessels:glass_bottle", 1, true),
 		getGoodsData("farming:drinking_cup", 1, true),
+	}, 
+	
+	soldier = {
+		{prob=2, split=0, min=1, max=1},
+		getGoodsData("default:sword_steel", 1, true),
+		getGoodsData("default:sword_stone", 1, true),
 	}, 
 	
 	stoneminer = {
