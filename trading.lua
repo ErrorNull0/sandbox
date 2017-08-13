@@ -25,12 +25,13 @@ local function getGoodsData(item_name)
 	local recipe = minetest.get_craft_recipe(item_name)
 	local items = recipe.items
 	local amount_in_stock = math.random(villagers.stock_min_items, villagers.stock_max_items)
+	print("\n    "..item_name.." items: "..minetest.serialize(items).." ")
 	
 	-- item has a craft recipe, sum up the cost
 	-- of each individual item in the recipe
 	if items then
 		local total_cost
-		for i, #items do
+		for i = 1, #items do
 			local base_item_name = items[i]:get_name()
 			total_cost = total_cost + getGoodsData(base_item_name)
 		end
@@ -57,12 +58,17 @@ end
 -- of all registered items that villagers will trade as well as the 
 -- stock quantity of the corresponding trade item
 local GOODS_DATA = {}
-for itemName, def in pairs(minetest.registered_items) do
-	-- itemName: "default:dirt"
-	-- def:	{"villagers:coins", coins_quant, stock_quant"}
-	GOODS_DATA[itemName] = getGoodsData(itemName)
-end
+--print(minetest.serialize(minetest.registered_items))
 
+print("## Listing all registered items...")
+for itemName, def in pairs(minetest.registered_items) do
+	if itemName == "" then 
+		-- do nothing
+	else
+		print("  name="..itemName)
+		GOODS_DATA[itemName] = getGoodsData(itemName)
+	end
+end
 
 local goodsDataCount = 1
 local DEFAULT_ITEM_NAMES = {}
@@ -113,7 +119,7 @@ local function getGoodsData(item_name, quantity, buyback)
 		local quant_received = GOODS_DATA[item_name][2] / 3
 		local purch_item
 		if quant_received < 1 then quant_received = 1 
-		else if quant_received > 99 then
+		elseif quant_received > 99 then
 			quant_received = math.floor(quant_received/100)
 			purch_item = "villagers:coins_gold"
 		else
@@ -263,31 +269,6 @@ villagers.GOODS = {
 			getGoodsData("doors:door_wood", 1),
 		},
 	},
-
-boats:boat
-doors:trapdoor
-
-doors:door_wood
-default:sign_wall_wood
-default:ladder_wood
-default:fence_wood				Wooden Fence
-doors:gate_wood_closed		Wooden Fence Gate
-doors:gate_wood_open		Wooden Fence Gate
-default:chest
-default:bookshelf
-cottages:table					table
-cottages:wood_flat
-cottages:hatch_wood				wooden hatch
-cottages:half_door_inverted		half door inverted
-cottages:half_door				half door
-cottages:gate_closed			closed fence gate
-cottages:gate_open				opened fence gate
-cottages:fence_corner			small fence corner
-cottages:fence_end				small fence end
-cottages:fence_small			small fence
-cottages:bench					simple wooden bench
-cottages:barrel_lying
-cottages:barrel
 
 	charachoal_burner = {
 		{prob=1, split=1, min=2, max=3},
