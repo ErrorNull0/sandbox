@@ -1,72 +1,81 @@
 -- Costs and Stock of all goods: index 1 is cost, index 2 is stock
 
--- assigns the cost (in silver coins)
--- of the listed 'base items' below
-local function getBaseCost(item_name)
-	local item_cost
-	if item_name == "air" then item_cost = 0
-	elseif item_name == "" then item_cost = xxx
-	elseif item_name == "" then item_cost = xxx
-	elseif item_name == "" then item_cost = xxx
-	elseif item_name == "" then item_cost = xxx
-	elseif item_name == "" then item_cost = xxx
-	elseif item_name == "" then item_cost = xxx
-	elseif item_name == "" then item_cost = xxx
-	elseif item_name == "" then item_cost = xxx
-	elseif item_name == "" then item_cost = xxx
-	elseif item_name == "" then item_cost = xxx
-	elseif item_name == "" then item_cost = xxx
-	end
-end
-
--- returns the cost item name and cost quantity for the item to be
--- traded as well as how much stock a villager will have of that item
-local function getGoodsData(item_name)
+local function getItemCost(item_name)
+	io.write("getItemCost() ")
 	local recipe = minetest.get_craft_recipe(item_name)
 	local items = recipe.items
-	local amount_in_stock = math.random(villagers.stock_min_items, villagers.stock_max_items)
-	print("\n    "..item_name.." items: "..minetest.serialize(items).." ")
-	
-	-- item has a craft recipe, sum up the cost
-	-- of each individual item in the recipe
+	local cost
 	if items then
+		io.write("recipeExists numIngredients="..#items.." ")
+		
 		local total_cost
 		for i = 1, #items do
+			io.write("\n  "..i..") ".." ")
+			
 			local base_item_name = items[i]:get_name()
-			total_cost = total_cost + getGoodsData(base_item_name)
+			io.write(base_item_name.." ")
+			
+			local base_item_cost = getItemCost(base_item_name)
+			io.write("cost="..base_item_cost.." ")
+			
+			total_cost = total_cost + base_item_cost
+			io.write("total="..total_cost.." ")
 		end
-		return {"villagers:coins", total_cost, amount_in_stock}
+		cost = total_cost
 		
-	-- item has no craft recipe and thus a 'base' item
 	else
-		if item_name == "villagers:coins" or 
-			item_name == "villagers:coins_gold" then
-			amount_in_stock = math.random(villagers.stock_min_coins, villagers.stock_max_coins)
+		io.write("noRecipe ")
+		if item_name == "air" then cost = 0
+		elseif item_name == "default:dirt" then cost = 1
+		else
+			io.write("baseCostUndefined return=0 ")
+			cost = 0
 		end
-		local base_cost = getBaseCost(item_name)
-		if base_cost == nil then
-			-- add error handling here for display on village formspec
-			print("\n## "..item_name.." has no recipe - base cost undefined.")
-			base_cost = 0
-		end
-		return {"villagers:coins", base_cost, amount_in_stock}
 	end
+	
+	return cost
+	io.write("getItemCostEND ")
+end
+
+
+-- returns the cost item name and cost amount for the item to be
+-- traded as well as how much stock a villager will have of that item
+local function getItemCostAndStock(item_name)
+	local log = true
+	io.write("getItemCS() ["..item_name.."] ")
+	
+	local amount_in_stock
+	if item_name == "villagers:coins" or 
+		item_name == "villagers:coins_gold" then
+		amount_in_stock = math.random(villagers.stock_min_coins, villagers.stock_max_coins)
+		io.write("stock="..amount_in_stock.." ")
+	else
+		amount_in_stock = math.random(villagers.stock_min_items, villagers.stock_max_items)
+		io.write("stock="..amount_in_stock.." ")
+	end
+	
+	local recipe = minetest.get_craft_recipe(item_name)
+	local items = recipe.items
+	
+	local item_cost = getItemCost(item_name)
+	
+	return {"villagers:coins", item_cost, amount_in_stock}
+	
+	io.write("getItemCsEND ")
 
 end 
 
+print("## Listing all registered items...")
 -- creates the main table to holds the cost item name and cost quantity
 -- of all registered items that villagers will trade as well as the 
 -- stock quantity of the corresponding trade item
 local GOODS_DATA = {}
---print(minetest.serialize(minetest.registered_items))
-
-print("## Listing all registered items...")
 for itemName, def in pairs(minetest.registered_items) do
 	if itemName == "" then 
 		-- do nothing
 	else
 		print("  name="..itemName)
-		GOODS_DATA[itemName] = getGoodsData(itemName)
+		GOODS_DATA[itemName] = getItemCostAndStock(itemName)
 	end
 end
 
@@ -953,7 +962,7 @@ function villagers.getTradeInventory(title, region, plot, bed, errors)
 		-- error handling
 		if popped_item[1] == "invalid_item" then
 			if log then 
-				io.write(" #ERROR Item #"..item_count.." - not a registered item '"..popped_item[2].."'.") 
+				io.write(" #ERROR Item #"..item_count.." not a registered item '"..popped_item[2].."'.") 
 			end
 			local error_message = "Item #"..item_count.." '"..popped_item[2]..
 			"' not registered for plot#"..plot.." bed#"..bed
@@ -965,7 +974,7 @@ function villagers.getTradeInventory(title, region, plot, bed, errors)
 				io.write(" #ERROR Item #"..item_count.." - no item desc for '"..popped_item[2].."'.") 
 			end				
 			local error_message = "Item #"..item_count.." '"..popped_item[2]..
-			"' has no desc for plot#"..plot.." bed#"..bed
+			"' no desc for plot#"..plot.." bed#"..bed
 			table.insert(errors, error_message)
 			popped_item = {"default:dirt", "Dirt [error]", 1, "villagers:coins", 1, 1}
 			
@@ -982,8 +991,6 @@ function villagers.getTradeInventory(title, region, plot, bed, errors)
 			if log then 
 				io.write(" #ERROR getTradeItem #"..item_count..", it is NIL.") 
 			end
-			local error_message = "getTradeInventory(): Error trade item #"..item_count.." "..
-				"is NIL for villager @ plot#"..plot.." bed#"..bed
 			local error_message = "Item #"..item_count.." is NIL for plot#"..plot.." bed#"..bed
 			table.insert(errors, error_message)
 			popped_item = {"default:dirt", "Dirt [error]", 1, "villagers:coins", 1, 1}
@@ -1012,7 +1019,7 @@ function villagers.endVillagerTrading(self, player)
 		minetest.after(2, function() 
 			self.object:set_yaw(self.vYaw)
 			
-			-- player had initiated tradeing while villager was
+			-- player had initiated trading while villager was
 			-- about to walk or dig. now continue with that action.
 			if self.vWalkReady then
 				self.vAction = "WALK"
@@ -1113,7 +1120,6 @@ cottages:wool_tent				wool for tents
 cottages:wool					Wool
 craftguide:book					Crafting Guide
 craftguide:sign					Crafting Guide Sign
-
 default:acacia_bush_leaves		Acacia Bush Leaves
 default:acacia_bush_sapling		Acacia Bush Sapling
 default:acacia_bush_stem		Acacia Bush Stem
