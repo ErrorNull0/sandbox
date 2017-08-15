@@ -1,5 +1,121 @@
 -- Costs and Stock of all goods: index 1 is cost, index 2 is stock
 
+local COSTS = {
+	["default:stick"] = 1,
+	["default:cobble"] = 4,
+	["default:coal_lump"] = 20,
+	["default:iron_lump"] = 100,
+	["default:copper_lump"] = 200,
+	["default:tin_lump"] = 200,
+	["default:gold_lump"] = 300,
+	["default:mese_crystal"] = 400,
+	["default:diamond"] = 500,
+	
+}
+
+local cooking_multiplier = 1.25
+
+COSTS["default:wood"] = COSTS["default:stick"] * 4
+COSTS["default:tree"] = COSTS["default:wood"] * 4
+COSTS["default:bush_stem"] = COSTS["default:wood"]
+
+COSTS["default:junglewood"] = COSTS["default:stick"] * 4
+COSTS["default:jungletree"] = COSTS["default:junglewood"] * 4
+
+COSTS["default:pine_wood"] = COSTS["default:stick"] * 4
+COSTS["default:pine_tree"] = COSTS["default:pine_wood"] * 4
+
+COSTS["default:acacia_wood"] = COSTS["default:stick"] * 4
+COSTS["default:acacia_tree"] = COSTS["default:acacia_wood"] * 4
+COSTS["default:acacia_bush_stem"] = COSTS["default:acacia_wood"]
+
+COSTS["default:aspen_wood"] = COSTS["default:stick"] * 4
+COSTS["default:aspen_tree"] = COSTS["default:aspen_wood"] * 4
+
+COSTS["default:steel_ingot"] = 
+	villagers.round(COSTS["default:iron_lump"] * cooking_multiplier)
+COSTS["default:steel_block"] = COSTS["default:steel_ingot"] * 9
+
+COSTS["default:copper_ingot"] = 
+	villagers.round(COSTS["default:copper_lump"] * cooking_multiplier)
+COSTS["default:copperblock"] = COSTS["default:copper_ingot"] * 9
+
+COSTS["default:tin_ingot"] = 
+	villagers.round(COSTS["default:tin_lump"] * cooking_multiplier)
+COSTS["default:tinblock"] = COSTS["default:tin_ingot"] * 9
+
+COSTS["default:bronze_ingot"] = 
+	villagers.round(((COSTS["default:copper_ingot"] * 8) + COSTS["default:tin_ingot"]) / 9)
+COSTS["default:bronzeblock"] = COSTS["default:bronze_ingot"] * 9
+
+COSTS["default:gold_ingot"] = 
+	villagers.round(COSTS["default:gold_lump"] * cooking_multiplier)
+COSTS["default:goldblock"] = COSTS["default:gold_ingot"] * 9
+
+COSTS["default:skeleton_key"] = villagers.round(COSTS["default:gold_ingot"] * cooking_multiplier)
+COSTS["default:key"] = COSTS["default:gold_ingot"]
+COSTS["default:mese_crystal_fragment"] = villagers.round(COSTS["default:mese_crystal"] / 9)
+COSTS["default:mese"] = COSTS["default:mese_crystal"] * 9
+
+COSTS["default:diamondblock"] = COSTS["default:diamond"] * 9
+
+COSTS["default:sign_wall_wood"] = 
+	villagers.round(((COSTS["default:wood"] * 6) + COSTS["default:stick"]) / 3)
+	
+COSTS["default:sign_wall_steel"] = 
+	villagers.round(((COSTS["default:steel_ingot"] * 6) + COSTS["default:stick"]) / 3)
+
+COSTS["default:torch"] = 
+	villagers.round(((COSTS["default:coal_lump"] + COSTS["default:coal_lump"]) * cooking_multiplier))
+
+COSTS["default:stone"] = villagers.round(COSTS["default:cobble"] * cooking_multiplier)
+
+COSTS["default:pick_wood"] = (COSTS["default:wood"] * 3) + (COSTS["default:stick"] * 2)
+COSTS["default:pick_stone"] = (COSTS["default:stone"] * 3) + (COSTS["default:stick"] * 2)
+COSTS["default:pick_steel"] = (COSTS["default:steel_ingot"] * 3) + (COSTS["default:stick"] * 2)
+COSTS["default:pick_bronze"] = (COSTS["default:bronze_ingot"] * 3) + (COSTS["default:stick"] * 2)
+COSTS["default:pick_mese"] = (COSTS["default:mese_crystal"] * 3) + (COSTS["default:stick"] * 2)
+COSTS["default:pick_diamond"] = (COSTS["default:diamond"] * 3) + (COSTS["default:stick"] * 2)
+
+
+--[[
+local BASE_ITEMS = {}
+for item_name, def in pairs(minetest.registered_items) do
+	local recipe_data = minetest.get_all_craft_recipes(item_name)
+	
+	-- item is crafted from other basic items and so has
+	-- a receipe. examine each of the basic items and
+	-- determine if these are base items
+	if recipe_data then
+		local ingred_count = #recipe_data
+		for i = 1, ingred_count do
+			local output = recipe_data[1].output
+			local output_data = string.split(output, " ")
+			if #output_data == 1 then
+			end
+		end
+
+
+	-- item has no recipe and thus is a 'base' item
+	else
+		if item_name == "air" then BASE_ITEMS[item_name] = 0
+		elseif item_name == "default:dirt" then BASE_ITEMS[item_name] = 1
+		else BASE_ITEMS[item_name] = -1 end
+	end
+end
+
+io.write("\n## Listing items not yet priced...")
+local item_num = 1
+for item_name, cost in pairs(BASE_ITEMS) do
+	if cost < 0 then
+		io.write("\n  "..item_num..") "..item_name)
+	end
+	item_num = item_num + 1
+end
+io.write("\nListing complete.\n")
+]]
+
+
 local function getItemCost(item_name)
 	io.write("getItemCost("..item_name..") ")
 	local recipe = minetest.get_craft_recipe(item_name)
@@ -1137,16 +1253,16 @@ craftguide:book					Crafting Guide
 craftguide:sign					Crafting Guide Sign
 default:acacia_bush_leaves		Acacia Bush Leaves
 default:acacia_bush_sapling		Acacia Bush Sapling
-default:acacia_bush_stem		Acacia Bush Stem
+## default:acacia_bush_stem		Acacia Bush Stem
 default:acacia_leaves			Acacia Leaves
 default:acacia_sapling			Acacia Tree Sapling
-default:acacia_tree				Acacia Tree
-default:acacia_wood				Acacia Wood Planks
+## default:acacia_tree				Acacia Tree
+## default:acacia_wood				Acacia Wood Planks
 default:apple					Apple
 default:aspen_leaves			Aspen Leaves
 default:aspen_sapling			Aspen Tree Sapling
-default:aspen_tree				Aspen Tree
-default:aspen_wood				Aspen Wood Planks
+## default:aspen_tree				Aspen Tree
+## default:aspen_wood				Aspen Wood Planks
 default:axe_bronze				Bronze Axe
 default:axe_diamond				Diamond Axe
 default:axe_mese				Mese Axe
@@ -1157,11 +1273,11 @@ default:book_written			Book With Text
 default:book					Book
 default:bookshelf				Bookshelf
 default:brick					Brick Block
-default:bronze_ingot			Bronze Ingot
-default:bronzeblock				Bronze Block
+## default:bronze_ingot			Bronze Ingot
+## default:bronzeblock				Bronze Block
 default:bush_leaves				Bush Leaves
 default:bush_sapling			Bush Sapling
-default:bush_stem				Bush Stem
+## default:bush_stem				Bush Stem
 default:cactus					Cactus
 default:chest_locked_open		Locked Chest
 default:chest_locked			Locked Chest
@@ -1171,12 +1287,12 @@ default:clay_brick				Clay Brick
 default:clay_lump				Clay Lump
 default:clay					Clay
 default:cloud					Cloud
-default:coal_lump				Coal Lump
+## default:coal_lump				Coal Lump
 default:coalblock				Coal Block
-default:cobble					Cobblestone
-default:copper_ingot			Copper Ingot
-default:copper_lump				Copper Lump
-default:copperblock				Copper Block
+## default:cobble					Cobblestone
+## default:copper_ingot			Copper Ingot
+## default:copper_lump				Copper Lump
+## default:copperblock				Copper Block
 default:coral_brown				Brown Coral
 default:coral_orange			Orange Coral
 default:coral_skeleton			Coral Skeleton
@@ -1188,7 +1304,7 @@ default:desert_sandstone		Desert Sandstone
 default:desert_stone_block		Desert Stone Block
 default:desert_stone			Desert Stone
 default:desert_stonebrick		Desert Stone Brick
-default:diamond					Diamond
+## default:diamond					Diamond
 default:diamondblock			Diamond Block
 default:dirt_with_dry_grass		Dirt with Dry Grass
 default:dirt_with_grass_footsteps		Dirt with Grass and Footsteps
@@ -1211,9 +1327,9 @@ default:flint					Flint
 default:furnace_active			Furnace
 default:furnace					Furnace
 default:glass					Glass
-default:gold_ingot				Gold Ingot
-default:gold_lump				Gold Lump
-default:goldblock				Gold Block
+## default:gold_ingot				Gold Ingot
+## default:gold_lump				Gold Lump
+## default:goldblock				Gold Block
 default:grass_1					Grass
 default:grass_2					Grass
 default:grass_3					Grass
@@ -1221,20 +1337,20 @@ default:grass_4					Grass
 default:grass_5					Grass
 default:gravel					Gravel
 default:ice						Ice
-default:iron_lump				Iron Lump
+## default:iron_lump				Iron Lump
 default:junglegrass				Jungle Grass
 default:jungleleaves			Jungle Leaves
 default:junglesapling			Jungle Sapling
-default:jungletree				Jungle Tree
-default:junglewood				Jungle Wood Planks
-default:key						Key
+## default:jungletree				Jungle Tree
+## default:junglewood				Jungle Wood Planks
+## default:key						Key
 default:ladder_steel			Steel Ladder
 default:ladder_wood				Wooden Ladder
 default:lava_flowing			Flowing Lava
 default:lava_source				Lava Source
 default:leaves					Leaves
-default:mese_crystal_fragment	Mese Crystal Fragment
-default:mese_crystal			Mese Crystal
+## default:mese_crystal_fragment	Mese Crystal Fragment
+## default:mese_crystal			Mese Crystal
 default:mese_post_light			Mese Post Light
 default:mese					Mese Block
 default:meselamp				Mese Lamp
@@ -1251,10 +1367,10 @@ default:pick_diamond		Diamond Pickaxe
 default:pick_mese			Mese Pickaxe
 default:pick_steel			Steel Pickaxe
 default:pick_stone			Stone Pickaxe
-default:pick_wood			Wooden Pickaxe
+## default:pick_wood			Wooden Pickaxe
 default:pine_needles		Pine Needles
 default:pine_sapling		Pine Sapling
-default:pine_tree			Pine Tree
+## default:pine_tree			Pine Tree
 default:pine_wood			Pine Wood Planks
 default:river_water_flowing		Flowing River Water
 default:river_water_source		River Water Source
@@ -1269,18 +1385,18 @@ default:shovel_mese			Mese Shovel
 default:shovel_steel		Steel Shovel
 default:shovel_stone		Stone Shovel
 default:shovel_wood			Wooden Shovel
-default:sign_wall_steel		Steel Sign
-default:sign_wall_wood		Wooden Sign
+## default:sign_wall_steel		Steel Sign
+## default:sign_wall_wood		Wooden Sign
 default:silver_sand			Silver Sand
 default:silver_sandstone_block		Silver Sandstone Block
 default:silver_sandstone_brick		Silver Sandstone Brick
 default:silver_sandstone		Silver Sandstone
-default:skeleton_key		Skeleton Key
+## default:skeleton_key		Skeleton Key
 default:snow				Snow
 default:snowblock			Snow Block
-default:steel_ingot			Steel Ingot
-default:steelblock			Steel Block
-default:stick				Stick
+## default:steel_ingot			Steel Ingot
+## default:steelblock			Steel Block
+## default:stick				Stick
 default:stone_block			Stone Block
 default:stone_with_coal		Coal Ore
 default:stone_with_copper	Copper Ore
@@ -1289,7 +1405,7 @@ default:stone_with_gold		Gold Ore
 default:stone_with_iron		Iron Ore
 default:stone_with_mese		Mese Ore
 default:stone_with_tin		Tin Ore
-default:stone				Stone
+## default:stone				Stone
 default:stonebrick			Stone Brick
 default:sword_bronze		Bronze Sword
 default:sword_diamond		Diamond Sword
@@ -1297,16 +1413,16 @@ default:sword_mese			Mese Sword
 default:sword_steel			Steel Sword
 default:sword_stone			Stone Sword
 default:sword_wood			Wooden Sword
-default:tin_ingot			Tin Ingot
-default:tin_lump			Tin Lump
-default:tinblock			Tin Block
-default:torch_ceiling		
-default:torch_wall		
-default:torch				Torch
-default:tree				Tree
+## default:tin_ingot			Tin Ingot
+## default:tin_lump			Tin Lump
+## default:tinblock			Tin Block
+## default:torch_ceiling		
+## default:torch_wall		
+## default:torch				Torch
+## default:tree				Tree
 default:water_flowing		Flowing Water
 default:water_source		Water Source
-default:wood				Wooden Planks
+## default:wood				Wooden Planks
 doors:door_glass_a			Glass Door
 doors:door_glass_b			Glass Door
 doors:door_glass			Glass Door
@@ -1657,4 +1773,60 @@ xpanes:bar_flat		Iron bar
 xpanes:bar		Iron bar
 xpanes:pane_flat		Glass Pane
 xpanes:pane		Glass Pane
+
+
+
+minetest.register_craft({
+	output = 'default:mese_crystal_fragment 9',
+	recipe = {
+		{'default:mese_crystal'},
+	}
+})
+
+minetest.register_craft({
+	output = "default:mese_crystal",
+	recipe = {
+		{"default:mese_crystal_fragment", "default:mese_crystal_fragment", "default:mese_crystal_fragment"},
+		{"default:mese_crystal_fragment", "default:mese_crystal_fragment", "default:mese_crystal_fragment"},
+		{"default:mese_crystal_fragment", "default:mese_crystal_fragment", "default:mese_crystal_fragment"},
+	}
+})
+
+
+minetest.register_craft({
+	output = 'default:mese_crystal 9',
+	recipe = {
+		{'default:mese'},
+	}
+})
+
+minetest.register_craft({
+	output = 'default:mese',
+	recipe = {
+		{'default:mese_crystal', 'default:mese_crystal', 'default:mese_crystal'},
+		{'default:mese_crystal', 'default:mese_crystal', 'default:mese_crystal'},
+		{'default:mese_crystal', 'default:mese_crystal', 'default:mese_crystal'},
+	}
+})
+
+
+minetest.register_craft({
+	output = 'default:sword_mese',
+	recipe = {
+		{'default:mese_crystal'},
+		{'default:mese_crystal'},
+		{'group:stick'},
+	}
+})
+
+minetest.register_node("default:stone_with_mese", {
+	description = "Mese Ore",
+	tiles = {"default_stone.png^default_mineral_mese.png"},
+	groups = {cracky = 1},
+	drop = "default:mese_crystal",
+	sounds = default.node_sound_stone_defaults(),
+})
+
+
+
 ]]
