@@ -1,18 +1,31 @@
 -- Costs and Stock of all goods: index 1 is cost, index 2 is stock
 
 local function getItemCost(item_name)
-	io.write("getItemCost() ")
+	io.write("getItemCost("..item_name..") ")
 	local recipe = minetest.get_craft_recipe(item_name)
 	local items = recipe.items
+	local method = recipe.method
 	local cost
+	local item_count = #items
+	
 	if items then
-		io.write("recipeExists numIngredients="..#items.." ")
+	
+		if method == "normal" then
+			io.write("NormalRecipe numIngred="..item_count.." ")
+		elseif method == "cooking" then
+			io.write("CookRecipe numIngred="..item_count.." ")
+		elseif method == "feul" then
+			io.write("FuelRecipe numIngred="..item_count.." ")
+		else
+			io.write("ERROR - unknownRecipeType ")
+		end
 		
+		io.write("recipeExists ["..method.."] numIngredients="..#items.." ")
+		io.write("\n  ingredients: "..minetest.serialize(items).." ")
 		local total_cost
 		for i = 1, #items do
-			io.write("\n  "..i..") ".." ")
-			
-			local base_item_name = items[i]:get_name()
+			io.write("\n    "..i..") ".." ")
+			local base_item_name = items[i]
 			io.write(base_item_name.." ")
 			
 			local base_item_cost = getItemCost(base_item_name)
@@ -24,7 +37,7 @@ local function getItemCost(item_name)
 		cost = total_cost
 		
 	else
-		io.write("noRecipe ")
+		io.write("noRecipe baseItemFound ")
 		if item_name == "air" then cost = 0
 		elseif item_name == "default:dirt" then cost = 1
 		else
@@ -33,8 +46,8 @@ local function getItemCost(item_name)
 		end
 	end
 	
-	return cost
 	io.write("getItemCostEND ")
+	return cost
 end
 
 
@@ -42,7 +55,7 @@ end
 -- traded as well as how much stock a villager will have of that item
 local function getItemCostAndStock(item_name)
 	local log = true
-	io.write("getItemCS() ["..item_name.."] ")
+	io.write("getItemCS() ")
 	
 	local amount_in_stock
 	if item_name == "villagers:coins" or 
@@ -59,25 +72,27 @@ local function getItemCostAndStock(item_name)
 	
 	local item_cost = getItemCost(item_name)
 	
-	return {"villagers:coins", item_cost, amount_in_stock}
-	
 	io.write("getItemCsEND ")
-
+	return {"villagers:coins", item_cost, amount_in_stock}
 end 
 
-print("## Listing all registered items...")
+io.write("\n## Listing all registered items...")
 -- creates the main table to holds the cost item name and cost quantity
 -- of all registered items that villagers will trade as well as the 
 -- stock quantity of the corresponding trade item
 local GOODS_DATA = {}
 for itemName, def in pairs(minetest.registered_items) do
+	io.write("\n  ")
 	if itemName == "" then 
-		-- do nothing
+		io.write("(empty string) ")
+	elseif itemName == nil then
+		io.write("(NIL) ")
 	else
-		print("  name="..itemName)
+		io.write(itemName.." ")
 		GOODS_DATA[itemName] = getItemCostAndStock(itemName)
 	end
 end
+io.write("\nListing Complete. \n")
 
 local goodsDataCount = 1
 local DEFAULT_ITEM_NAMES = {}
