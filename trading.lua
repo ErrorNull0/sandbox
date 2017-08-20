@@ -2,73 +2,138 @@
 
 local COSTS = {
 	["default:stick"] = 1,
+	["default:bush_stem"] = 1,
+	["default:acacia_bush_stem"] = 1,
+	["default:bush_sapling"] = 4,
+	["default:acacia_bush_sapling"] = 4,
+	["default:aspen_sapling"] = 5,
+	["default:pine_sapling"] = 5,
+	["default:sapling"] = 6,
+	["default:acacia_sapling"] = 7,
+	["default:jungle_sapling"] = 8,
+	["default:papyrus"] = 3,
+	["default:cactus"] = 10,
 	["default:cobble"] = 4,
+	["default:mossy_cobble"] = 4,
+	["default:desert_cobble"] = 4,
+	["default:sand"] = 3,
+	["default:snow"] = 2,
+	["default:desert_sand"] = 3,
+	["default:silver_sand"] = 3,
+	["default:clay_lump"] = 4,
 	["default:coal_lump"] = 20,
 	["default:iron_lump"] = 100,
 	["default:copper_lump"] = 200,
 	["default:tin_lump"] = 200,
-	["default:gold_lump"] = 300,
-	["default:mese_crystal"] = 400,
-	["default:diamond"] = 500,
-	
+	["default:gold_lump"] = 400,
+	["default:mese_crystal"] = 600,
+	["default:diamond"] = 800,
+	["default:obsidian"] = 1000,
 }
 
-local cooking_multiplier = 1.25
+local cook_multiplier = 1.25
+local burntime_multiplier = 1.15
+local aspen_modifier = 0
+local pine_modifier = 0
+local apple_modifier = 0
+local acacia_modifier = 1
+local jungle_modifier = 2
+-- TREES AND WOOD
+-- aspen, pine, apple, acacia, jungle
 
-COSTS["default:wood"] = COSTS["default:stick"] * 4
+COSTS["default:aspen_wood"] = (COSTS["default:stick"] * 4) + aspen_modifier
+COSTS["default:aspen_tree"] = COSTS["default:aspen_wood"] * 4
+
+COSTS["default:pine_wood"] = (COSTS["default:stick"] * 4) + pine_modifier
+COSTS["default:pine_tree"] = COSTS["default:pine_wood"] * 4
+
+COSTS["default:wood"] = (COSTS["default:stick"] * 4) + apple_modifier
 COSTS["default:tree"] = COSTS["default:wood"] * 4
 COSTS["default:bush_stem"] = COSTS["default:wood"]
 
-COSTS["default:junglewood"] = COSTS["default:stick"] * 4
-COSTS["default:jungletree"] = COSTS["default:junglewood"] * 4
-
-COSTS["default:pine_wood"] = COSTS["default:stick"] * 4
-COSTS["default:pine_tree"] = COSTS["default:pine_wood"] * 4
-
-COSTS["default:acacia_wood"] = COSTS["default:stick"] * 4
+COSTS["default:acacia_wood"] = (COSTS["default:stick"] * 4) + acacia_modifier
 COSTS["default:acacia_tree"] = COSTS["default:acacia_wood"] * 4
 COSTS["default:acacia_bush_stem"] = COSTS["default:acacia_wood"]
 
-COSTS["default:aspen_wood"] = COSTS["default:stick"] * 4
-COSTS["default:aspen_tree"] = COSTS["default:aspen_wood"] * 4
+COSTS["default:junglewood"] = (COSTS["default:stick"] * 4) + jungle_modifier
+COSTS["default:jungletree"] = COSTS["default:junglewood"] * 4
 
-COSTS["default:steel_ingot"] = 
-	villagers.round(COSTS["default:iron_lump"] * cooking_multiplier)
+COSTS["default:paper"] = COSTS["default:papyrus"] * 3
+COSTS["default:book"] = COSTS["default:paper"] * 3
+
+
+-- EARTH AND MINERALS
+
+COSTS["default:coalblock"] = villagers.round(COSTS["default:coal_lump"] * 9 * burntime_multiplier)
+COSTS["default:snowblock"] = COSTS["default:snow"] * 9
+COSTS["default:glass"] = villagers.round(COSTS["default:sand"] * cook_multiplier)
+
+COSTS["default:stone"] = villagers.round(COSTS["default:cobble"] * cook_multiplier)
+COSTS["default:stonebrick"] = COSTS["default:stone"]
+COSTS["default:stone_block"] = COSTS["default:stone"]
+
+COSTS["default:desert_stone"] = villagers.round(COSTS["default:desert_cobble"] * cook_multiplier)
+COSTS["default:desert_stonebrick"] = COSTS["default:desert_stone"]
+COSTS["default:desert_stone_block"] = COSTS["default:desert_stone"]
+
+COSTS["default:sandstone"] = COSTS["default:sand"] * 4
+COSTS["default:sandstonebrick"] = COSTS["default:sandstone"]
+COSTS["default:sandstone_block"] = COSTS["default:sandstone"]
+
+COSTS["default:desert_sandstone"] = COSTS["default:desert_sand"] * 4
+COSTS["default:desert_sandstone_brick"] = COSTS["default:desert_sandstone"]
+COSTS["default:desert_sandstone_block"] = COSTS["default:desert_sandstone"]
+
+COSTS["default:silver_sandstone"] = COSTS["default:silver_sand"] * 4
+COSTS["default:silver_sandstone_brick"] = COSTS["default:silver_sandstone"]
+COSTS["default:silver_sandstone_block"] = COSTS["default:silver_sandstone"]
+
+COSTS["default:clay"] = COSTS["default:clay_lump"] * 4
+COSTS["default:clay_brick"] = villagers.round(COSTS["default:clay_lump"] * cook_multiplier)
+COSTS["default:brick"] = COSTS["default:clay_brick"] * 4
+
+COSTS["default:steel_ingot"] = villagers.round(COSTS["default:iron_lump"] * cook_multiplier)
 COSTS["default:steel_block"] = COSTS["default:steel_ingot"] * 9
 
-COSTS["default:copper_ingot"] = 
-	villagers.round(COSTS["default:copper_lump"] * cooking_multiplier)
+COSTS["default:copper_ingot"] = villagers.round(COSTS["default:copper_lump"] * cook_multiplier)
 COSTS["default:copperblock"] = COSTS["default:copper_ingot"] * 9
 
-COSTS["default:tin_ingot"] = 
-	villagers.round(COSTS["default:tin_lump"] * cooking_multiplier)
+COSTS["default:tin_ingot"] = villagers.round(COSTS["default:tin_lump"] * cook_multiplier)
 COSTS["default:tinblock"] = COSTS["default:tin_ingot"] * 9
 
-COSTS["default:bronze_ingot"] = 
-	villagers.round(((COSTS["default:copper_ingot"] * 8) + COSTS["default:tin_ingot"]) / 9)
+COSTS["default:bronze_ingot"] = villagers.round(((COSTS["default:copper_ingot"] * 8) + COSTS["default:tin_ingot"]) / 9)
 COSTS["default:bronzeblock"] = COSTS["default:bronze_ingot"] * 9
 
-COSTS["default:gold_ingot"] = 
-	villagers.round(COSTS["default:gold_lump"] * cooking_multiplier)
+COSTS["default:gold_ingot"] = villagers.round(COSTS["default:gold_lump"] * cook_multiplier)
 COSTS["default:goldblock"] = COSTS["default:gold_ingot"] * 9
 
-COSTS["default:skeleton_key"] = villagers.round(COSTS["default:gold_ingot"] * cooking_multiplier)
-COSTS["default:key"] = COSTS["default:gold_ingot"]
 COSTS["default:mese_crystal_fragment"] = villagers.round(COSTS["default:mese_crystal"] / 9)
 COSTS["default:mese"] = COSTS["default:mese_crystal"] * 9
 
 COSTS["default:diamondblock"] = COSTS["default:diamond"] * 9
 
-COSTS["default:sign_wall_wood"] = 
-	villagers.round(((COSTS["default:wood"] * 6) + COSTS["default:stick"]) / 3)
-	
-COSTS["default:sign_wall_steel"] = 
-	villagers.round(((COSTS["default:steel_ingot"] * 6) + COSTS["default:stick"]) / 3)
+COSTS["default:obsidian_shard"] = villagers.round(COSTS["default:obsidian"] / 9)
+COSTS["default:obsidian_glass"] = villagers.round(COSTS["default:obsidian_shard"] * cook_multiplier)
+COSTS["default:obsidian_brick"] = COSTS["default:obsidian"]
+COSTS["default:obsidian_block"] = COSTS["default:obsidian"]
 
-COSTS["default:torch"] = 
-	villagers.round(((COSTS["default:coal_lump"] + COSTS["default:coal_lump"]) * cooking_multiplier))
 
-COSTS["default:stone"] = villagers.round(COSTS["default:cobble"] * cooking_multiplier)
+
+
+-- ITEMS AND TOOLS
+
+COSTS["default:skeleton_key"] = villagers.round(COSTS["default:gold_ingot"] * cook_multiplier)
+COSTS["default:key"] = COSTS["default:gold_ingot"]
+
+COSTS["default:sign_wall_wood"] = villagers.round(((COSTS["default:wood"] * 6) + COSTS["default:stick"]) / 3)
+COSTS["default:sign_wall_steel"] = villagers.round(((COSTS["default:steel_ingot"] * 6) + COSTS["default:stick"]) / 3)
+COSTS["default:ladder_wood"] = villagers.round((COSTS["default:stick"] * 7) / 5)
+COSTS["default:ladder_steel"] = villagers.round((COSTS["default:steel_ingot"] * 7) / 15)
+
+COSTS["default:torch"] = villagers.round(((COSTS["default:coal_lump"] + COSTS["default:coal_lump"]) * cook_multiplier))
+COSTS["default:meselamp"] = COSTS["default:glass"] + COSTS["default:mese_crystal"]
+COSTS["default:mese_post_light"] = villagers.round((COSTS["default:glass"] + COSTS["default:wood"] + (COSTS["default:mese_crystal"] * 3)) / 3)
+
 
 COSTS["default:pick_wood"] = (COSTS["default:wood"] * 3) + (COSTS["default:stick"] * 2)
 COSTS["default:pick_stone"] = (COSTS["default:stone"] * 3) + (COSTS["default:stick"] * 2)
@@ -76,6 +141,37 @@ COSTS["default:pick_steel"] = (COSTS["default:steel_ingot"] * 3) + (COSTS["defau
 COSTS["default:pick_bronze"] = (COSTS["default:bronze_ingot"] * 3) + (COSTS["default:stick"] * 2)
 COSTS["default:pick_mese"] = (COSTS["default:mese_crystal"] * 3) + (COSTS["default:stick"] * 2)
 COSTS["default:pick_diamond"] = (COSTS["default:diamond"] * 3) + (COSTS["default:stick"] * 2)
+
+COSTS["default:shovel_wood"] = COSTS["default:wood"] + (COSTS["default:stick"] * 2)
+COSTS["default:shovel_stone"] = COSTS["default:stone"] + (COSTS["default:stick"] * 2)
+COSTS["default:shovel_steel"] = COSTS["default:steel_ingot"] + (COSTS["default:stick"] * 2)
+COSTS["default:shovel_bronze"] = COSTS["default:bronze_ingot"] + (COSTS["default:stick"] * 2)
+COSTS["default:shovel_mese"] = COSTS["default:mese_crystal"] + (COSTS["default:stick"] * 2)
+COSTS["default:shovel_diamond"] = COSTS["default:diamond"] + (COSTS["default:stick"] * 2)
+
+COSTS["default:axe_wood"] = (COSTS["default:wood"] * 3) + (COSTS["default:stick"] * 2)
+COSTS["default:axe_stone"] = (COSTS["default:stone"] * 3) + (COSTS["default:stick"] * 2)
+COSTS["default:axe_steel"] = (COSTS["default:steel_ingot"] * 3) + (COSTS["default:stick"] * 2)
+COSTS["default:axe_bronze"] = (COSTS["default:bronze_ingot"] * 3) + (COSTS["default:stick"] * 2)
+COSTS["default:axe_mese"] = (COSTS["default:mese_crystal"] * 3) + (COSTS["default:stick"] * 2)
+COSTS["default:axe_diamond"] = (COSTS["default:diamond"] * 3) + (COSTS["default:stick"] * 2)
+
+COSTS["default:sword_wood"] = (COSTS["default:wood"] * 2) + COSTS["default:stick"]
+COSTS["default:sword_stone"] = (COSTS["default:stone"] * 2) + COSTS["default:stick"]
+COSTS["default:sword_steel"] = (COSTS["default:steel_ingot"] * 2) + COSTS["default:stick"]
+COSTS["default:sword_bronze"] = (COSTS["default:bronze_ingot"] * 2) + COSTS["default:stick"]
+COSTS["default:sword_mese"] = (COSTS["default:mese_crystal"] * 2) + COSTS["default:stick"]
+COSTS["default:sword_diamond"] = (COSTS["default:diamond"] * 2) + COSTS["default:stick"]
+
+
+
+
+-- FURNATURE
+
+COSTS["default:furnace"] = COSTS["default:stone"] * 8
+COSTS["default:chest"] = COSTS["default:wood"] * 8
+COSTS["default:chest_locked"] = (COSTS["default:wood"] * 8) + COSTS["default:steel_ingot"]
+COSTS["default:bookshelf"] = (COSTS["default:wood"] * 6) + (COSTS["default:book"] * 3)
 
 
 --[[
@@ -94,8 +190,6 @@ for item_name, def in pairs(minetest.registered_items) do
 			if #output_data == 1 then
 			end
 		end
-
-
 	-- item has no recipe and thus is a 'base' item
 	else
 		if item_name == "air" then BASE_ITEMS[item_name] = 0
@@ -103,7 +197,6 @@ for item_name, def in pairs(minetest.registered_items) do
 		else BASE_ITEMS[item_name] = -1 end
 	end
 end
-
 io.write("\n## Listing items not yet priced...")
 local item_num = 1
 for item_name, cost in pairs(BASE_ITEMS) do
@@ -1773,16 +1866,12 @@ xpanes:bar_flat		Iron bar
 xpanes:bar		Iron bar
 xpanes:pane_flat		Glass Pane
 xpanes:pane		Glass Pane
-
-
-
 minetest.register_craft({
 	output = 'default:mese_crystal_fragment 9',
 	recipe = {
 		{'default:mese_crystal'},
 	}
 })
-
 minetest.register_craft({
 	output = "default:mese_crystal",
 	recipe = {
@@ -1791,15 +1880,12 @@ minetest.register_craft({
 		{"default:mese_crystal_fragment", "default:mese_crystal_fragment", "default:mese_crystal_fragment"},
 	}
 })
-
-
 minetest.register_craft({
 	output = 'default:mese_crystal 9',
 	recipe = {
 		{'default:mese'},
 	}
 })
-
 minetest.register_craft({
 	output = 'default:mese',
 	recipe = {
@@ -1808,8 +1894,6 @@ minetest.register_craft({
 		{'default:mese_crystal', 'default:mese_crystal', 'default:mese_crystal'},
 	}
 })
-
-
 minetest.register_craft({
 	output = 'default:sword_mese',
 	recipe = {
@@ -1818,7 +1902,6 @@ minetest.register_craft({
 		{'group:stick'},
 	}
 })
-
 minetest.register_node("default:stone_with_mese", {
 	description = "Mese Ore",
 	tiles = {"default_stone.png^default_mineral_mese.png"},
@@ -1826,7 +1909,4 @@ minetest.register_node("default:stone_with_mese", {
 	drop = "default:mese_crystal",
 	sounds = default.node_sound_stone_defaults(),
 })
-
-
-
 ]]
