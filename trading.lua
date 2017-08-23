@@ -1,6 +1,27 @@
 -- Costs and Stock of all goods: index 1 is cost, index 2 is stock
 
 local COSTS = {
+
+	["default:grass_1"] = 1,
+	["default:dry_grass_1"] = 1,
+	["default:dry_shrub"] = 1,
+
+	["default:dirt"] = 1,
+	["default:gravel"] = 2,
+	["default:mossycobble"] = 5,
+	["default:ice"] = 5,
+
+	["default:leaves"] = 2,
+	["default:jungleleaves"] = 2,
+	["default:pine_needles"] = 2,
+	["default:acacia_leaves"] = 2,
+	["default:aspen_leaves"] = 2,
+	["default:bush_leaves"] = 2,
+	["default:acacia_bush_leaves"] = 2,
+
+	["default:apple"] = 3,
+	["default:coral_skeleton"] = 5,
+
 	["default:stick"] = 1,
 	["default:bush_stem"] = 1,
 	["default:acacia_bush_stem"] = 1,
@@ -10,7 +31,7 @@ local COSTS = {
 	["default:pine_sapling"] = 5,
 	["default:sapling"] = 6,
 	["default:acacia_sapling"] = 7,
-	["default:jungle_sapling"] = 8,
+	["default:junglesapling"] = 8,
 	["default:papyrus"] = 3,
 	["default:cactus"] = 10,
 	["default:cobble"] = 4,
@@ -93,7 +114,7 @@ COSTS["default:clay_brick"] = villagers.round(COSTS["default:clay_lump"] * cook_
 COSTS["default:brick"] = COSTS["default:clay_brick"] * 4
 
 COSTS["default:steel_ingot"] = villagers.round(COSTS["default:iron_lump"] * cook_multiplier)
-COSTS["default:steel_block"] = COSTS["default:steel_ingot"] * 9
+COSTS["default:steelblock"] = COSTS["default:steel_ingot"] * 9
 
 COSTS["default:copper_ingot"] = villagers.round(COSTS["default:copper_lump"] * cook_multiplier)
 COSTS["default:copperblock"] = COSTS["default:copper_ingot"] * 9
@@ -114,10 +135,8 @@ COSTS["default:diamondblock"] = COSTS["default:diamond"] * 9
 
 COSTS["default:obsidian_shard"] = villagers.round(COSTS["default:obsidian"] / 9)
 COSTS["default:obsidian_glass"] = villagers.round(COSTS["default:obsidian_shard"] * cook_multiplier)
-COSTS["default:obsidian_brick"] = COSTS["default:obsidian"]
+COSTS["default:obsidianbrick"] = COSTS["default:obsidian"]
 COSTS["default:obsidian_block"] = COSTS["default:obsidian"]
-
-
 
 
 -- ITEMS AND TOOLS
@@ -164,14 +183,19 @@ COSTS["default:sword_mese"] = (COSTS["default:mese_crystal"] * 2) + COSTS["defau
 COSTS["default:sword_diamond"] = (COSTS["default:diamond"] * 2) + COSTS["default:stick"]
 
 
-
-
 -- FURNATURE
 
 COSTS["default:furnace"] = COSTS["default:stone"] * 8
 COSTS["default:chest"] = COSTS["default:wood"] * 8
 COSTS["default:chest_locked"] = (COSTS["default:wood"] * 8) + COSTS["default:steel_ingot"]
 COSTS["default:bookshelf"] = (COSTS["default:wood"] * 6) + (COSTS["default:book"] * 3)
+
+COST["default:fence_aspen_wood"] = (COST["default:stick"] * 4) + (COST["default:aspen_wood"] * 2)
+COST["default:fence_pine_wood"] = (COST["default:stick"] * 4) + (COST["default:pine_wood"] * 2)
+COST["default:fence_wood"] = (COST["default:stick"] * 4) + (COST["default:wood"] * 2)
+COST["default:fence_acacia_wood"] = (COST["default:stick"] * 4) + (COST["default:acacia_wood"] * 2)
+COST["default:fence_junglewood"] = (COST["default:stick"] * 4) + (COST["default:junglewood"] * 2)
+
 
 
 --[[
