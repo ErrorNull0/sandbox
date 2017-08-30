@@ -3,12 +3,12 @@
 local COSTS = {
 
 	["default:grass_1"] = 1,
+	["default:junglegrass"] = 1,
 	["default:dry_grass_1"] = 1,
 	["default:dry_shrub"] = 1,
 
 	["default:dirt"] = 1,
 	["default:gravel"] = 2,
-	["default:mossycobble"] = 5,
 	["default:ice"] = 5,
 
 	["default:leaves"] = 2,
@@ -35,7 +35,7 @@ local COSTS = {
 	["default:papyrus"] = 3,
 	["default:cactus"] = 10,
 	["default:cobble"] = 4,
-	["default:mossy_cobble"] = 4,
+	["default:mossycobble"] = 5,
 	["default:desert_cobble"] = 4,
 	["default:sand"] = 3,
 	["default:snow"] = 2,
@@ -50,6 +50,32 @@ local COSTS = {
 	["default:mese_crystal"] = 600,
 	["default:diamond"] = 800,
 	["default:obsidian"] = 1000,
+	
+	["wool:black"] = 15,
+	["wool:blue"] = 20,
+	["wool:brown"] = 15,
+	["wool:cyan"] = 20,
+	["wool:dark_green"] = 20,
+	["wool:dark_grey"] = 15,
+	["wool:green"] = 20,
+	["wool:grey"] = 15,
+	["wool:magenta"] = 20,
+	["wool:orange"] = 20,
+	["wool:pink"] = 20,
+	["wool:red"] = 20,
+	["wool:violet"] = 20,
+	["wool:white"] = 15,
+	["wool:yellow"] = 20,
+	
+	["flowers:dandelion_white"] = 12,
+	["flowers:dandelion_yellow"] = 12,
+	["flowers:geranium"] = 12,
+	["flowers:mushroom_brown"] = 12,
+	["flowers:mushroom_red"] = 12,
+	["flowers:rose"] = 12,
+	["flowers:tulip"] = 12,
+	["flowers:viola"] = 12,
+	["flowers:waterlily"] = 20,
 }
 
 local cook_multiplier = 1.25
@@ -59,8 +85,8 @@ local pine_modifier = 0
 local apple_modifier = 0
 local acacia_modifier = 1
 local jungle_modifier = 2
--- TREES AND WOOD
--- aspen, pine, apple, acacia, jungle
+
+-- TREES AND WOOD [aspen, pine, apple, acacia, jungle]
 
 COSTS["default:aspen_wood"] = (COSTS["default:stick"] * 4) + aspen_modifier
 COSTS["default:aspen_tree"] = COSTS["default:aspen_wood"] * 4
@@ -81,7 +107,6 @@ COSTS["default:jungletree"] = COSTS["default:junglewood"] * 4
 
 COSTS["default:paper"] = COSTS["default:papyrus"] * 3
 COSTS["default:book"] = COSTS["default:paper"] * 3
-
 
 -- EARTH AND MINERALS
 
@@ -138,6 +163,9 @@ COSTS["default:obsidian_glass"] = villagers.round(COSTS["default:obsidian_shard"
 COSTS["default:obsidianbrick"] = COSTS["default:obsidian"]
 COSTS["default:obsidian_block"] = COSTS["default:obsidian"]
 
+COSTS["walls:cobble"] = COSTS["default:cobble"] * 6
+COSTS["walls:mossycobble"] = COSTS["default:mossycobble"] * 6
+COSTS["walls:desertcobble"] = COSTS["default:desert_cobble"] * 6
 
 -- ITEMS AND TOOLS
 
@@ -148,11 +176,12 @@ COSTS["default:sign_wall_wood"] = villagers.round(((COSTS["default:wood"] * 6) +
 COSTS["default:sign_wall_steel"] = villagers.round(((COSTS["default:steel_ingot"] * 6) + COSTS["default:stick"]) / 3)
 COSTS["default:ladder_wood"] = villagers.round((COSTS["default:stick"] * 7) / 5)
 COSTS["default:ladder_steel"] = villagers.round((COSTS["default:steel_ingot"] * 7) / 15)
+COSTS["boats:boat"] = COSTS["default:wood"] * 5
+COSTS["bucket:bucket_empty"] = COSTS["default:steel_ingot"] * 3
 
 COSTS["default:torch"] = villagers.round(((COSTS["default:coal_lump"] + COSTS["default:coal_lump"]) * cook_multiplier))
 COSTS["default:meselamp"] = COSTS["default:glass"] + COSTS["default:mese_crystal"]
 COSTS["default:mese_post_light"] = villagers.round((COSTS["default:glass"] + COSTS["default:wood"] + (COSTS["default:mese_crystal"] * 3)) / 3)
-
 
 COSTS["default:pick_wood"] = (COSTS["default:wood"] * 3) + (COSTS["default:stick"] * 2)
 COSTS["default:pick_stone"] = (COSTS["default:stone"] * 3) + (COSTS["default:stick"] * 2)
@@ -182,110 +211,233 @@ COSTS["default:sword_bronze"] = (COSTS["default:bronze_ingot"] * 2) + COSTS["def
 COSTS["default:sword_mese"] = (COSTS["default:mese_crystal"] * 2) + COSTS["default:stick"]
 COSTS["default:sword_diamond"] = (COSTS["default:diamond"] * 2) + COSTS["default:stick"]
 
+COSTS["vessels:glass_bottle"] = villagers.round(COSTS["default:glass"] * 5 / 10)
+COSTS["vessels:drinking_glass"] = villagers.round(COSTS["default:glass"] * 7 / 14)
+COSTS["vessels:steel_bottle"] = COSTS["default:steel_ingot"]
+COSTS["vessels:shelf"] = (COSTS["default:wood"] * 6) + COSTS["vessels:glass_bottle"] + COSTS["vessels:drinking_glass"] + COSTS["vessels:steel_bottle"]
 
--- FURNATURE
+COSTS["carts:cart"] = COSTS["default:steel_ingot"] * 5
+COSTS["carts:rail"] = villagers.round((COSTS["default:steel_ingot"] * 6) + (COSTS["default:wood"] * 2) / 18)
+COSTS["carts:powerrail"] = villagers.round((COSTS["default:steel_ingot"] * 6) + COSTS["default:mese_crystal"] + (COSTS["default:wood"] * 2) / 18)
+COSTS["carts:brakerail"] = villagers.round((COSTS["default:steel_ingot"] * 6) + COSTS["default:coal_lump"] + (COSTS["default:wood"] * 2) / 18)
+
+-- DYES
+
+COSTS["dye:black"] = villagers.round(COSTS["default:coal_lump"] / 4)
+COSTS["dye:red"] = villagers.round(COSTS["flowers:rose"] / 4)
+COSTS["dye:orange"] = villagers.round(COSTS["flowers:tulip"] / 4)
+COSTS["dye:yellow"] = villagers.round(COSTS["flowers:dandelion_yellow"] / 4)
+COSTS["dye:blue"] = villagers.round(COSTS["flowers:geranium"] / 4)
+COSTS["dye:violet"] = villagers.round(COSTS["flowers:viola"] / 4)
+COSTS["dye:white"] = villagers.round(COSTS["flowers:dandelion_white"] / 4)
+COSTS["dye:brown"] = villagers.round((COSTS["dye:orange"] + COSTS["dye:black"]) / 2)
+COSTS["dye:green"] = villagers.round((COSTS["dye:blue"] + COSTS["dye:yellow"]) / 2)
+COSTS["dye:cyan"] = villagers.round((COSTS["dye:blue"] + COSTS["dye:green"]) / 2)
+COSTS["dye:dark_green"] = villagers.round((COSTS["dye:green"] + COSTS["dye:black"]) / 2)
+COSTS["dye:dark_grey"] = villagers.round((COSTS["dye:blue"] + COSTS["dye:orange"] + COSTS["dye:yellow"] + COSTS["dye:violet"]) / 4)
+COSTS["dye:grey"] = villagers.round((COSTS["dye:black"] + COSTS["dye:white"]) / 2)
+COSTS["dye:pink"] = villagers.round((COSTS["dye:red"] + COSTS["dye:white"]) / 2)
+COSTS["dye:magenta"] = villagers.round((COSTS["dye:pink"] + COSTS["dye:violet"]) / 2)
+
+-- FURNITURE
 
 COSTS["default:furnace"] = COSTS["default:stone"] * 8
 COSTS["default:chest"] = COSTS["default:wood"] * 8
 COSTS["default:chest_locked"] = (COSTS["default:wood"] * 8) + COSTS["default:steel_ingot"]
 COSTS["default:bookshelf"] = (COSTS["default:wood"] * 6) + (COSTS["default:book"] * 3)
 
-COST["default:fence_aspen_wood"] = (COST["default:stick"] * 4) + (COST["default:aspen_wood"] * 2)
-COST["default:fence_pine_wood"] = (COST["default:stick"] * 4) + (COST["default:pine_wood"] * 2)
-COST["default:fence_wood"] = (COST["default:stick"] * 4) + (COST["default:wood"] * 2)
-COST["default:fence_acacia_wood"] = (COST["default:stick"] * 4) + (COST["default:acacia_wood"] * 2)
-COST["default:fence_junglewood"] = (COST["default:stick"] * 4) + (COST["default:junglewood"] * 2)
+COSTS["default:fence_aspen_wood"] = (COSTS["default:stick"] * 4) + (COSTS["default:aspen_wood"] * 2)
+COSTS["default:fence_pine_wood"] = (COSTS["default:stick"] * 4) + (COSTS["default:pine_wood"] * 2)
+COSTS["default:fence_wood"] = (COSTS["default:stick"] * 4) + (COSTS["default:wood"] * 2)
+COSTS["default:fence_acacia_wood"] = (COSTS["default:stick"] * 4) + (COSTS["default:acacia_wood"] * 2)
+COSTS["default:fence_junglewood"] = (COSTS["default:stick"] * 4) + (COSTS["default:junglewood"] * 2)
 
+COSTS["beds:bed_bottom"] = (COSTS["wool:red"] * 2) + COSTS["wool:white"] + (COSTS["default:wood"] * 3)
+COSTS["beds:fancy_bed_bottom"] = (COSTS["wool:red"] * 2) + COSTS["wool:white"] + (COSTS["default:wood"] * 3) + COSTS["default:stick"]
 
+-- ** UNUSED ** Not assigned to any village traders
 
---[[
-local BASE_ITEMS = {}
-for item_name, def in pairs(minetest.registered_items) do
-	local recipe_data = minetest.get_all_craft_recipes(item_name)
-	
-	-- item is crafted from other basic items and so has
-	-- a receipe. examine each of the basic items and
-	-- determine if these are base items
-	if recipe_data then
-		local ingred_count = #recipe_data
-		for i = 1, ingred_count do
-			local output = recipe_data[1].output
-			local output_data = string.split(output, " ")
-			if #output_data == 1 then
-			end
-		end
-	-- item has no recipe and thus is a 'base' item
-	else
-		if item_name == "air" then BASE_ITEMS[item_name] = 0
-		elseif item_name == "default:dirt" then BASE_ITEMS[item_name] = 1
-		else BASE_ITEMS[item_name] = -1 end
-	end
-end
-io.write("\n## Listing items not yet priced...")
-local item_num = 1
-for item_name, cost in pairs(BASE_ITEMS) do
-	if cost < 0 then
-		io.write("\n  "..item_num..") "..item_name)
-	end
-	item_num = item_num + 1
-end
-io.write("\nListing complete.\n")
-]]
+COSTS["air"] = 1
+COSTS["ignore"] = 1
+COSTS["unknown"] = 1
 
+COSTS["beds:bed_top"] = 1
+COSTS["beds:fancy_bed_top"] = 1
+COSTS["bones:bones"] = 1
+COSTS["bucket:bucket_lava"] = 1
+COSTS["bucket:bucket_river_water"] = 1
+COSTS["bucket:bucket_water"] = 1
+COSTS["default:book_written"] = 1
+COSTS["default:chest_locked_open"] = 1
+COSTS["default:chest_open"] = 1
+COSTS["default:cloud"] = 1
+COSTS["default:coral_brown"] = 1
+COSTS["default:coral_orange"] = 1
+COSTS["default:dirt_with_dry_grass"] = 1
+COSTS["default:dirt_with_grass"] = 1
+COSTS["default:dirt_with_grass_footsteps"] = 1
+COSTS["default:dirt_with_rainforest_litter"] = 1
+COSTS["default:dirt_with_snow"] = 1
+COSTS["default:dry_grass_2"] = 1
+COSTS["default:dry_grass_3"] = 1
+COSTS["default:dry_grass_4"] = 1
+COSTS["default:dry_grass_5"] = 1
+COSTS["default:furnace_active"] = 1
+COSTS["default:grass_2"] = 1
+COSTS["default:grass_3"] = 1
+COSTS["default:grass_4"] = 1
+COSTS["default:grass_5"] = 1
+COSTS["default:lava_flowing"] = 1
+COSTS["default:lava_source"] = 1
+COSTS["default:river_water_flowing"] = 1
+COSTS["default:river_water_source"] = 1
+COSTS["default:stone_with_coal"] = 1
+COSTS["default:stone_with_copper"] = 1
+COSTS["default:stone_with_diamond"] = 1
+COSTS["default:stone_with_gold"] = 1
+COSTS["default:stone_with_iron"] = 1
+COSTS["default:stone_with_mese"] = 1
+COSTS["default:stone_with_tin"] = 1
+COSTS["default:torch_ceiling"] = 1
+COSTS["default:torch_wall"] = 1
+COSTS["default:water_flowing"] = 1
+COSTS["default:water_source"] = 1
+COSTS["doors:gate_acacia_wood_open"] = 1
+COSTS["doors:gate_aspen_wood_open"] = 1
+COSTS["doors:gate_junglewood_open"] = 1
+COSTS["doors:gate_pine_wood_open"] = 1
+COSTS["doors:gate_wood_open"] = 1
+COSTS["doors:trapdoor_open"] = 1
+COSTS["doors:trapdoor_steel_open"] = 1
+COSTS["doors:hidden"] = 1
 
-local function getItemCost(item_name)
-	io.write("getItemCost("..item_name..") ")
-	local recipe = minetest.get_craft_recipe(item_name)
-	local items = recipe.items
-	local method = recipe.method
-	local cost
-	local item_count = #items
-	
-	if items then
-	
-		if method == "normal" then
-			io.write("NormalRecipe numIngred="..item_count.." ")
-		elseif method == "cooking" then
-			io.write("CookRecipe numIngred="..item_count.." ")
-		elseif method == "feul" then
-			io.write("FuelRecipe numIngred="..item_count.." ")
-		else
-			io.write("ERROR - unknownRecipeType ")
-		end
-		
-		io.write("recipeExists ["..method.."] numIngredients="..#items.." ")
-		io.write("\n  ingredients: "..minetest.serialize(items).." ")
-		local total_cost
-		for i = 1, #items do
-			io.write("\n    "..i..") ".." ")
-			local base_item_name = items[i]
-			io.write(base_item_name.." ")
-			
-			local base_item_cost = getItemCost(base_item_name)
-			io.write("cost="..base_item_cost.." ")
-			
-			total_cost = total_cost + base_item_cost
-			io.write("total="..total_cost.." ")
-		end
-		cost = total_cost
-		
-	else
-		io.write("noRecipe baseItemFound ")
-		if item_name == "air" then cost = 0
-		elseif item_name == "default:dirt" then cost = 1
-		else
-			io.write("baseCostUndefined return=0 ")
-			cost = 0
-		end
-	end
-	
-	io.write("getItemCostEND ")
-	return cost
-end
+COSTS["doors:door_glass_a"] = 1
+COSTS["doors:door_glass_b"] = 1
+COSTS["doors:door_steel_a"] = 1
+COSTS["doors:door_steel_b"] = 1
+COSTS["doors:door_wood_a"] = 1
+COSTS["doors:door_wood_b"] = 1
+
+COSTS["farming:wheat_1"] = 1
+COSTS["farming:wheat_2"] = 1
+COSTS["farming:wheat_3"] = 1
+COSTS["farming:wheat_4"] = 1
+COSTS["farming:wheat_5"] = 1
+COSTS["farming:wheat_6"] = 1
+COSTS["farming:wheat_7"] = 1
+COSTS["farming:wheat_8"] = 1
+COSTS["farming:cotton_1"] = 1
+COSTS["farming:cotton_2"] = 1
+COSTS["farming:cotton_3"] = 1
+COSTS["farming:cotton_4"] = 1
+COSTS["farming:cotton_5"] = 1
+COSTS["farming:cotton_6"] = 1
+COSTS["farming:cotton_7"] = 1
+COSTS["farming:cotton_8"] = 1
+
+COSTS["stairs:stair_inner_acacia_wood"] = 1
+COSTS["stairs:stair_inner_aspen_wood"] = 1
+COSTS["stairs:stair_inner_brick"] = 1
+COSTS["stairs:stair_inner_bronzeblock"] = 1
+COSTS["stairs:stair_inner_clay"] = 1
+COSTS["stairs:stair_inner_cobble"] = 1
+COSTS["stairs:stair_inner_copperblock"] = 1
+COSTS["stairs:stair_inner_desert_cobble"] = 1
+COSTS["stairs:stair_inner_desert_sandstone"] = 1
+COSTS["stairs:stair_inner_desert_sandstone_block"] = 1
+COSTS["stairs:stair_inner_desert_sandstone_brick"] = 1
+COSTS["stairs:stair_inner_desert_stone"] = 1
+COSTS["stairs:stair_inner_desert_stone_block"] = 1
+COSTS["stairs:stair_inner_desert_stonebrick"] = 1
+COSTS["stairs:stair_inner_feldweg"] = 1
+COSTS["stairs:stair_inner_goldblock"] = 1
+COSTS["stairs:stair_inner_ice"] = 1
+COSTS["stairs:stair_inner_junglewood"] = 1
+COSTS["stairs:stair_inner_loam"] = 1
+COSTS["stairs:stair_inner_mossycobble"] = 1
+COSTS["stairs:stair_inner_obsidian"] = 1
+COSTS["stairs:stair_inner_obsidian_block"] = 1
+COSTS["stairs:stair_inner_obsidianbrick"] = 1
+COSTS["stairs:stair_inner_pine_wood"] = 1
+COSTS["stairs:stair_inner_sandstone"] = 1
+COSTS["stairs:stair_inner_sandstone_block"] = 1
+COSTS["stairs:stair_inner_sandstonebrick"] = 1
+COSTS["stairs:stair_inner_silver_sandstone"] = 1
+COSTS["stairs:stair_inner_silver_sandstone_block"] = 1
+COSTS["stairs:stair_inner_silver_sandstone_brick"] = 1
+COSTS["stairs:stair_inner_snowblock"] = 1
+COSTS["stairs:stair_inner_steelblock"] = 1
+COSTS["stairs:stair_inner_stone"] = 1
+COSTS["stairs:stair_inner_stone_block"] = 1
+COSTS["stairs:stair_inner_stonebrick"] = 1
+COSTS["stairs:stair_inner_straw"] = 1
+COSTS["stairs:stair_inner_tinblock"] = 1
+COSTS["stairs:stair_inner_wood"] = 1
+COSTS["stairs:stair_outer_acacia_wood"] = 1
+COSTS["stairs:stair_outer_aspen_wood"] = 1
+COSTS["stairs:stair_outer_brick"] = 1
+COSTS["stairs:stair_outer_bronzeblock"] = 1
+COSTS["stairs:stair_outer_clay"] = 1
+COSTS["stairs:stair_outer_cobble"] = 1
+COSTS["stairs:stair_outer_copperblock"] = 1
+COSTS["stairs:stair_outer_desert_cobble"] = 1
+COSTS["stairs:stair_outer_desert_sandstone"] = 1
+COSTS["stairs:stair_outer_desert_sandstone_block"] = 1
+COSTS["stairs:stair_outer_desert_sandstone_brick"] = 1
+COSTS["stairs:stair_outer_desert_stone"] = 1
+COSTS["stairs:stair_outer_desert_stone_block"] = 1
+COSTS["stairs:stair_outer_desert_stonebrick"] = 1
+COSTS["stairs:stair_outer_feldweg"] = 1
+COSTS["stairs:stair_outer_goldblock"] = 1
+COSTS["stairs:stair_outer_ice"] = 1
+COSTS["stairs:stair_outer_junglewood"] = 1
+COSTS["stairs:stair_outer_loam"] = 1
+COSTS["stairs:stair_outer_mossycobble"] = 1
+COSTS["stairs:stair_outer_obsidian"] = 1
+COSTS["stairs:stair_outer_obsidian_block"] = 1
+COSTS["stairs:stair_outer_obsidianbrick"] = 1
+COSTS["stairs:stair_outer_pine_wood"] = 1
+COSTS["stairs:stair_outer_sandstone"] = 1
+COSTS["stairs:stair_outer_sandstone_block"] = 1
+COSTS["stairs:stair_outer_sandstonebrick"] = 1
+COSTS["stairs:stair_outer_silver_sandstone"] = 1
+COSTS["stairs:stair_outer_silver_sandstone_block"] = 1
+COSTS["stairs:stair_outer_silver_sandstone_brick"] = 1
+COSTS["stairs:stair_outer_snowblock"] = 1
+COSTS["stairs:stair_outer_steelblock"] = 1
+COSTS["stairs:stair_outer_stone"] = 1
+COSTS["stairs:stair_outer_stone_block"] = 1
+COSTS["stairs:stair_outer_stonebrick"] = 1
+COSTS["stairs:stair_outer_straw"] = 1
+COSTS["stairs:stair_outer_tinblock"] = 1
+COSTS["stairs:stair_outer_wood"] = 1
+
+COSTS["fire:basic_flame"] = 1
+COSTS["fire:permanent_flame"] = 1
+
+COSTS["handle_schematics:build"] = 1
+COSTS["handle_schematics:dig_here"] = 1
+COSTS["handle_schematics:support"] = 1
+COSTS["handle_schematics:support_setup"] = 1
+
+COSTS["mg_villages:desert_sand_soil"] = 1
+COSTS["mg_villages:lava_flowing_tamed"] = 1
+COSTS["mg_villages:lava_source_tamed"] = 1
+COSTS["mg_villages:mob_spawner"] = 1
+COSTS["mg_villages:mob_workplace_marker"] = 1
+COSTS["mg_villages:plotmarker"] = 1
+COSTS["mg_villages:road"] = 1
+COSTS["mg_villages:soil"] = 1
+
+COSTS["tnt:boom"] = 1
+COSTS["tnt:gunpowder_burning"] = 1
+
+COSTS["vessels:glass_fragments"] = 1
 
 
 -- returns the cost item name and cost amount for the item to be
 -- traded as well as how much stock a villager will have of that item
+local UNKNOWN_ITEMS = {} -- for testing only
 local function getItemCostAndStock(item_name)
 	local log = true
 	io.write("getItemCS() ")
@@ -303,7 +455,13 @@ local function getItemCostAndStock(item_name)
 	local recipe = minetest.get_craft_recipe(item_name)
 	local items = recipe.items
 	
-	local item_cost = getItemCost(item_name)
+	--local item_cost = getItemCost(item_name)
+	local item_cost = COSTS[item_name]
+	if item_cost == nil then
+		io.write("unknown="..item_name.." setCost=1 ")
+		table.insert(UNKNOWN_ITEMS, item_name)
+		item_cost = 1
+	end
 	
 	io.write("getItemCsEND ")
 	return {"villagers:coins", item_cost, amount_in_stock}
@@ -327,6 +485,12 @@ for itemName, def in pairs(minetest.registered_items) do
 end
 io.write("\nListing Complete. \n")
 
+io.write("\n## Listing UNKNOWN items...")
+for i=1, #UNKNOWN_ITEMS do
+	io.write("\n  - "..UNKNOWN_ITEMS[i])
+end
+io.write("\nListing Complete. \n")
+
 local goodsDataCount = 1
 local DEFAULT_ITEM_NAMES = {}
 for key,_ in pairs(GOODS_DATA) do
@@ -341,11 +505,14 @@ end
 
 
 local function getGoodsData(item_name, quantity, buyback)
-	local log = false
+	local log = true
 	if log then 
 		io.write("\ngetGoodsData() ") 
-		if buyback then io.write("playerSell ")
-		else io.write("villagerSell ") end
+		if buyback then 
+			io.write("playerSell ")
+		else 
+			io.write("villagerSell ") 
+		end
 		io.write("item_name="..item_name.." ")
 	end
 	
@@ -374,14 +541,15 @@ local function getGoodsData(item_name, quantity, buyback)
 	local goods
 	if buyback then
 		local quant_received = GOODS_DATA[item_name][2] / 3
-		local purch_item
-		if quant_received < 1 then quant_received = 1 
+		if log then io.write("quant_received="..quant_received.." ") end
+		local purch_item = "villagers:coins"
+		if quant_received < 1 then 
+			quant_received = 1 
 		elseif quant_received > 99 then
 			quant_received = math.floor(quant_received/100)
 			purch_item = "villagers:coins_gold"
 		else
 			quant_received = math.floor(quant_received)
-			purch_item = "villagers:coins"
 		end
 		local purch_desc = minetest.registered_items[purch_item].description
 		
@@ -649,7 +817,7 @@ villagers.GOODS = {
 		{prob=1, split=3, min=3, max=5},
 		getGoodsData("cottages:table", 1),
 		getGoodsData("cottages:bench", 1),
-		getGoodsData("beds:bed", 1),
+		getGoodsData("beds:bed_bottom", 1),
 		getGoodsData("cottages:shelf", 1),
 		getGoodsData("default:bookshelf", 1),
 		getGoodsData("default:chest", 1),
@@ -682,7 +850,7 @@ villagers.GOODS = {
 	
 	innkeeper = {
 		{prob=1, split=1, min=2, max=3},
-		getGoodsData("beds:bed", 1),
+		getGoodsData("beds:bed_bottom", 1),
 		getGoodsData("default:chest", 1),
 		getGoodsData("default:paper", 1),
 		getGoodsData("default:torch", 1),
@@ -741,7 +909,91 @@ villagers.GOODS = {
 		getGoodsData("farming:seed_barley", 1),
 	}, 
 	
-	shopkeeper = DEFAULT_GOODS,
+	--[[
+	baker
+	barkeeper
+	blacksmith
+	carpenter
+	charachoal_burner
+	cooper
+	coppersmith
+	doormaker
+	dyemaker
+	farmer
+	flower_seller
+	fruit_trader
+	furnituremaker
+	glassmaker
+	goldsmith
+	iceman
+	innkeeper
+	librarian
+	lumberjack
+	miller
+	roofer
+	sawmill_owner
+	seed_seller
+	smith
+	stairmaker
+	stonemason
+	tinsmith
+	toolmaker
+	trader
+	wheelwright
+	wood_trader
+	]]
+	shopkeeper = {
+		hot = {
+			{prob=1, split=2, min=3, max=5},
+			getGoodsData("default:acacia_sapling", 1),
+			getGoodsData("default:sandstone", 1),
+			getGoodsData("default:acacia_wood", 1),
+			getGoodsData("default:fence_acacia_wood", 1),
+			getGoodsData("doors:gate_acacia_wood_closed", 1),
+			getGoodsData("default:acacia_bush_sapling", 1),
+			getGoodsData("carts:powerrail", 1),
+		},
+		cold = {
+			{prob=1, split=2, min=3, max=5},
+			getGoodsData("default:pine_sapling", 1),
+			getGoodsData("default:pine_wood", 1),
+			getGoodsData("default:cobble", 1),
+			getGoodsData("default:fence_pine_wood", 1),
+			getGoodsData("doors:gate_pine_wood_closed", 1),
+			getGoodsData("carts:powerrail", 1),
+		},
+		normal = {
+			{prob=1, split=2, min=5, max=5},
+			getGoodsData("default:sapling", 1),
+			getGoodsData("default:wood", 1),
+			getGoodsData("default:aspen_sapling", 1),
+			getGoodsData("default:aspen_wood", 1),
+			getGoodsData("default:cobble", 1),
+			getGoodsData("default:fence_aspen_wood", 1),
+			getGoodsData("default:fence_wood", 1),
+			getGoodsData("doors:gate_aspen_wood_closed", 1),
+			getGoodsData("doors:gate_wood_closed", 1),
+			getGoodsData("carts:powerrail", 1),
+		},
+		desert = {
+			{prob=1, split=0, min=3, max=3},
+			getGoodsData("default:desert_sandstone", 1),
+			getGoodsData("default:silver_sandstone", 1),
+			getGoodsData("default:clay", 1),
+			getGoodsData("default:cactus", 1),
+			getGoodsData("carts:powerrail", 1),
+		},
+		native = {
+			{prob=1, split=1, min=3, max=5},
+			getGoodsData("default:junglesapling", 1),
+			getGoodsData("default:junglewood", 1),
+			getGoodsData("default:fence_junglewood", 1),
+			getGoodsData("doors:gate_junglewood_closed", 1),
+			getGoodsData("default:mossycobble", 1),
+			getGoodsData("carts:powerrail", 1),
+		}
+
+	}, 
 	
 	smith = {
 		{prob=1, split=1, min=3, max=4},
@@ -803,22 +1055,57 @@ villagers.GOODS = {
 	},
 	
 	stonemason = {
-		{prob=1, split=0, min=1, max=1},
-		getGoodsData("xxx:xxx", 1),
-		getGoodsData("xxx:xxx", 1),
-		getGoodsData("xxx:xxx", 1),
-		getGoodsData("xxx:xxx", 1),
-		getGoodsData("xxx:xxx", 1),
-		getGoodsData("xxx:xxx", 1),
-		getGoodsData("xxx:xxx", 1),
-		getGoodsData("xxx:xxx", 1),
-		getGoodsData("xxx:xxx", 1),
-		getGoodsData("xxx:xxx", 1),
-		getGoodsData("xxx:xxx", 1),
-		getGoodsData("xxx:xxx", 1),
-		getGoodsData("xxx:xxx", 1),
-		getGoodsData("xxx:xxx", 1),
-		getGoodsData("xxx:xxx", 1),
+		hot = {
+			{prob=1, split=0, min=3, max=5},
+			getGoodsData("default:sandstone", 1),
+			getGoodsData("default:sandstonebrick", 1),
+			getGoodsData("default:silver_sandstone", 1),
+			getGoodsData("default:silver_sandstone_brick", 1),
+			getGoodsData("stairs:slab_sandstone", 1),
+			getGoodsData("stairs:slab_sandstonebrick", 1),
+			getGoodsData("stairs:slab_silver_sandstone", 1),
+			getGoodsData("stairs:slab_silver_sandstone_brick", 1),
+		},
+		cold = {
+			{prob=1, split=1, min=3, max=5},
+			getGoodsData("walls:cobble", 1),
+			getGoodsData("stairs:slab_cobble", 1),
+			getGoodsData("default:stone", 1),
+			getGoodsData("default:stonebrick", 1),
+			getGoodsData("stairs:slab_stone", 1),
+			getGoodsData("stairs:slab_stonebrick", 1),
+		},
+		normal = {
+			{prob=1, split=1, min=5, max=5},
+			getGoodsData("walls:cobble", 1),
+			getGoodsData("stairs:slab_cobble", 1),
+			getGoodsData("default:stone", 1),
+			getGoodsData("default:stonebrick", 1),
+			getGoodsData("stairs:slab_stone", 1),
+			getGoodsData("stairs:slab_stonebrick", 1),
+			getGoodsData("walls:mossycobble", 1),
+			getGoodsData("stairs:slab_mossycobble", 1),
+		},
+		desert = {
+			{prob=1, split=1, min=3, max=5},
+			getGoodsData("walls:desertcobble", 1),
+			getGoodsData("default:desert_stonebrick", 1),
+			getGoodsData("default:desert_sandstone_brick", 1),
+			getGoodsData("stairs:slab_desert_cobble", 1),
+			getGoodsData("stairs:slab_desert_stone", 1),
+			getGoodsData("stairs:slab_desert_sandstone", 1),
+			getGoodsData("stairs:slab_desert_stonebrick", 1),
+			getGoodsData("stairs:slab_desert_sandstone_brick", 1),
+		},
+		native = {
+			{prob=1, split=1, min=3, max=5},
+			getGoodsData("walls:cobble", 1),
+			getGoodsData("walls:mossycobble", 1),
+			getGoodsData("stairs:slab_cobble", 1),
+			getGoodsData("stairs:slab_mossycobble", 1),
+			getGoodsData("default:stone", 1),
+			getGoodsData("stairs:slab_stone", 1),
+		}
 	},
 	
 	tinsmith = {
@@ -1013,10 +1300,10 @@ villagers.GOODS = {
 
 
 function villagers.getTradingFormspec(self, player_name)
-	local log = false
+	local log = true
 	if log then 
-		io.write("getFormspec() ") 
-		io.write("for "..self.vName.." vSell:"..dump(self.vSell).."\n")
+		--io.write("getFormspec() ") 
+		--io.write("for "..self.vName.." vSell:"..dump(self.vSell).."\n")
 	end
 		
 	local item_count = #self.vSell
@@ -1064,7 +1351,7 @@ function villagers.getTradingFormspec(self, player_name)
 		local cost_desc = sell_data[5]
 		local cost_quant = sell_data[6]
 		local item_stock = sell_data[7]
-		if log then io.write("sell_data #"..item_index..": "..minetest.serialize(sell_data).." ") end
+		if log then io.write("\nsell_data #"..item_index..": "..minetest.serialize(sell_data).." ") end
 		
 		local inv_quant = 0
 		for i=1, inv_size do
@@ -1215,7 +1502,7 @@ function villagers.getTradeInventory(title, region, plot, bed, errors)
 			local error_message = "Item #"..item_count.." '"..popped_item[2]..
 			"' not registered for plot#"..plot.." bed#"..bed
 			table.insert(errors, error_message)
-			popped_item = {"default:dirt", "Dirt [error]", 1, "villagers:coins", 1, 1}
+			popped_item = {"villagers:unknown_item", popped_item[2], 1, "villagers:coins", "Silver Coin", 1, 0}
 			
 		elseif popped_item[1] == "no_description" then
 			if log then 
@@ -1224,7 +1511,7 @@ function villagers.getTradeInventory(title, region, plot, bed, errors)
 			local error_message = "Item #"..item_count.." '"..popped_item[2]..
 			"' no desc for plot#"..plot.." bed#"..bed
 			table.insert(errors, error_message)
-			popped_item = {"default:dirt", "Dirt [error]", 1, "villagers:coins", 1, 1}
+			popped_item = {"villagers:unknown_item", popped_item[2], 1, "villagers:coins", "Silver Coin", 1, 0}
 			
 		elseif popped_item[1] == "naming_error" then
 			if log then 
@@ -1233,7 +1520,7 @@ function villagers.getTradeInventory(title, region, plot, bed, errors)
 			local error_message = "Item #"..item_count.." '"..popped_item[2]..
 			"' not in GOODS_DATA for plot#"..plot.." bed#"..bed
 			table.insert(errors, error_message)
-			popped_item = {"default:dirt", "Dirt [error]", 1, "villagers:coins", 1, 1}
+			popped_item = {"villagers:unknown_item", popped_item[2], 1, "villagers:coins", "Silver Coin", 1, 0}
 			
 		elseif popped_item == nil then
 			if log then 
@@ -1241,10 +1528,10 @@ function villagers.getTradeInventory(title, region, plot, bed, errors)
 			end
 			local error_message = "Item #"..item_count.." is NIL for plot#"..plot.." bed#"..bed
 			table.insert(errors, error_message)
-			popped_item = {"default:dirt", "Dirt [error]", 1, "villagers:coins", 1, 1}
+			popped_item = {"villagers:unknown_item", popped_item[2], 1, "villagers:coins", "Silver Coin", 1, 0}
 		end
 		
-		if log then  io.write("\n    adding: "..minetest.serialize(popped_item).." ") end
+		if log then io.write("\n    adding: "..minetest.serialize(popped_item).." ") end
 		table.insert(new_trade_inventory, popped_item)
 		item_count = item_count - 1
 	end
@@ -1289,6 +1576,202 @@ function villagers.endVillagerTrading(self, player)
 end
 
 --[[
+
+cottages:anvil
+cottages:barrel
+cottages:barrel_lying
+cottages:barrel_lying_open
+cottages:barrel_open
+cottages:bed_foot
+cottages:bed_head
+cottages:bench
+cottages:feldweg
+cottages:feldweg_crossing
+cottages:feldweg_curve
+cottages:feldweg_end
+cottages:feldweg_slope
+cottages:feldweg_slope_long
+cottages:feldweg_t_junction
+cottages:fence_corner
+cottages:fence_end
+cottages:fence_small
+cottages:gate_closed
+cottages:gate_open
+cottages:glass_pane
+cottages:glass_pane_side
+cottages:half_door
+cottages:half_door_inverted
+cottages:hammer
+cottages:handmill
+cottages:hatch_steel
+cottages:hatch_wood
+cottages:ladder_with_rope_and_rail
+cottages:loam
+cottages:reet
+cottages:roof_black
+cottages:roof_brown
+cottages:roof_connector_black
+cottages:roof_connector_brown
+cottages:roof_connector_red
+cottages:roof_connector_reet
+cottages:roof_connector_slate
+cottages:roof_connector_straw
+cottages:roof_connector_wood
+cottages:roof_flat_black
+cottages:roof_flat_brown
+cottages:roof_flat_red
+cottages:roof_flat_reet
+cottages:roof_flat_slate
+cottages:roof_flat_straw
+cottages:roof_flat_wood
+cottages:roof_red
+cottages:roof_reet
+cottages:roof_slate
+cottages:roof_straw
+cottages:roof_wood
+cottages:rope
+cottages:shelf
+cottages:slate_vertical
+cottages:sleeping_mat
+cottages:sleeping_mat_head
+cottages:stovepipe
+cottages:straw
+cottages:straw_bale
+cottages:straw_ground
+cottages:straw_mat
+cottages:table
+cottages:threshing_floor
+cottages:tub
+cottages:wagon_wheel
+cottages:washing
+cottages:window_shutter_closed
+cottages:window_shutter_open
+cottages:wood_flat
+cottages:wool
+cottages:wool_tent
+default:flint
+doors:door_glass
+doors:door_obsidian_glass
+doors:door_obsidian_glass_a
+doors:door_obsidian_glass_b
+doors:door_steel
+doors:door_wood
+doors:gate_acacia_wood_closed
+doors:gate_aspen_wood_closed
+doors:gate_junglewood_closed
+doors:gate_pine_wood_closed
+doors:gate_wood_closed
+doors:trapdoor
+doors:trapdoor_steel
+farming:bread
+farming:cotton
+farming:desert_sand_soil
+farming:desert_sand_soil_wet
+farming:flour
+farming:hoe_bronze
+farming:hoe_diamond
+farming:hoe_mese
+farming:hoe_steel
+farming:hoe_stone
+farming:hoe_wood
+farming:seed_cotton
+farming:seed_wheat
+farming:soil
+farming:soil_wet
+farming:straw
+farming:string
+farming:wheat
+fire:flint_and_steel
+screwdriver:screwdriver
+stairs:slab_acacia_wood
+stairs:slab_aspen_wood
+stairs:slab_brick
+stairs:slab_bronzeblock
+stairs:slab_clay
+stairs:slab_cobble
+stairs:slab_copperblock
+stairs:slab_desert_cobble
+stairs:slab_desert_sandstone
+stairs:slab_desert_sandstone_block
+stairs:slab_desert_sandstone_brick
+stairs:slab_desert_stone
+stairs:slab_desert_stone_block
+stairs:slab_desert_stonebrick
+stairs:slab_feldweg
+stairs:slab_goldblock
+stairs:slab_ice
+stairs:slab_junglewood
+stairs:slab_loam
+stairs:slab_mossycobble
+stairs:slab_obsidian
+stairs:slab_obsidian_block
+stairs:slab_obsidianbrick
+stairs:slab_pine_wood
+stairs:slab_sandstone
+stairs:slab_sandstone_block
+stairs:slab_sandstonebrick
+stairs:slab_silver_sandstone
+stairs:slab_silver_sandstone_block
+stairs:slab_silver_sandstone_brick
+stairs:slab_snowblock
+stairs:slab_steelblock
+stairs:slab_stone
+stairs:slab_stone_block
+stairs:slab_stonebrick
+stairs:slab_straw
+stairs:slab_tinblock
+stairs:slab_wood
+stairs:stair_acacia_wood
+stairs:stair_aspen_wood
+stairs:stair_brick
+stairs:stair_bronzeblock
+stairs:stair_clay
+stairs:stair_cobble
+stairs:stair_copperblock
+stairs:stair_desert_cobble
+stairs:stair_desert_sandstone
+stairs:stair_desert_sandstone_block
+stairs:stair_desert_sandstone_brick
+stairs:stair_desert_stone
+stairs:stair_desert_stone_block
+stairs:stair_desert_stonebrick
+stairs:stair_feldweg
+stairs:stair_goldblock
+stairs:stair_ice
+stairs:stair_junglewood
+stairs:stair_loam
+stairs:stair_mossycobble
+stairs:stair_obsidian
+stairs:stair_obsidian_block
+stairs:stair_obsidianbrick
+stairs:stair_pine_wood
+stairs:stair_sandstone
+stairs:stair_sandstone_block
+stairs:stair_sandstonebrick
+stairs:stair_silver_sandstone
+stairs:stair_silver_sandstone_block
+stairs:stair_silver_sandstone_brick
+stairs:stair_snowblock
+stairs:stair_steelblock
+stairs:stair_stone
+stairs:stair_stone_block
+stairs:stair_stonebrick
+stairs:stair_straw
+stairs:stair_tinblock
+stairs:stair_wood
+tnt:gunpowder
+tnt:tnt
+tnt:tnt_burning
+villagers:coins
+villagers:coins_gold
+villagers:unknown_item
+xpanes:bar
+xpanes:bar_flat
+xpanes:pane
+xpanes:pane_flat
+
+----------
+
 air								Air (you hacker you!)
 beds:bed_bottom					Simple Bed
 beds:bed_top		
@@ -1370,16 +1853,16 @@ craftguide:book					Crafting Guide
 craftguide:sign					Crafting Guide Sign
 default:acacia_bush_leaves		Acacia Bush Leaves
 default:acacia_bush_sapling		Acacia Bush Sapling
-## default:acacia_bush_stem		Acacia Bush Stem
+default:acacia_bush_stem		Acacia Bush Stem
 default:acacia_leaves			Acacia Leaves
 default:acacia_sapling			Acacia Tree Sapling
-## default:acacia_tree				Acacia Tree
-## default:acacia_wood				Acacia Wood Planks
+default:acacia_tree				Acacia Tree
+default:acacia_wood				Acacia Wood Planks
 default:apple					Apple
 default:aspen_leaves			Aspen Leaves
 default:aspen_sapling			Aspen Tree Sapling
-## default:aspen_tree				Aspen Tree
-## default:aspen_wood				Aspen Wood Planks
+default:aspen_tree				Aspen Tree
+default:aspen_wood				Aspen Wood Planks
 default:axe_bronze				Bronze Axe
 default:axe_diamond				Diamond Axe
 default:axe_mese				Mese Axe
@@ -1390,11 +1873,11 @@ default:book_written			Book With Text
 default:book					Book
 default:bookshelf				Bookshelf
 default:brick					Brick Block
-## default:bronze_ingot			Bronze Ingot
-## default:bronzeblock				Bronze Block
+default:bronze_ingot			Bronze Ingot
+default:bronzeblock				Bronze Block
 default:bush_leaves				Bush Leaves
 default:bush_sapling			Bush Sapling
-## default:bush_stem				Bush Stem
+default:bush_stem				Bush Stem
 default:cactus					Cactus
 default:chest_locked_open		Locked Chest
 default:chest_locked			Locked Chest
@@ -1404,12 +1887,12 @@ default:clay_brick				Clay Brick
 default:clay_lump				Clay Lump
 default:clay					Clay
 default:cloud					Cloud
-## default:coal_lump				Coal Lump
+default:coal_lump				Coal Lump
 default:coalblock				Coal Block
-## default:cobble					Cobblestone
-## default:copper_ingot			Copper Ingot
-## default:copper_lump				Copper Lump
-## default:copperblock				Copper Block
+default:cobble					Cobblestone
+default:copper_ingot			Copper Ingot
+default:copper_lump				Copper Lump
+default:copperblock				Copper Block
 default:coral_brown				Brown Coral
 default:coral_orange			Orange Coral
 default:coral_skeleton			Coral Skeleton
@@ -1421,7 +1904,7 @@ default:desert_sandstone		Desert Sandstone
 default:desert_stone_block		Desert Stone Block
 default:desert_stone			Desert Stone
 default:desert_stonebrick		Desert Stone Brick
-## default:diamond					Diamond
+default:diamond					Diamond
 default:diamondblock			Diamond Block
 default:dirt_with_dry_grass		Dirt with Dry Grass
 default:dirt_with_grass_footsteps		Dirt with Grass and Footsteps
@@ -1444,9 +1927,9 @@ default:flint					Flint
 default:furnace_active			Furnace
 default:furnace					Furnace
 default:glass					Glass
-## default:gold_ingot				Gold Ingot
-## default:gold_lump				Gold Lump
-## default:goldblock				Gold Block
+default:gold_ingot				Gold Ingot
+default:gold_lump				Gold Lump
+default:goldblock				Gold Block
 default:grass_1					Grass
 default:grass_2					Grass
 default:grass_3					Grass
@@ -1454,20 +1937,20 @@ default:grass_4					Grass
 default:grass_5					Grass
 default:gravel					Gravel
 default:ice						Ice
-## default:iron_lump				Iron Lump
+default:iron_lump				Iron Lump
 default:junglegrass				Jungle Grass
 default:jungleleaves			Jungle Leaves
 default:junglesapling			Jungle Sapling
-## default:jungletree				Jungle Tree
-## default:junglewood				Jungle Wood Planks
-## default:key						Key
+default:jungletree				Jungle Tree
+default:junglewood				Jungle Wood Planks
+default:key						Key
 default:ladder_steel			Steel Ladder
 default:ladder_wood				Wooden Ladder
 default:lava_flowing			Flowing Lava
 default:lava_source				Lava Source
 default:leaves					Leaves
-## default:mese_crystal_fragment	Mese Crystal Fragment
-## default:mese_crystal			Mese Crystal
+default:mese_crystal_fragment	Mese Crystal Fragment
+default:mese_crystal			Mese Crystal
 default:mese_post_light			Mese Post Light
 default:mese					Mese Block
 default:meselamp				Mese Lamp
@@ -1484,10 +1967,10 @@ default:pick_diamond		Diamond Pickaxe
 default:pick_mese			Mese Pickaxe
 default:pick_steel			Steel Pickaxe
 default:pick_stone			Stone Pickaxe
-## default:pick_wood			Wooden Pickaxe
+default:pick_wood			Wooden Pickaxe
 default:pine_needles		Pine Needles
 default:pine_sapling		Pine Sapling
-## default:pine_tree			Pine Tree
+default:pine_tree			Pine Tree
 default:pine_wood			Pine Wood Planks
 default:river_water_flowing		Flowing River Water
 default:river_water_source		River Water Source
@@ -1502,18 +1985,18 @@ default:shovel_mese			Mese Shovel
 default:shovel_steel		Steel Shovel
 default:shovel_stone		Stone Shovel
 default:shovel_wood			Wooden Shovel
-## default:sign_wall_steel		Steel Sign
-## default:sign_wall_wood		Wooden Sign
+default:sign_wall_steel		Steel Sign
+default:sign_wall_wood		Wooden Sign
 default:silver_sand			Silver Sand
 default:silver_sandstone_block		Silver Sandstone Block
 default:silver_sandstone_brick		Silver Sandstone Brick
 default:silver_sandstone		Silver Sandstone
-## default:skeleton_key		Skeleton Key
+default:skeleton_key		Skeleton Key
 default:snow				Snow
 default:snowblock			Snow Block
-## default:steel_ingot			Steel Ingot
-## default:steelblock			Steel Block
-## default:stick				Stick
+default:steel_ingot			Steel Ingot
+default:steelblock			Steel Block
+default:stick				Stick
 default:stone_block			Stone Block
 default:stone_with_coal		Coal Ore
 default:stone_with_copper	Copper Ore
@@ -1522,7 +2005,7 @@ default:stone_with_gold		Gold Ore
 default:stone_with_iron		Iron Ore
 default:stone_with_mese		Mese Ore
 default:stone_with_tin		Tin Ore
-## default:stone				Stone
+default:stone				Stone
 default:stonebrick			Stone Brick
 default:sword_bronze		Bronze Sword
 default:sword_diamond		Diamond Sword
@@ -1530,16 +2013,16 @@ default:sword_mese			Mese Sword
 default:sword_steel			Steel Sword
 default:sword_stone			Stone Sword
 default:sword_wood			Wooden Sword
-## default:tin_ingot			Tin Ingot
-## default:tin_lump			Tin Lump
-## default:tinblock			Tin Block
-## default:torch_ceiling		
-## default:torch_wall		
-## default:torch				Torch
-## default:tree				Tree
+default:tin_ingot			Tin Ingot
+default:tin_lump			Tin Lump
+default:tinblock			Tin Block
+default:torch_ceiling		
+default:torch_wall		
+default:torch				Torch
+default:tree				Tree
 default:water_flowing		Flowing Water
 default:water_source		Water Source
-## default:wood				Wooden Planks
+default:wood				Wooden Planks
 doors:door_glass_a			Glass Door
 doors:door_glass_b			Glass Door
 doors:door_glass			Glass Door
@@ -1890,6 +2373,7 @@ xpanes:bar_flat		Iron bar
 xpanes:bar		Iron bar
 xpanes:pane_flat		Glass Pane
 xpanes:pane		Glass Pane
+
 minetest.register_craft({
 	output = 'default:mese_crystal_fragment 9',
 	recipe = {
