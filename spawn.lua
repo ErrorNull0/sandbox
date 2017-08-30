@@ -47,7 +47,9 @@ function getRegionFromArea(pos, radius, errors)
 				nodename == "FELDWEG" or 
 				nodename == "STONE" or 
 				nodename == "STONEBRICK" or 
-				nodename == "COBBLE" or 
+				nodename == "COBBLE" or
+				nodename == "GRAVEL" or
+				nodename == "SOIL" or
 				nodename == "AIR" or 
 				nodename == "WATER_SOURCE" or 
 				nodename == "IGNORE" then
@@ -134,32 +136,32 @@ function getRegionFromArea(pos, radius, errors)
 	--tent, claytrader, lumberjack, log cabin, nore, medieval, taoki, cornernote 
 	-- assign region type based on the top node found
 	-- region types: cold, hot, normal, native, desert
-	if top_nodename == "DIRT_WITH_SNOW" then 
-		region_type = "cold"
-	elseif top_nodename == "SNOWBLOCK" then 
-		region_type = "cold"
-	elseif top_nodename == "ICE" then 
-		region_type = "cold"
+	if top_nodename == "DIRT_WITH_SNOW" or
+		top_nodename == "SNOWBLOCK" or
+		top_nodename == "ICE" then
+			region_type = "cold"
+			
 	elseif top_nodename == "DIRT_WITH_DRY_GRASS" then 
 		region_type = "hot"
+		
 	elseif top_nodename == "DIRT_WITH_GRASS" then 
 		region_type = "normal"
-	elseif top_nodename == "DIRT_WITH_RAINFOREST_LITTER" then 
-		region_type = "native"
-	elseif top_nodename == "SOIL_WET" then 
-		region_type = "native"
+		
+	elseif top_nodename == "DIRT_WITH_RAINFOREST_LITTER" or
+		top_nodename == "SOIL_WET" or
+		top_nodename == "MOSSYCOBBLE" then
+			region_type = "native"
+			
 	elseif top_nodename == "SAND" or
 		top_nodename == "DESERT_SAND" or
 		top_nodename == "SILVER_SAND" or
 		top_nodename == "DESERT_STONE" or
 		top_nodename == "SANDSTONE" then 
-		if math.random(2) == 1 then 
-			region_type = "hot"
-		else 
-			region_type = "desert" 
-		end
+			if math.random(2) == 1 then region_type = "hot"
+			else region_type = "desert" end
+			
 	else 
-		io.write(" #ERROR IN getRegionFromArea()# ")
+		io.write(" #ERROR getRegionFromArea()# ")
 		local error_message = "Unknown value for top_nodename = "..top_nodename.." "..
 			"Falling back to region=NORMAL."
 		table.insert(errors, error_message)
