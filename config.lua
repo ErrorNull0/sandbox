@@ -1,5 +1,3 @@
--- set 'false' to not give player startup coins
-villagers.startup_coins = true
 villagers.stock_min_items = 40
 villagers.stock_max_items = 70
 villagers.stock_min_coins = 700
