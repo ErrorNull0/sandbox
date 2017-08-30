@@ -1,12 +1,16 @@
 COMPLETED:
 - automatically generate cost (in coins) and stock quantity of all registered items
+- merged LouisCyfer pull request to add coin drops for dirt type nodes
+- unknown/unregistered items in a trader's inventory will show as a question mark
+- /villagers list command only shows traders within 50m of player
+- added soft dependancy for beds, boats, bones, buckets, cars, default, doors, dye, farming, 
+-- fire, flowers, screwdriver, stairs, tnt, vessels, walls, wools, xpanes
 
 TODO:
-
-- run code and expect getGoodsData() to print errors of all registered items that have
--- no recipe and also no base cost assigned. use this error list as the master 'base' items
-- test new code that dynamically creates GOODS_DATA table as well as
--- the new supporting functions getGoodsData() and getBaseCost()
+- create recipe books for dye colors, furnature, tools, etc.
+- beds and fancy beds crashing furniture makers?
+- beds:fancy_bed (and maybe beds:bed) not being added correctly. test to ensure maybe need to
+-- use beds:bed_bottom instead?
 - item stock seems to be updated/accessed globally for same job titles? and not locally for each individual trader?
 - see if DEFAULT_ITEM_NAMES table is necessary now that all trade items are dynamically
 -- created based on items that are actually registered via minetest.registered_items
