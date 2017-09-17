@@ -21,6 +21,7 @@ local COSTS = {
 
 	["default:apple"] = 3,
 	["default:coral_skeleton"] = 5,
+	["farming:wheat"] = 3,
 
 	["default:stick"] = 1,
 	["default:bush_stem"] = 1,
@@ -255,6 +256,26 @@ COSTS["default:fence_junglewood"] = (COSTS["default:stick"] * 4) + (COSTS["defau
 COSTS["beds:bed_bottom"] = (COSTS["wool:red"] * 2) + COSTS["wool:white"] + (COSTS["default:wood"] * 3)
 COSTS["beds:fancy_bed_bottom"] = (COSTS["wool:red"] * 2) + COSTS["wool:white"] + (COSTS["default:wood"] * 3) + COSTS["default:stick"]
 
+COSTS["doors:door_wood_a"] = COSTS["default:wood"] * 6
+COSTS["doors:door_glass_a"] = COSTS["default:glass"] * 6
+COSTS["doors:door_steel_a"] = COSTS["default:steel_ingot"] * 6
+COSTS["doors:door_obsidian_glass_a"] = COSTS["default:obsidian_glass"] * 6
+
+COSTS["doors:trapdoor"] = villagers.round((COSTS["default:wood"] * 6) / 2)
+COSTS["doors:trapdoor_steel"] = COSTS["default:steel_ingot"] * 4
+
+COSTS["doors:gate_acacia_wood_closed"] = (COSTS["default:stick"] * 4) + (COSTS["default:acacia_wood"] * 2)
+COSTS["doors:gate_aspen_wood_closed"] = (COSTS["default:stick"] * 4) + (COSTS["default:aspen_wood"] * 2)
+COSTS["doors:gate_junglewood_closed"] = (COSTS["default:stick"] * 4) + (COSTS["default:junglewood"] * 2)
+COSTS["doors:gate_pine_wood_closed"] = (COSTS["default:stick"] * 4) + (COSTS["default:pine_wood"] * 2)
+COSTS["doors:gate_wood_closed"] = (COSTS["default:stick"] * 4) + (COSTS["default:wood"] * 2)
+
+-- FARMING
+
+COSTS["farming:flour"] = COSTS["farming:wheat"] * 4
+COSTS["farming:bread"] = villagers.round(COSTS["farming:wheat"] * cook_multiplier)
+
+
 -- ** UNUSED ** Not assigned to any village traders
 
 COSTS["air"] = 1
@@ -302,38 +323,37 @@ COSTS["default:torch_ceiling"] = 1
 COSTS["default:torch_wall"] = 1
 COSTS["default:water_flowing"] = 1
 COSTS["default:water_source"] = 1
+
 COSTS["doors:gate_acacia_wood_open"] = 1
 COSTS["doors:gate_aspen_wood_open"] = 1
 COSTS["doors:gate_junglewood_open"] = 1
 COSTS["doors:gate_pine_wood_open"] = 1
 COSTS["doors:gate_wood_open"] = 1
+
 COSTS["doors:trapdoor_open"] = 1
 COSTS["doors:trapdoor_steel_open"] = 1
+
+--COSTS["doors:door_glass_b"] = 1
+--COSTS["doors:door_steel_b"] = 1
+--COSTS["doors:door_wood_b"] = 1
 COSTS["doors:hidden"] = 1
 
-COSTS["doors:door_glass_a"] = 1
-COSTS["doors:door_glass_b"] = 1
-COSTS["doors:door_steel_a"] = 1
-COSTS["doors:door_steel_b"] = 1
-COSTS["doors:door_wood_a"] = 1
-COSTS["doors:door_wood_b"] = 1
-
-COSTS["farming:wheat_1"] = 1
-COSTS["farming:wheat_2"] = 1
-COSTS["farming:wheat_3"] = 1
-COSTS["farming:wheat_4"] = 1
-COSTS["farming:wheat_5"] = 1
-COSTS["farming:wheat_6"] = 1
-COSTS["farming:wheat_7"] = 1
-COSTS["farming:wheat_8"] = 1
-COSTS["farming:cotton_1"] = 1
-COSTS["farming:cotton_2"] = 1
-COSTS["farming:cotton_3"] = 1
-COSTS["farming:cotton_4"] = 1
-COSTS["farming:cotton_5"] = 1
-COSTS["farming:cotton_6"] = 1
-COSTS["farming:cotton_7"] = 1
-COSTS["farming:cotton_8"] = 1
+--COSTS["farming:wheat_1"] = 1
+--COSTS["farming:wheat_2"] = 1
+--COSTS["farming:wheat_3"] = 1
+--COSTS["farming:wheat_4"] = 1
+--COSTS["farming:wheat_5"] = 1
+--COSTS["farming:wheat_6"] = 1
+--COSTS["farming:wheat_7"] = 1
+--COSTS["farming:wheat_8"] = 1
+--COSTS["farming:cotton_1"] = 1
+--COSTS["farming:cotton_2"] = 1
+--COSTS["farming:cotton_3"] = 1
+--COSTS["farming:cotton_4"] = 1
+--COSTS["farming:cotton_5"] = 1
+--COSTS["farming:cotton_6"] = 1
+--COSTS["farming:cotton_7"] = 1
+--COSTS["farming:cotton_8"] = 1
 
 COSTS["stairs:stair_inner_acacia_wood"] = 1
 COSTS["stairs:stair_inner_aspen_wood"] = 1
@@ -724,6 +744,7 @@ villagers.GOODS = {
 		getGoodsData("doors:door_wood_a", 1),
 		getGoodsData("doors:trapdoor", 1),
 		getGoodsData("doors:gate_wood_closed", 1),
+		getGoodsData("doors:door_obsidian_glass", 1),
 	},
 	
 	dyemaker = {
@@ -821,7 +842,7 @@ villagers.GOODS = {
 		getGoodsData("cottages:shelf", 1),
 		getGoodsData("default:bookshelf", 1),
 		getGoodsData("default:chest", 1),
-		getGoodsData("beds:fancy_bed", 1),
+		getGoodsData("beds:fancy_bed_bottom", 1),
 		getGoodsData("vessels:shelf", 1),
 	},
 	
