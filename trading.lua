@@ -10,6 +10,7 @@ local COSTS = {
 	["default:dirt"] = 1,
 	["default:gravel"] = 2,
 	["default:ice"] = 5,
+	["default:flint"] = 12,
 
 	["default:leaves"] = 2,
 	["default:jungleleaves"] = 2,
@@ -22,6 +23,7 @@ local COSTS = {
 	["default:apple"] = 3,
 	["default:coral_skeleton"] = 5,
 	["farming:wheat"] = 3,
+	["farming:cotton"] = 3,
 
 	["default:stick"] = 1,
 	["default:bush_stem"] = 1,
@@ -52,31 +54,15 @@ local COSTS = {
 	["default:diamond"] = 800,
 	["default:obsidian"] = 1000,
 	
-	["wool:black"] = 15,
-	["wool:blue"] = 20,
-	["wool:brown"] = 15,
-	["wool:cyan"] = 20,
-	["wool:dark_green"] = 20,
-	["wool:dark_grey"] = 15,
-	["wool:green"] = 20,
-	["wool:grey"] = 15,
-	["wool:magenta"] = 20,
-	["wool:orange"] = 20,
-	["wool:pink"] = 20,
-	["wool:red"] = 20,
-	["wool:violet"] = 20,
-	["wool:white"] = 15,
-	["wool:yellow"] = 20,
-	
 	["flowers:dandelion_white"] = 12,
 	["flowers:dandelion_yellow"] = 12,
 	["flowers:geranium"] = 12,
-	["flowers:mushroom_brown"] = 12,
-	["flowers:mushroom_red"] = 12,
 	["flowers:rose"] = 12,
 	["flowers:tulip"] = 12,
 	["flowers:viola"] = 12,
 	["flowers:waterlily"] = 20,
+	["flowers:mushroom_brown"] = 12,
+	["flowers:mushroom_red"] = 12,
 }
 
 local cook_multiplier = 1.25
@@ -222,6 +208,9 @@ COSTS["carts:rail"] = villagers.round((COSTS["default:steel_ingot"] * 6) + (COST
 COSTS["carts:powerrail"] = villagers.round((COSTS["default:steel_ingot"] * 6) + COSTS["default:mese_crystal"] + (COSTS["default:wood"] * 2) / 18)
 COSTS["carts:brakerail"] = villagers.round((COSTS["default:steel_ingot"] * 6) + COSTS["default:coal_lump"] + (COSTS["default:wood"] * 2) / 18)
 
+COSTS["fire:flint_and_steel"] = COSTS["default:flint"] + COSTS["default:steel_ingot"]
+COSTS["screwdriver:screwdriver"] = COSTS["default:stick"] + COSTS["default:steel_ingot"]
+
 -- DYES
 
 COSTS["dye:black"] = villagers.round(COSTS["default:coal_lump"] / 4)
@@ -239,6 +228,39 @@ COSTS["dye:dark_grey"] = villagers.round((COSTS["dye:blue"] + COSTS["dye:orange"
 COSTS["dye:grey"] = villagers.round((COSTS["dye:black"] + COSTS["dye:white"]) / 2)
 COSTS["dye:pink"] = villagers.round((COSTS["dye:red"] + COSTS["dye:white"]) / 2)
 COSTS["dye:magenta"] = villagers.round((COSTS["dye:pink"] + COSTS["dye:violet"]) / 2)
+
+-- FARMING
+
+COSTS["farming:straw"] = COSTS["farming:wheat"] * 3
+COSTS["farming:flour"] = COSTS["farming:wheat"] * 4
+COSTS["farming:bread"] = villagers.round(COSTS["farming:wheat"] * cook_multiplier)
+COSTS["farming:string"] = COSTS["farming:cotton"] + 1
+COSTS["farming:straw"] = COSTS["farming:wheat"] * 3
+
+COSTS["farming:hoe_wood"] = (COSTS["default:wood"] * 2) + (COSTS["default:stick"] * 2)
+COSTS["farming:hoe_stone"] = (COSTS["default:stone"] * 2) + (COSTS["default:stick"] * 2)
+COSTS["farming:hoe_steel"] = (COSTS["default:steel_ingot"] * 2) + (COSTS["default:stick"] * 2)
+COSTS["farming:hoe_bronze"] = (COSTS["default:bronze_ingot"] * 2) + (COSTS["default:stick"] * 2)
+COSTS["farming:hoe_mese"] = (COSTS["default:mese_crystal"] * 2) + (COSTS["default:stick"] * 2)
+COSTS["farming:hoe_diamond"] = (COSTS["default:diamond"] * 2) + (COSTS["default:stick"] * 2)
+
+-- WOOL
+local base_wool_cost = (COSTS["farming:cotton"] * 4) + 3
+COSTS["wool:white"] = base_wool_cost + COSTS["dye:white"]
+COSTS["wool:black"] = base_wool_cost + COSTS["dye:black"]
+COSTS["wool:blue"] = base_wool_cost + COSTS["dye:blue"]
+COSTS["wool:brown"] = base_wool_cost + COSTS["dye:brown"]
+COSTS["wool:cyan"] = base_wool_cost + COSTS["dye:cyan"]
+COSTS["wool:dark_green"] = base_wool_cost + COSTS["dye:dark_green"]
+COSTS["wool:dark_grey"] = base_wool_cost + COSTS["dye:dark_grey"]
+COSTS["wool:green"] = base_wool_cost + COSTS["dye:green"]
+COSTS["wool:grey"] = base_wool_cost + COSTS["dye:grey"]
+COSTS["wool:magenta"] = base_wool_cost + COSTS["dye:magenta"]
+COSTS["wool:orange"] = base_wool_cost + COSTS["dye:orange"]
+COSTS["wool:pink"] = base_wool_cost + COSTS["dye:pink"]
+COSTS["wool:red"] = base_wool_cost + COSTS["dye:red"]
+COSTS["wool:violet"] = base_wool_cost + COSTS["dye:violet"]
+COSTS["wool:yellow"] = base_wool_cost + COSTS["dye:yellow"]
 
 -- FURNITURE
 
@@ -270,10 +292,21 @@ COSTS["doors:gate_junglewood_closed"] = (COSTS["default:stick"] * 4) + (COSTS["d
 COSTS["doors:gate_pine_wood_closed"] = (COSTS["default:stick"] * 4) + (COSTS["default:pine_wood"] * 2)
 COSTS["doors:gate_wood_closed"] = (COSTS["default:stick"] * 4) + (COSTS["default:wood"] * 2)
 
--- FARMING
-
-COSTS["farming:flour"] = COSTS["farming:wheat"] * 4
-COSTS["farming:bread"] = villagers.round(COSTS["farming:wheat"] * cook_multiplier)
+-- stairs (including inner and outer styles) and slabs
+local stair_materials = { "wood", "junglewood", "pine_wood", "acacia_wood",
+	"aspen_wood", "stone", "cobble", "mossycobble", "stonebrick", "stone_block",
+	"desert_stone", "desert_cobble", "desert_stonebrick", "desert_stone_block",
+	"sandstone", "sandstonebrick", "sandstone_block", "desert_sandstone",
+	"desert_sandstone_brick", "desert_sandstone_block", "silver_sandstone",
+	"silver_sandstone_brick", "silver_sandstone_block", "obsidian", "obsidianbrick",
+	"obsidian_block", "brick", "steelblock", "tinblock", "copperblock", "bronzeblock",
+	"goldblock", "ice", "snowblock" }
+for i = 0, #stair_materials do
+	COSTS["stairs:stair_"..stair_materials[i]] = COSTS["default:"..stair_materials[i]] * 6
+	COSTS["stairs:stair_outer_"..stair_materials[i]] = COSTS["default:"..stair_materials[i]] * 6
+	COSTS["stairs:stair_inner_"..stair_materials[i]] = COSTS["default:"..stair_materials[i]] * 4
+	COSTS["stairs:slab_"..stair_materials[i]] = COSTS["default:"..stair_materials[i]] * 3
+end
 
 
 -- ** UNUSED ** Not assigned to any village traders
@@ -354,7 +387,7 @@ COSTS["doors:hidden"] = 1
 --COSTS["farming:cotton_6"] = 1
 --COSTS["farming:cotton_7"] = 1
 --COSTS["farming:cotton_8"] = 1
-
+--[[
 COSTS["stairs:stair_inner_acacia_wood"] = 1
 COSTS["stairs:stair_inner_aspen_wood"] = 1
 COSTS["stairs:stair_inner_brick"] = 1
@@ -431,9 +464,9 @@ COSTS["stairs:stair_outer_stonebrick"] = 1
 COSTS["stairs:stair_outer_straw"] = 1
 COSTS["stairs:stair_outer_tinblock"] = 1
 COSTS["stairs:stair_outer_wood"] = 1
-
-COSTS["fire:basic_flame"] = 1
-COSTS["fire:permanent_flame"] = 1
+]]
+--COSTS["fire:basic_flame"] = 1
+--COSTS["fire:permanent_flame"] = 1
 
 COSTS["handle_schematics:build"] = 1
 COSTS["handle_schematics:dig_here"] = 1
@@ -1597,7 +1630,6 @@ function villagers.endVillagerTrading(self, player)
 end
 
 --[[
-
 cottages:anvil
 cottages:barrel
 cottages:barrel_lying
@@ -1790,9 +1822,7 @@ xpanes:bar
 xpanes:bar_flat
 xpanes:pane
 xpanes:pane_flat
-
 ----------
-
 air								Air (you hacker you!)
 beds:bed_bottom					Simple Bed
 beds:bed_top		
@@ -2394,7 +2424,6 @@ xpanes:bar_flat		Iron bar
 xpanes:bar		Iron bar
 xpanes:pane_flat		Glass Pane
 xpanes:pane		Glass Pane
-
 minetest.register_craft({
 	output = 'default:mese_crystal_fragment 9',
 	recipe = {
