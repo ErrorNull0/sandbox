@@ -202,6 +202,7 @@ COSTS["vessels:glass_bottle"] = villagers.round(COSTS["default:glass"] * 5 / 10)
 COSTS["vessels:drinking_glass"] = villagers.round(COSTS["default:glass"] * 7 / 14)
 COSTS["vessels:steel_bottle"] = COSTS["default:steel_ingot"]
 COSTS["vessels:shelf"] = (COSTS["default:wood"] * 6) + COSTS["vessels:glass_bottle"] + COSTS["vessels:drinking_glass"] + COSTS["vessels:steel_bottle"]
+COSTS["vessels:glass_fragments"] = villagers.round((COSTS["vessels:glass_bottle"] + COSTS["vessels:drinking_glass"]) / 2)
 
 COSTS["carts:cart"] = COSTS["default:steel_ingot"] * 5
 COSTS["carts:rail"] = villagers.round((COSTS["default:steel_ingot"] * 6) + (COSTS["default:wood"] * 2) / 18)
@@ -210,6 +211,10 @@ COSTS["carts:brakerail"] = villagers.round((COSTS["default:steel_ingot"] * 6) + 
 
 COSTS["fire:flint_and_steel"] = COSTS["default:flint"] + COSTS["default:steel_ingot"]
 COSTS["screwdriver:screwdriver"] = COSTS["default:stick"] + COSTS["default:steel_ingot"]
+
+COSTS["tnt:gunpowder"] = villagers.round((COSTS["default:coal_lump"] + COSTS["default:gravel"]) / 5)
+COSTS["tnt:tnt"] = (COSTS["tnt:gunpowder"] * 5) + (COSTS["default:wood"] * 4)
+
 
 -- DYES
 
@@ -301,12 +306,13 @@ local stair_materials = { "wood", "junglewood", "pine_wood", "acacia_wood",
 	"silver_sandstone_brick", "silver_sandstone_block", "obsidian", "obsidianbrick",
 	"obsidian_block", "brick", "steelblock", "tinblock", "copperblock", "bronzeblock",
 	"goldblock", "ice", "snowblock" }
-for i = 0, #stair_materials do
+for i = 1, #stair_materials do
 	COSTS["stairs:stair_"..stair_materials[i]] = COSTS["default:"..stair_materials[i]] * 6
 	COSTS["stairs:stair_outer_"..stair_materials[i]] = COSTS["default:"..stair_materials[i]] * 6
 	COSTS["stairs:stair_inner_"..stair_materials[i]] = COSTS["default:"..stair_materials[i]] * 4
 	COSTS["stairs:slab_"..stair_materials[i]] = COSTS["default:"..stair_materials[i]] * 3
 end
+
 
 
 -- ** UNUSED ** Not assigned to any village traders
@@ -482,8 +488,8 @@ COSTS["mg_villages:plotmarker"] = 1
 COSTS["mg_villages:road"] = 1
 COSTS["mg_villages:soil"] = 1
 
-COSTS["tnt:boom"] = 1
-COSTS["tnt:gunpowder_burning"] = 1
+--COSTS["tnt:boom"] = 1
+--COSTS["tnt:gunpowder_burning"] = 1
 
 COSTS["vessels:glass_fragments"] = 1
 
