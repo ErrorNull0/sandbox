@@ -1,0 +1,120 @@
+<html>
+<head>
+	<script lang="javascript" src="assets/shim.js"></script> <!-- for older browsers -->
+	<script lang="javascript" src="assets/xlsx.full.min.js"></script>
+</head>
+
+<body>
+<h2>Orbital User Import Tool for Peoplesoft</h2>
+version 0.1
+
+<p></p>
+<table border=0 width="100%">
+	<tr>
+		<td width="50%" valign="top">
+			<input type="file" id="browsefile">
+			<p id="confirm-xls"></p>
+		</td>
+		<td>-== Message Display ==-<p id="output">Click CHOOSE FILE to begin.</p></td>
+	</tr>
+</table>
+<p id="excelpreview"></p>
+
+
+<script>
+
+	var rABS = true; // true: readAsBinaryString ; false: readAsArrayBuffer
+	var outputmessages = document.getElementById("output").innerHTML;
+	
+	function output(message, indent) {
+		if (indent) { message = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + message; }
+		
+		outputmessages = outputmessages + "<br>" + message;
+		document.getElementById("output").innerHTML = outputmessages;
+	}
+	
+	function handleFile(event) {
+		
+		// clear any info or data display from prior runs
+		document.getElementById("confirm-xls").innerHTML = "";
+		document.getElementById("excelpreview").innerHTML = "";
+		
+		var filepath = document.getElementById("browsefile").value.toLowerCase();
+		var filename = filepath.split("\\").pop();
+		
+		var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.xlsx|.xls)$/;
+		var result = regex.test(filepath);
+		
+		if (!result) { 
+			output("<b>" + filename + "</b> is not an Excel file. Try again.");
+			return			
+		}
+		
+		var file_ext = filename.split(".").pop();
+		if (file_ext == "xls") {
+			output("<b>" + filename + "</b> uses the \"old\" form intended for Configui import. " +
+				"If you proceed, the data will attempt to be converted then imported to Peoplesoft." +
+				"<p>Click PROCEED WITH IMPORT to continue...<br>Or, start over with a different file.");
+				
+			document.getElementById("confirm-xls").innerHTML = "<input type=\"button\" id=\"proceed\" value=\"PROCEED WITH IMPORT\">"
+			return
+		} else {
+			output("<b>" + filename + "</b> seems OK.");
+		}
+		
+		var files = event.target.files
+		var file = files[0];
+		var reader = new FileReader();
+		reader.onload = function(event) {
+			
+			var data = event.target.result;
+			if (!rABS) {
+				data = new Uint8Array(data);
+				output("Raw data converted to Uint8Array.");
+			}
+			var workbook = XLSX.read(data, {type: rABS ? 'binary' : 'array'});
+			
+			output("Data instantiated as Excel objects.");
+			/* DO SOMETHING WITH workbook HERE */
+			
+			var first_sheet_name = workbook.SheetNames[0];
+			var address_of_cell = 'A3';
+
+			/* Get worksheet */
+			var worksheet = workbook.Sheets[first_sheet_name];
+
+			/* Find desired cell */
+			var desired_cell = worksheet[address_of_cell];
+
+			/* Get the value */
+			var desired_value = (desired_cell ? desired_cell.v : undefined);
+			
+			var table_preview_data = XLSX.utils.sheet_to_html(worksheet,{header:"",footer:""});
+			document.getElementById("excelpreview").innerHTML = table_preview_data;
+			console.log(table_preview_data);
+			
+		};
+		if (rABS) {
+			reader.readAsBinaryString(file);
+			output("Reading raw data as binary string...");
+			
+		} else {
+			reader.readAsArrayBuffer(file);
+			output("Reading raw data as array buffer...");
+			
+		}
+	}
+	document.getElementById("browsefile").addEventListener('change', handleFile, false);
+	console.log('Browse File button ready...');
+
+</script>
+
+
+</body>
+</html>
+
+
+
+
+
+
