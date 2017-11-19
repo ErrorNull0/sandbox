@@ -1,0 +1,30 @@
+items.xml
+
+<item id="777" name="zombieJerky">
+<property name="Meshfile" value="Items/Misc/parcelPrefab"/> 
+<property name="CustomIcon" value="zombieJerky" /> <!-- make the icon --> 
+<property name="Material" value="organic"/> 
+<property name="HoldType" value="31"/> 
+<property name="Stacknumber" value="50"/> <!-- STK food --> 
+<property name="EconomicValue" value="1"/> 
+<property class="Action1"> 
+  <property name="Class" value="Eat"/> 
+  <property name="Delay" value="1.0"/> 
+  <property name="Use_time" value="..."/> 
+  <property name="Gain_health" value="0"/> 
+  <property name="Gain_food" value="5"/> 
+  <property name="Buff" value="eatFood_2_Trigger"/> 
+  <property name="Gain_water" value="-4"/> 
+  <property name="Gain_wellness" value="-0.05"/> 
+  <property name="Gain_stamina" value="-4"/> 
+  <property name="Sound_start" value="player_eating"/> 
+</property> 
+<property name="Group" value="Food/Cooking"/> 
+</item>
+ 
+recipes.xml
+ 
+<recipe name="zombieJerky" count="2" craft_area="campfire"> 
+<ingredient name="rottenFlesh" count="1"/> 
+<ingredient name="nitratePowder" count="1"/> <!-- look up spelling --> 
+</recipe>
